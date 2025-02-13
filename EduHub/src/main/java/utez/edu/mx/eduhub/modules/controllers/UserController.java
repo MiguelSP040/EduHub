@@ -43,7 +43,7 @@ public class UserController {
 
     // Eliminar un usuario por ID (ID es recibido en el cuerpo)
     @DeleteMapping
-    public ResponseEntity<?> deleteById(@Valid @RequestBody UserEntity user) {
+    public ResponseEntity<?> deleteById(@RequestBody UserEntity user) {
         return service.deleteById(user);
     }
 }
