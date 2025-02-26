@@ -2,7 +2,6 @@ package utez.edu.mx.eduhub.auth.DTO;
 
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 
 public class AuthLoginDto {
     @NotBlank(message = "El nombre de usuario es obligatorio")

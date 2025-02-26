@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/eduhub/api/user")
+@CrossOrigin(origins = "*", methods = { RequestMethod.POST, RequestMethod.GET })
 @Validated
 public class UserController {
 

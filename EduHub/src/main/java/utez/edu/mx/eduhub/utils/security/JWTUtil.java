@@ -14,7 +14,7 @@ import java.util.function.Function;
 @Component
 public class JWTUtil {
 
-    private final String SECRET_KEY = ""; // Clave secreta para firmar el token
+    private final String SECRET_KEY = "8SVK61SYxWVprHEPudEkfNgj+Ol/loVHJzqh80ts1ucYmeMJmM2WbDqh04e58Lh54i3YYwPB/cxxyndMaC63uA=="; // Clave secreta para firmar el token
 
     public String generateToken (UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();

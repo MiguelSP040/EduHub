@@ -34,19 +34,20 @@ public class UserEntity {
     @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
     private String password;
 
-    private Set<String> roles; // ADMIN, DOCENTE, ALUMNO
+    @NotBlank(message = "El rol no puede estar vacío")
+    private String role; // ROLE_ADMIN, ROLE_INSTRUCTOR, ROLE_STUDENT
 
     public UserEntity() {
     }
 
-    public UserEntity(String name, String surname, String lastname, String username, String email, String password, Set<String> roles) {
+    public UserEntity(String name, String surname, String lastname, String username, String email, String password, String role) {
         this.name = name;
         this.surname = surname;
         this.lastname = lastname;
         this.username = username;
         this.email = email;
         this.password = password;
-        this.roles = roles;
+        this.role = role;
     }
 
     public String getId() {
@@ -105,11 +106,11 @@ public class UserEntity {
         this.password = password;
     }
 
-    public Set<String> getRoles() {
-        return roles;
+    public String getRole() {
+        return role;
     }
 
-    public void setRoles(Set<String> roles) {
-        this.roles = roles;
+    public void setRoles(String role) {
+        this.role = role;
     }
 }

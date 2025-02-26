@@ -6,8 +6,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import utez.edu.mx.eduhub.modules.entities.UserEntity;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Collections;
 
 public class UserDetailsImpl implements UserDetails {
 
@@ -17,15 +16,12 @@ public class UserDetailsImpl implements UserDetails {
     private String password;
     private Collection<? extends GrantedAuthority> authorities;
 
-
     public UserDetailsImpl(UserEntity user) {
         this.id = user.getId();
         this.username = user.getUsername();
         this.email = user.getEmail();
         this.password = user.getPassword();
-        this.authorities = user.getRoles().stream()
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toSet());
+        this.authorities = Collections.singletonList(new SimpleGrantedAuthority(user.getRole()));
     }
 
     @Override

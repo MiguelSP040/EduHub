@@ -38,6 +38,29 @@ public class AuthService {
     private PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
+    public ResponseEntity<?> verifyPassword(AuthLoginDto authLoginDto) {
+        Optional<UserEntity> optionalUser = repository.findByUsernameOrEmail(authLoginDto.getUser(), authLoginDto.getUser());
+
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(404).body("Usuario no encontrado");
+        }
+
+        UserEntity found = optionalUser.get();
+
+        // Comparar la contraseña ingresada con la almacenada en la BD
+        if (!authLoginDto.getPassword().equals(found.getPassword())) {
+            return ResponseEntity.status(401).body("Contraseña incorrecta");
+        }
+
+        return ResponseEntity.ok("Contraseña verificada correctamente");
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isEmailRegistered(String email) {
+        return repository.findByEmail(email).isPresent();
+    }
+
+    @Transactional(readOnly = true)
     public ResponseEntity<?> login(AuthLoginDto authLoginDto) {
         Optional<UserEntity> optionalUser = repository.findByUsernameOrEmail(authLoginDto.getUser(), authLoginDto.getUser());
 
@@ -67,7 +90,7 @@ public class AuthService {
                     "surname", found.getSurname(),
                     "lastname", found.getLastname(),
                     "email", found.getEmail(),
-                    "roles", found.getRoles()
+                    "role", found.getRole()
             ));
 
             return ResponseEntity.ok(response);

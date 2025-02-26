@@ -50,10 +50,7 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/eduhub/auth/**").permitAll()
-                        .requestMatchers("/eduhub/api/user/**").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers("/eduhub/api/admin/**").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers("/eduhub/api/docente/**").hasAuthority("ROLE_INSTRUCTOR")
-                        .requestMatchers("/eduhub/api/alumno/**").hasAuthority("ROLE_STUDENT")
+                        .requestMatchers("/eduhub/api/user/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
