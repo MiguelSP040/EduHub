@@ -47,8 +47,7 @@ public class AuthService {
 
         UserEntity found = optionalUser.get();
 
-        // Comparar la contraseña ingresada con la almacenada en la BD
-        if (!authLoginDto.getPassword().equals(found.getPassword())) {
+        if (!passwordEncoder.matches(authLoginDto.getPassword(), found.getPassword())) {
             return ResponseEntity.status(401).body("Contraseña incorrecta");
         }
 
@@ -62,7 +61,8 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public ResponseEntity<?> login(AuthLoginDto authLoginDto) {
-        Optional<UserEntity> optionalUser = repository.findByUsernameOrEmail(authLoginDto.getUser(), authLoginDto.getUser());
+        Optional<UserEntity> optionalUser =
+                repository.findByUsernameOrEmail(authLoginDto.getUser(), authLoginDto.getUser());
 
         if (optionalUser.isEmpty()) {
             return ResponseEntity.status(404).body("Usuario o contraseña incorrectos");
@@ -70,17 +70,21 @@ public class AuthService {
 
         UserEntity found = optionalUser.get();
 
-        if (!authLoginDto.getPassword().equals(found.getPassword())) {
-            return ResponseEntity.status(401).body("Ususario o contraseña incorrectos");
+        // Verificar la contraseña
+        if (!passwordEncoder.matches(authLoginDto.getPassword(), found.getPassword())) {
+            return ResponseEntity.status(401).body("Usuario o contraseña incorrectos");
         }
 
         try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authLoginDto.getUser(), authLoginDto.getPassword()));
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(authLoginDto.getUser(), authLoginDto.getPassword())
+            );
 
+            // Generar el token
             UserDetails userDetails = new UserDetailsImpl(found);
-
             String jwt = jwtUtil.generateToken(userDetails);
 
+            // Respuesta
             Map<String, Object> response = new HashMap<>();
             response.put("token", jwt);
             response.put("user", Map.of(
