@@ -37,15 +37,10 @@ public class UserEntity {
     @NotBlank(message = "El rol no puede estar vacío")
     private String role; // ROLE_ADMIN, ROLE_INSTRUCTOR, ROLE_STUDENT
 
-    private String description;
-
-    private Boolean isValidated;
-
     public UserEntity() {
     }
 
-    public UserEntity(String id, String name, String surname, String lastname, String username, String email, String password, String role, String description, Boolean isValidated) {
-        this.id = id;
+    public UserEntity(String name, String surname, String lastname, String username, String email, String password, String role) {
         this.name = name;
         this.surname = surname;
         this.lastname = lastname;
@@ -53,8 +48,6 @@ public class UserEntity {
         this.email = email;
         this.password = password;
         this.role = role;
-        this.description = description;
-        this.isValidated = isValidated;
     }
 
     public String getId() {
@@ -65,19 +58,19 @@ public class UserEntity {
         this.id = id;
     }
 
-    public @NotBlank(message = "El nombre no puede estar vacío") String getName() {
+    public String getName() {
         return name;
     }
 
-    public void setName(@NotBlank(message = "El nombre no puede estar vacío") String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
-    public @NotBlank(message = "El apellido no puede estar vacío") String getSurname() {
+    public String getSurname() {
         return surname;
     }
 
-    public void setSurname(@NotBlank(message = "El apellido no puede estar vacío") String surname) {
+    public void setSurname(String surname) {
         this.surname = surname;
     }
 
@@ -89,51 +82,35 @@ public class UserEntity {
         this.lastname = lastname;
     }
 
-    public @NotBlank(message = "El nombre de usuario no puede estar vacío") String getUsername() {
+    public String getUsername() {
         return username;
     }
 
-    public void setUsername(@NotBlank(message = "El nombre de usuario no puede estar vacío") String username) {
+    public void setUsername(String username) {
         this.username = username;
     }
 
-    public @NotBlank(message = "El correo no puede estar vacío") @Email(message = "El correo debe tener un formato válido") String getEmail() {
+    public String getEmail() {
         return email;
     }
 
-    public void setEmail(@NotBlank(message = "El correo no puede estar vacío") @Email(message = "El correo debe tener un formato válido") String email) {
+    public void setEmail(String email) {
         this.email = email;
     }
 
-    public @NotBlank(message = "La contraseña no puede estar vacía") @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres") String getPassword() {
+    public String getPassword() {
         return password;
     }
 
-    public void setPassword(@NotBlank(message = "La contraseña no puede estar vacía") @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres") String password) {
+    public void setPassword(String password) {
         this.password = password;
     }
 
-    public @NotBlank(message = "El rol no puede estar vacío") String getRole() {
+    public String getRole() {
         return role;
     }
 
-    public void setRole(@NotBlank(message = "El rol no puede estar vacío") String role) {
+    public void setRoles(String role) {
         this.role = role;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Boolean getValidated() {
-        return isValidated;
-    }
-
-    public void setValidated(Boolean validated) {
-        isValidated = validated;
     }
 }
