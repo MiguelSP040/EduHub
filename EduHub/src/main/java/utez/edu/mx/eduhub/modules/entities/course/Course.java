@@ -83,20 +83,20 @@ public class Course {
         this.dateEnd = dateEnd;
     }
 
-    public Boolean getArchived() {
+    public Boolean getIsArchived() {
         return isArchived;
     }
 
-    public void setArchived(Boolean archived) {
-        isArchived = archived;
+    public void setIsArchived(Boolean isArchived) {
+        this.isArchived = isArchived;
     }
 
-    public Boolean getPublished() {
+    public Boolean getIsPublished() {
         return isPublished;
     }
 
-    public void setPublished(Boolean published) {
-        isPublished = published;
+    public void setIsPublished(Boolean isPublished) {
+        this.isPublished = isPublished;
     }
 
     public String getStatus() {

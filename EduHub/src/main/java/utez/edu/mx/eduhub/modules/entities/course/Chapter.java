@@ -12,14 +12,16 @@ public class Chapter {
     private String nameChapter;
     private String descriptionChapter;
     private List<String> multimedia;
+    private String content; 
 
     public Chapter() {}
 
-    public Chapter(String id, String nameChapter, String descriptionChapter, List<String> multimedia) {
+    public Chapter(String id, String nameChapter, String descriptionChapter, List<String> multimedia, String content) {
         this.id = id;
         this.nameChapter = nameChapter;
         this.descriptionChapter = descriptionChapter;
         this.multimedia = multimedia;
+        this.content = content;
     }
 
     public String getId() {
@@ -53,5 +55,12 @@ public class Chapter {
     public void setMultimedia(List<String> multimedia) {
         this.multimedia = multimedia;
     }
-}
 
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+}
