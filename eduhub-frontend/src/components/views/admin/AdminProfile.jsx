@@ -3,6 +3,7 @@ import { AuthContext } from "../../../context/AuthContext";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
 
+
 const AdminProfile = () => {
     const { user } = useContext(AuthContext);
     const { name, surname, lastname, email, username } = user;
