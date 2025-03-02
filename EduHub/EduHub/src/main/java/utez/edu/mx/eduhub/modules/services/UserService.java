@@ -3,7 +3,6 @@ package utez.edu.mx.eduhub.modules.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import utez.edu.mx.eduhub.modules.entities.UserEntity;
 import utez.edu.mx.eduhub.modules.repositories.UserRepository;
@@ -15,9 +14,6 @@ public class UserService {
 
     @Autowired
     private UserRepository repository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     public ResponseEntity<?> findAll() {
         return ResponseEntity.ok(repository.findAll());
@@ -33,7 +29,6 @@ public class UserService {
     }
 
     public ResponseEntity<?> save(UserEntity user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
         try {
             repository.save(user);
             return ResponseEntity.ok("Usuario guardado exitosamente");
@@ -47,17 +42,12 @@ public class UserService {
         Optional<UserEntity> existingUserOptional = repository.findById(user.getId());
         if (existingUserOptional.isPresent()) {
             UserEntity existingUser = existingUserOptional.get();
-
-            existingUser.setName(user.getName() != null ? user.getName() : existingUser.getName());
-            existingUser.setSurname(user.getSurname() != null ? user.getSurname() : existingUser.getSurname());
-            existingUser.setLastname(user.getLastname() != null ? user.getLastname() : existingUser.getLastname());
-            existingUser.setUsername(user.getUsername() != null ? user.getUsername() : existingUser.getUsername());
-            existingUser.setEmail(user.getEmail() != null ? user.getEmail() : existingUser.getEmail());
-
-            if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-                existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
-            }
-
+                existingUser.setName(user.getName());
+                existingUser.setSurname(user.getSurname());
+                existingUser.setLastname(user.getLastname());
+                existingUser.setUsername(user.getUsername());
+                existingUser.setEmail(user.getEmail());
+                existingUser.setPassword(user.getPassword());
             try {
                 repository.save(existingUser);
                 return ResponseEntity.ok("Usuario actualizado exitosamente");
