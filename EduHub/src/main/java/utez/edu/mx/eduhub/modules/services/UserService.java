@@ -33,6 +33,8 @@ public class UserService {
     }
 
     public ResponseEntity<?> save(UserEntity user) {
+        user.setActive(!"ROLE_INSTRUCTOR".equals(user.getRole()));
+
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         try {
             repository.save(user);
@@ -53,9 +55,14 @@ public class UserService {
             existingUser.setLastname(user.getLastname() != null ? user.getLastname() : existingUser.getLastname());
             existingUser.setUsername(user.getUsername() != null ? user.getUsername() : existingUser.getUsername());
             existingUser.setEmail(user.getEmail() != null ? user.getEmail() : existingUser.getEmail());
+            existingUser.setDescription(user.getDescription() != null ? user.getDescription() : existingUser.getDescription());
 
             if (user.getPassword() != null && !user.getPassword().isEmpty()) {
                 existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
+            }
+
+            if (user.isActive() != existingUser.isActive()) {
+                existingUser.setActive(user.isActive());
             }
 
             try {

@@ -8,14 +8,14 @@ const PasswordInput = ({ value, onChange, placeholder }) => {
         <div className="input-group my-3">
             <input
                 type={showPassword ? "text" : "password"}
-                className="form-control border-0 flex-grow-1"
+                className="form-control flex-grow-1"
                 placeholder={placeholder}
                 value={value}
                 onChange={onChange}
             />
             <button
                 type="button"
-                className="btn bg-white text-blue-600 border-start border-0"
+                className="btn bg-white text-blue-600 border"
                 onClick={() => setShowPassword(!showPassword)}
             >
                 {showPassword ? <EyeSlash /> : <Eye />}

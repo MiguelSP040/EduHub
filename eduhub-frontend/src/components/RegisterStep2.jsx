@@ -13,9 +13,14 @@ const RegisterStep2 = ({ setView, formData, setFormData }) => {
         if (isDisabled) return;
 
         setLoading(true);
-        const response = await registerUser(formData);
 
         try {
+            let userData = { ...formData };
+
+            userData.isActive = formData.role === "ROLE_INSTRUCTOR" ? false : true;
+
+            const response = await registerUser(userData);
+        
             if (!formData.username || !formData.password || !confirmPassword || !formData.role) {
                 alert("Todos los campos son obligatorios");
                 return;
@@ -26,13 +31,22 @@ const RegisterStep2 = ({ setView, formData, setFormData }) => {
                 return;
             }
 
-            if (!response) {
+            if (!response.ok) {
                 alert("Error de conexión con el servidor.");
                 return;
             }
 
             alert("Registro completado con éxito");
-            console.log(formData);
+            console.log(userData);
+            setFormData({
+                name: "",
+                surname: "",
+                email: "",
+                username: "",
+                password: "",
+                role: "",
+                isActive: false
+            });
             setView("login");
         } catch (error) {
             console.error("Error al registrar usuario:", error);

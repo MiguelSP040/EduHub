@@ -101,7 +101,7 @@ const Login = ({ setView }) => {
         >
           {loading ? (
             <div className="spinner-border text-light" role="status">
-              <span className="sr-only"></span>
+              <span className="visually-hidden"></span>
             </div>
           ) : (
             "Iniciar sesión"

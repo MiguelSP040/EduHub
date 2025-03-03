@@ -32,3 +32,14 @@ export const checkEmail = async (email) => {
     const response = await fetch(`${API_URL}/auth/check-email?email=${email}`);
     return response.json();
 };
+
+export const verifyPassword = async (authLoginDto) => {
+    const response = await fetch(`${API_URL}/auth/verify-password`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(authLoginDto),
+    });
+    return response;
+};

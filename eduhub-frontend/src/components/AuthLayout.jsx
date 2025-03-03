@@ -13,7 +13,7 @@ const AuthLayout = ({ children }) => {
                                 <p>EduHubPro 2025 - Copyright</p>
                             </div>
                             {/* Sección Derecha */}
-                            <div className="col-md-6 d-flex align-items-center p-0 p-md-4">
+                            <div className="col-md-6 d-flex align-items-center p-2 p-md-4">
                                 <div className="w-100">{children}</div>
                             </div>
                         </div>

@@ -18,7 +18,8 @@ const AppRouter = () => {
         email: "",
         username: "",
         password: "",
-        role: ""
+        role: "",
+        isActive: false
     });
 
     return (
