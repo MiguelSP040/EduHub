@@ -9,6 +9,7 @@ import PrivateRoute from "./PrivateRouter";
 import { useState } from "react";
 import AdminProfile from "../components/views/admin/AdminProfile";
 import AdminFinance from "../components/views/admin/AdminFinance";
+import AdminApproveInstructors from "../components/views/admin/AdminApproveInstructors"
 
 const AppRouter = () => {
     const [view, setView] = useState("login");
@@ -51,6 +52,11 @@ const AppRouter = () => {
                 <Route path="/finance" element={
                     <PrivateRoute>
                         <AdminFinance/>
+                    </PrivateRoute>
+                    } />
+                <Route path="/instructors" element={
+                    <PrivateRoute>
+                        <AdminApproveInstructors/>
                     </PrivateRoute>
                     } />
             </Routes>

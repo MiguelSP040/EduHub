@@ -7,6 +7,7 @@ import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
 import { Modal } from "bootstrap";
 
+
 const AdminProfile = () => {
     const { user } = useContext(AuthContext);
     const [loading, setLoading] = useState(false);
