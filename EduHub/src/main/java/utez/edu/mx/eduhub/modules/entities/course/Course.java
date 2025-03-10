@@ -3,32 +3,45 @@ package utez.edu.mx.eduhub.modules.entities.course;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 import java.util.List;
 
 @Document(collection = "courses")
 public class Course {
+    
     @Id
     private String id;
-    @NotBlank(message = "Título requerido")
-    private String title;
-    private String description;
-    private Date dateStart;
-    private Date dateEnd;
-    private Boolean isArchived; //Acciones del Admin
-    private Boolean isPublished; //Acciones del Admin
-    private String status; //pendiente, aceptado y rechazado
 
-    //RELACIONES
+    @NotBlank(message = "Ingrese un título para el curso")
+    private String title;
+
+    @NotBlank(message = "Ingrese una descripción para el curso")
+    private String description;
+
+    @NotBlank(message = "Ingrese una fecha de inicio para el curso")
+    @DateTimeFormat(pattern = "dd-MM-yyyy")
+    private Date dateStart;
+
+    @NotBlank(message = "Ingrese una fecha de fin para el curso")
+    @DateTimeFormat(pattern = "dd-MM-yyyy")
+    private Date dateEnd;
+
+    //Acciones del ROLE_ADMIN
+    private Boolean isArchived; 
+    private Boolean isPublished; 
+    private String status; //pendiente, aceptado o rechazado
+
+    //Relaciones
     private String docenteId; //Referencia al Docente creador del curso
     private List<String> studentsEnrolled; //Referencia: studentId
-    private List<Sesion> sessions; //Embebido: OneToMany
+    private List<Session> sessions; //Embebido: OneToMany
     private List<Rating> ratings; //Embebido: OneToMany
 
     public Course() {}
 
-    public Course(String id, String title, String description, Date dateStart, Date dateEnd, Boolean isArchived, Boolean isPublished, String status, String docenteId, List<String> studentsEnrolled, List<Sesion> sessions, List<Rating> ratings) {
+    public Course(String id, String title, String description, Date dateStart, Date dateEnd, Boolean isArchived, Boolean isPublished, String status, String docenteId, List<String> studentsEnrolled, List<Session> sessions, List<Rating> ratings) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -123,11 +136,11 @@ public class Course {
         this.studentsEnrolled = studentsEnrolled;
     }
 
-    public List<Sesion> getSessions() {
+    public List<Session> getSessions() {
         return sessions;
     }
 
-    public void setSessions(List<Sesion> sessions) {
+    public void setSessions(List<Session> sessions) {
         this.sessions = sessions;
     }
 

@@ -2,16 +2,23 @@ package utez.edu.mx.eduhub.modules.entities.course;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-
+import jakarta.validation.constraints.NotBlank;
 import java.util.List;
 
 @Document(collection = "chapters")
 public class Chapter {
+
     @Id
     private String id;
+
+    @NotBlank(message = "Ingrese un nombre para el capítulo")
     private String nameChapter;
+
+    @NotBlank(message = "Ingrese una descripción breve para el capítulo")
     private String descriptionChapter;
+
     private List<String> multimedia;
+
     private String content; 
 
     public Chapter() {}

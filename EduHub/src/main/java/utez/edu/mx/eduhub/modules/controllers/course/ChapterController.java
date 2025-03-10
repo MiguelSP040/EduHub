@@ -1,6 +1,7 @@
 package utez.edu.mx.eduhub.modules.controllers.course;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import utez.edu.mx.eduhub.modules.entities.course.Chapter;
 import utez.edu.mx.eduhub.modules.services.course.ChapterService;
@@ -13,27 +14,27 @@ public class ChapterController {
     private ChapterService chapterService;
 
     @GetMapping("")
-    public List<Chapter> getAllChapters() {
-        return chapterService.getAllChapters();
+    public ResponseEntity<?> findAll() {
+        return chapterService.findAll();
     }
 
     @GetMapping("/{id}")
-    public Chapter findById(@PathVariable String id) {
+    public ResponseEntity<?> findById(@PathVariable String id) {
         return chapterService.findById(id);
     }
 
     @PostMapping("")
-    public Chapter create(@RequestBody Chapter chapter) {
-        return chapterService.create(chapter);
+    public ResponseEntity<?> save(@RequestBody Chapter chapter) {
+        return chapterService.save(chapter);
     }
 
     @PutMapping("")
-    public Chapter update(@RequestBody Chapter chapter){
+    public ResponseEntity<?> update(@RequestBody Chapter chapter){
         return chapterService.update(chapter);
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable String id) {
-        chapterService.delete(id);
+    public ResponseEntity<?> delete(@PathVariable String id) {
+        return chapterService.delete(id);
     }
 }
