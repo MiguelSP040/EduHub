@@ -14,6 +14,7 @@ public class Course {
     @NotBlank(message = "Título requerido")
     private String title;
     private String description;
+    private double price;
     private Date dateStart;
     private Date dateEnd;
     private Boolean isArchived; //Acciones del Admin

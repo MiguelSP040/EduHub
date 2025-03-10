@@ -59,8 +59,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/eduhub/api/user").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/eduhub/api/courses").permitAll()
                         .requestMatchers("/eduhub/auth/**").permitAll()
                         .requestMatchers("/eduhub/api/user/**").authenticated()
+                        .requestMatchers("/eduhub/api/courses/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
