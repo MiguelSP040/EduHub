@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { registerUser } from "../services/authService";
 import RoleSelector from "./RoleSelector";
 import PasswordInput from "./PasswordInputRegister";

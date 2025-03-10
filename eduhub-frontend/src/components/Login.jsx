@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { login } from "../services/authService";
@@ -10,6 +10,15 @@ const Login = ({ setView }) => {
   const [loading, setLoading] = useState(false);
   const { loginUser } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const userData = JSON.parse(localStorage.getItem("user"));
+    
+    if (token && userData?.role) {
+      navigate(userData.role === "ROLE_ADMIN" ? "/admin" : "/instructor");
+    }
+  }, [navigate]);
 
   const isDisabled = !user.trim() || !password.trim();
 

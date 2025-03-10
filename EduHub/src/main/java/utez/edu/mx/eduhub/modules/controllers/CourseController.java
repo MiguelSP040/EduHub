@@ -5,7 +5,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import utez.edu.mx.eduhub.modules.entities.course.Course;
 import utez.edu.mx.eduhub.modules.services.CourseService;
-import java.util.List;
 
 @RestController
 @RequestMapping("/eduhub/api/courses")
@@ -17,14 +16,17 @@ public class CourseController {
 
     @GetMapping
     public ResponseEntity<?> getAllCourses() {
-        return ResponseEntity.ok(courseService.findAll());
+        return courseService.findAll();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getCourseById(@PathVariable String id) {
-        return courseService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return courseService.findById(id);
+    }
+
+    @GetMapping("/instructor/{docenteId}")
+    public ResponseEntity<?> getCoursesByInstructor(@PathVariable String docenteId) {
+        return courseService.findByInstructorId(docenteId);
     }
 
     @PostMapping
@@ -32,10 +34,13 @@ public class CourseController {
         return courseService.save(course);
     }
 
-    // 🔹 Nuevo endpoint para obtener cursos de un instructor específico
-    @GetMapping("/instructor/{instructorId}")
-    public ResponseEntity<?> getCoursesByInstructor(@PathVariable String instructorId) {
-        List<Course> courses = courseService.findByInstructorId(instructorId);
-        return ResponseEntity.ok(courses);
+    @PutMapping
+    public ResponseEntity<?> updateCourse(@RequestBody Course course) {
+        return courseService.update(course);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteCourse(@PathVariable String id) {
+        return courseService.deleteById(id);
     }
 }

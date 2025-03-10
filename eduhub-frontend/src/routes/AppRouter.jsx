@@ -9,6 +9,11 @@ import PrivateRoute from "./PrivateRouter";
 import { useState } from "react";
 import AdminProfile from "../components/views/admin/AdminProfile";
 import AdminFinance from "../components/views/admin/AdminFinance";
+import InstructorDashboard from "../components/views/instructor/InstructorDashboard";
+import InstructorProfile from "../components/views/instructor/InstructorProfile";
+import NewCourse from "../components/views/instructor/newCourse";
+import MyStudents from "../components/views/instructor/MyStudents";
+import MyCourse from "../components/views/instructor/MyCourse";
 
 const AppRouter = () => {
     const [view, setView] = useState("login");
@@ -26,33 +31,58 @@ const AppRouter = () => {
         <Router>
             <Routes>
                 <Route path="/" element={
-                        <AuthLayout>
-                            {view === "login" ? 
-                            <Login setView={setView} /> : 
-                            view === "registerStep1" ? 
-                            <RegisterStep1 setView={setView} formData={formData} setFormData={setFormData} /> : 
-                            view === "registerStep2" ?
-                            <RegisterStep2 setView={setView} formData={formData} setFormData={setFormData} /> :
-                            view === "recover" ?
-                            <Recover setView={setView}/> :
-                            null}
-                        </AuthLayout>
-                    } />
+                    <AuthLayout>
+                        {view === "login" ? 
+                        <Login setView={setView} /> : 
+                        view === "registerStep1" ? 
+                        <RegisterStep1 setView={setView} formData={formData} setFormData={setFormData} /> : 
+                        view === "registerStep2" ?
+                        <RegisterStep2 setView={setView} formData={formData} setFormData={setFormData} /> :
+                        view === "recover" ?
+                        <Recover setView={setView}/> :
+                        null}
+                    </AuthLayout>
+                } />
                 <Route path="/admin" element={
                     <PrivateRoute>
                         <AdminDashboard />
                     </PrivateRoute>
-                    } />
-                <Route path="/profile" element={
-                <PrivateRoute>
-                    <AdminProfile />
-                </PrivateRoute>
+                } />
+                <Route path="/profileAdmin" element={
+                    <PrivateRoute>
+                        <AdminProfile />
+                    </PrivateRoute>
                 } />
                 <Route path="/finance" element={
                     <PrivateRoute>
                         <AdminFinance/>
                     </PrivateRoute>
-                    } />
+                } />
+                <Route path="/instructor" element={
+                    <PrivateRoute>
+                        <InstructorDashboard/>
+                    </PrivateRoute>
+                } />
+                <Route path="/profile" element={
+                    <PrivateRoute>
+                        <InstructorProfile/>
+                    </PrivateRoute>
+                } />
+                <Route path="/instructor/new-course" element={
+                    <PrivateRoute> 
+                        <NewCourse />
+                    </PrivateRoute>
+                } />
+                <Route path="/students" element={
+                    <PrivateRoute> 
+                        <MyStudents />
+                    </PrivateRoute>
+                } />
+                <Route path="/instructor/course" element={
+                    <PrivateRoute>
+                        <MyCourse />
+                    </PrivateRoute>
+                } />
             </Routes>
         </Router>
     );

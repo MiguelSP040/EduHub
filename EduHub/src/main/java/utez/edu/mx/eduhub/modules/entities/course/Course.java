@@ -3,33 +3,46 @@ package utez.edu.mx.eduhub.modules.entities.course;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 import java.util.List;
 
 @Document(collection = "courses")
 public class Course {
+
     @Id
     private String id;
-    @NotBlank(message = "Título requerido")
+
+    @NotBlank(message = "Ingrese un título para el curso")
     private String title;
+
+    @NotBlank(message = "Ingrese una descripción para el curso")
     private String description;
     private double price;
-    private Date dateStart;
-    private Date dateEnd;
-    private Boolean isArchived; //Acciones del Admin
-    private Boolean isPublished; //Acciones del Admin
-    private String status; //pendiente, aceptado y rechazado
 
-    //RELACIONES
+    @NotBlank(message = "Ingrese una fecha de inicio para el curso")
+    @DateTimeFormat(pattern = "dd-MM-yyyy")
+    private Date dateStart;
+
+    @NotBlank(message = "Ingrese una fecha de fin para el curso")
+    @DateTimeFormat(pattern = "dd-MM-yyyy")
+    private Date dateEnd;
+
+    //Acciones del ROLE_ADMIN
+    private Boolean isArchived;
+    private Boolean isPublished;
+    private String status; //pendiente, aceptado o rechazado
+
+    //Relaciones
     private String docenteId; //Referencia al Docente creador del curso
     private List<String> studentsEnrolled; //Referencia: studentId
-    private List<Sesion> sessions; //Embebido: OneToMany
+    private List<Session> sessions; //Embebido: OneToMany
     private List<Rating> ratings; //Embebido: OneToMany
 
     public Course() {}
 
-    public Course(String id, String title, String description, Date dateStart, Date dateEnd, Boolean isArchived, Boolean isPublished, String status, String docenteId, List<String> studentsEnrolled, List<Sesion> sessions, List<Rating> ratings) {
+    public Course(String id, String title, String description, Date dateStart, Date dateEnd, Boolean isArchived, Boolean isPublished, String status, String docenteId, List<String> studentsEnrolled, List<Session> sessions, List<Rating> ratings) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -52,35 +65,43 @@ public class Course {
         this.id = id;
     }
 
-    public @NotBlank(message = "Título requerido") String getTitle() {
+    public @NotBlank(message = "Ingrese un título para el curso") String getTitle() {
         return title;
     }
 
-    public void setTitle(@NotBlank(message = "Título requerido") String title) {
+    public void setTitle(@NotBlank(message = "Ingrese un título para el curso") String title) {
         this.title = title;
     }
 
-    public String getDescription() {
+    public @NotBlank(message = "Ingrese una descripción para el curso") String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    public void setDescription(@NotBlank(message = "Ingrese una descripción para el curso") String description) {
         this.description = description;
     }
 
-    public Date getDateStart() {
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public @NotBlank(message = "Ingrese una fecha de inicio para el curso") Date getDateStart() {
         return dateStart;
     }
 
-    public void setDateStart(Date dateStart) {
+    public void setDateStart(@NotBlank(message = "Ingrese una fecha de inicio para el curso") Date dateStart) {
         this.dateStart = dateStart;
     }
 
-    public Date getDateEnd() {
+    public @NotBlank(message = "Ingrese una fecha de fin para el curso") Date getDateEnd() {
         return dateEnd;
     }
 
-    public void setDateEnd(Date dateEnd) {
+    public void setDateEnd(@NotBlank(message = "Ingrese una fecha de fin para el curso") Date dateEnd) {
         this.dateEnd = dateEnd;
     }
 
@@ -124,11 +145,11 @@ public class Course {
         this.studentsEnrolled = studentsEnrolled;
     }
 
-    public List<Sesion> getSessions() {
+    public List<Session> getSessions() {
         return sessions;
     }
 
-    public void setSessions(List<Sesion> sessions) {
+    public void setSessions(List<Session> sessions) {
         this.sessions = sessions;
     }
 
