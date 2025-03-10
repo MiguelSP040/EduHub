@@ -50,7 +50,7 @@ public class CourseService {
             return ResponseEntity.ok("Curso registrado exitosamente, pendiente de aprobación.");
         } catch (Exception e) {
             System.out.println("Error al guardar el curso: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar el curso");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar el curso.");
         }
     }
 
