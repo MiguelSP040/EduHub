@@ -26,44 +26,55 @@ const Login = ({ setView }) => {
     setLoading(true);
 
     try {
-      const response = await login(user, password);
+        const response = await login(user, password);
 
-      if (!response || response.statusCode !== "OK") {
-        alert("Usuario o contraseña incorrectos");
-        return;
-      }
+        if (!response || !response.statusCode) {
+            alert("Error en la autenticación. Intenta de nuevo.");
+            return;
+        }
 
-      const { token, user: userData } = response.body;
+        if (response.statusCode === "NOT_FOUND" || response.statusCode === "UNAUTHORIZED") {
+            alert("Usuario o contraseña incorrectos");
+            return;
+        }
 
-      if (!token || !userData) {
-        alert("Error en la autenticación. Intenta de nuevo.");
-        return;
-      }
+        if (response.statusCode === "FORBIDDEN") {
+            alert("Tu cuenta no ha sido verificada por un administrador.");
+            return;
+        }
 
-      // Guardar usuario y token en el contexto y localStorage
-      loginUser({ ...userData, token });
+        if (response.statusCode !== "OK") {
+            alert("Error inesperado. Intenta de nuevo.");
+            return;
+        }
 
-      // Redirigir según el rol
-      switch (userData.role) {
-        case "ROLE_ADMIN":
-          navigate("/admin");
-          break;
-        case "ROLE_STUDENT":
-          navigate("/student");
-          break;
-        case "ROLE_INSTRUCTOR":
-          navigate("/instructor");
-          break;
-        default:
-          alert("Rol desconocido. Contacta con el administrador.");
-          navigate("/");
-      }
+        const { token, user: userData } = response;
 
+        if (!token || !userData) {
+            alert("Error en la autenticación. Intenta de nuevo.");
+            return;
+        }
+
+        // Guardar usuario y token en el contexto y localStorage
+        loginUser({ ...userData, token });
+
+        // Redirigir según el rol
+        switch (userData.role) {
+            case "ROLE_ADMIN":
+                navigate("/admin");
+                break;
+            case "ROLE_INSTRUCTOR":
+                navigate("/instructor");
+                break;
+            default:
+                alert("Rol desconocido. Contacta con el administrador.");
+                navigate("/");
+        }
     } catch (error) {
-      console.error("Error al iniciar sesión:", error);
-      alert("Error al iniciar sesión.");
+        console.error("Error al iniciar sesión:", error);
+        alert("Error al iniciar sesión.");
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
   };
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getStudentsByCourse } from "../../../services/courseService";
+import { CheckCircle  } from "react-feather";
 
 const MyStudents = ({ courseId }) => {
     const [students, setStudents] = useState([]);
@@ -37,7 +38,7 @@ const MyStudents = ({ courseId }) => {
                                 <td>{student.enrolledDate}</td>
                                 <td>{student.attendance}</td>
                                 <td>
-                                    {student.status === "Activo" ? "✅" : "⚠️"}
+                                    {student.status === "Activo" ? <CheckCircle/> : null}
                                 </td>
                             </tr>
                         ))

@@ -17,7 +17,7 @@ const RegisterStep2 = ({ setView, formData, setFormData }) => {
         try {
             let userData = { ...formData };
 
-            userData.isActive = formData.role === "ROLE_INSTRUCTOR" ? false : true;
+            userData.isActive = formData.role !== "ROLE_INSTRUCTOR";
 
             const response = await registerUser(userData);
         
