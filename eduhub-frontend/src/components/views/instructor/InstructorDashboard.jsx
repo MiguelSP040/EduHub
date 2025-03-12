@@ -65,7 +65,7 @@ const InstructorDashboard = () => {
                             <div className="row">
                                 {myCourses.length > 0 ? (
                                     myCourses.map((course) => (
-                                        <div key={course.id} className="col-12 col-md-4 col-xl-4 mb-4">
+                                        <div key={course.id} className="col-12 col-md-4 col-xl-2 mb-4">
                                             <div className="card p-0 text-start">
                                                 <img src="https://placehold.co/300x200.png" className="card-img-top" alt={course.title} />
                                                 <div className="card-body">
@@ -99,7 +99,7 @@ const InstructorDashboard = () => {
                             <div className="row">
                                 {availableCourses.length > 0 ? (
                                     availableCourses.map((course) => (
-                                        <div key={course.id} className="col-12 col-md-4 col-xl-4 mb-4">
+                                        <div key={course.id} className="col-12 col-md-4 col-xl-2 mb-4">
                                             <div className="card p-0 text-start">
                                                 <img src="https://placehold.co/300x200.png" className="card-img-top" alt={course.title} />
                                                 <div className="card-body">

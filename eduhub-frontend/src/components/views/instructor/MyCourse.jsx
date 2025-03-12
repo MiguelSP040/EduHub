@@ -4,6 +4,7 @@ import Sidebar from "./Sidebar";
 import Navbar from "../Navbar";
 import { AuthContext } from "../../../context/AuthContext";
 import MyStudents from "./MyStudents";
+import CourseConfig from "./CourseConfig";
 
 const MyCourse = () => {
     const navigate = useNavigate();
@@ -19,7 +20,7 @@ const MyCourse = () => {
             setCourse(location.state.course);
         } else {
             console.error("No se encontró la información del curso.");
-            navigate("/instructor"); // Redirige si no hay datos
+            navigate("/instructor");
         }
     }, [location, navigate]);
 
@@ -40,20 +41,20 @@ const MyCourse = () => {
                         {course ? (
                             <>
                                 {/* Barra de navegación de pestañas */}
-                                <nav className="mb-4">
+                                <nav className="d-flex justify-content-center mb-4">
                                     <ul className="nav nav-tabs">
                                         <li className="nav-item">
-                                            <button className={`nav-link ${activeTab === "material" ? "active" : ""}`} onClick={() => setActiveTab("material")}>
+                                            <button className={`btn ${activeTab === "material" ? "btn-purple-900" : "btn-outline-secondary"}`} onClick={() => setActiveTab("material")}>
                                                 Material
                                             </button>
                                         </li>
-                                        <li className="nav-item">
-                                            <button className={`nav-link ${activeTab === "students" ? "active" : ""}`} onClick={() => setActiveTab("students")}>
+                                        <li className="nav-item px-2">
+                                            <button className={`btn ${activeTab === "students" ? "btn-purple-900" : "btn-outline-secondary"}`} onClick={() => setActiveTab("students")}>
                                                 Estudiantes
                                             </button>
                                         </li>
                                         <li className="nav-item">
-                                            <button className={`nav-link ${activeTab === "config" ? "active" : ""}`} onClick={() => setActiveTab("config")}>
+                                            <button className={`btn ${activeTab === "config" ? "btn-purple-900" : "btn-outline-secondary"}`} onClick={() => setActiveTab("config")}>
                                                 Configuración
                                             </button>
                                         </li>
@@ -95,18 +96,7 @@ const MyCourse = () => {
 
                                 {activeTab === "students" && <MyStudents courseId={course.id} />}
 
-                                {activeTab === "config" && (
-                                    <div>
-                                        <h2>Configuración del Curso</h2>
-                                        <label>Título del Curso</label>
-                                        <input type="text" className="form-control" defaultValue={course.title} />
-
-                                        <label>Descripción</label>
-                                        <textarea className="form-control" defaultValue={course.description} rows="3"></textarea>
-
-                                        <button className="btn btn-success mt-3">Guardar Cambios</button>
-                                    </div>
-                                )}
+                                {activeTab === "config" && <CourseConfig course={course} />}
                             </>
                         ) : (
                             <p className="text-muted">Cargando curso...</p>
