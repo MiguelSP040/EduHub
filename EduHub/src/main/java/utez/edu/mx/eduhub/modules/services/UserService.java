@@ -56,13 +56,10 @@ public class UserService {
             existingUser.setUsername(user.getUsername() != null ? user.getUsername() : existingUser.getUsername());
             existingUser.setEmail(user.getEmail() != null ? user.getEmail() : existingUser.getEmail());
             existingUser.setDescription(user.getDescription() != null ? user.getDescription() : existingUser.getDescription());
+            existingUser.setActive(existingUser.isActive());
 
             if (user.getPassword() != null && !user.getPassword().isEmpty()) {
                 existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
-            }
-
-            if (user.isActive() != existingUser.isActive()) {
-                existingUser.setActive(user.isActive());
             }
 
             try {

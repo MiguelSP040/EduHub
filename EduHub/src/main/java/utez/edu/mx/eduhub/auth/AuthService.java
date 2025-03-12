@@ -3,6 +3,7 @@ package utez.edu.mx.eduhub.auth;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -65,14 +66,19 @@ public class AuthService {
                 repository.findByUsernameOrEmail(authLoginDto.getUser(), authLoginDto.getUser());
 
         if (optionalUser.isEmpty()) {
-            return ResponseEntity.status(404).body("Usuario o contraseña incorrectos");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("statusCode", "NOT_FOUND", "message", "Usuario o contraseña incorrectos"));
         }
 
         UserEntity found = optionalUser.get();
 
-        // Verificar la contraseña
+        // 🔹 Primero verificar la contraseña antes de validar el estado del usuario
         if (!passwordEncoder.matches(authLoginDto.getPassword(), found.getPassword())) {
-            return ResponseEntity.status(401).body("Usuario o contraseña incorrectos");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("statusCode", "UNAUTHORIZED", "message", "Usuario o contraseña incorrectos"));
+        }
+
+        // 🔹 Luego verificar si el usuario está activo
+        if (!found.isActive()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("statusCode", "FORBIDDEN", "message", "Tu cuenta no ha sido verificada por un administrador."));
         }
 
         try {
@@ -86,6 +92,7 @@ public class AuthService {
 
             // Respuesta
             Map<String, Object> response = new HashMap<>();
+            response.put("statusCode", "OK");
             response.put("token", jwt);
             response.put("user", Map.of(
                     "id", found.getId(),
@@ -100,7 +107,7 @@ public class AuthService {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             logger.error("Error al iniciar sesión: " + e.getMessage());
-            return ResponseEntity.status(500).body("Error interno del servidor al intentar autenticar");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("statusCode", "INTERNAL_SERVER_ERROR", "message", "Error interno del servidor al intentar autenticar"));
         }
     }
 }
