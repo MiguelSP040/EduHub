@@ -4,6 +4,7 @@ import Login from "../components/Login";
 import RegisterStep1 from "../components/RegisterStep1";
 import RegisterStep2 from "../components/RegisterStep2";
 import Recover from "../components/Recover";
+import ResetPassword from "../components/ResetPassword"; // 🔹 Importar la vista de reseteo de contraseña
 import AdminDashboard from "../components/views/admin/AdminDashboard";
 import PrivateRoute from "./PrivateRouter";
 import { useState } from "react";
@@ -43,6 +44,13 @@ const AppRouter = () => {
                         null}
                     </AuthLayout>
                 } />
+                
+                <Route path="/reset-password" element={
+                    <AuthLayout>
+                        <ResetPassword />
+                    </AuthLayout>
+                    } />
+
                 <Route path="/admin" element={
                     <PrivateRoute>
                         <AdminDashboard />

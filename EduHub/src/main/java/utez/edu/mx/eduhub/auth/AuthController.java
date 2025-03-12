@@ -6,6 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import utez.edu.mx.eduhub.auth.DTO.AuthLoginDto;
+import utez.edu.mx.eduhub.auth.DTO.PasswordResetDto;
+import utez.edu.mx.eduhub.auth.DTO.PasswordResetRequestDto;
 
 @RestController
 @RequestMapping("/eduhub/auth")
@@ -35,4 +37,21 @@ public class AuthController {
         return ResponseEntity.ok(service.login(authLogin));
     }
 
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody PasswordResetRequestDto requestDto) {
+        boolean emailSent = service.sendPasswordResetEmail(requestDto);
+        if (!emailSent) {
+            return ResponseEntity.status(404).body("Correo no registrado.");
+        }
+        return ResponseEntity.ok("Se ha enviado un correo de recuperación.");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody PasswordResetDto resetDto) {
+        boolean passwordReset = service.resetPassword(resetDto);
+        if (!passwordReset) {
+            return ResponseEntity.status(400).body("Token inválido o expirado.");
+        }
+        return ResponseEntity.ok("Contraseña actualizada correctamente.");
+    }
 }

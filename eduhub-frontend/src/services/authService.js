@@ -43,3 +43,55 @@ export const verifyPassword = async (authLoginDto) => {
     });
     return response;
 };
+
+export const requestPasswordReset = async (email) => {
+    try {
+        const response = await fetch(`${API_URL}/auth/forgot-password`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+        });
+
+        const text = await response.text();
+        
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status} - ${text}`);
+        }
+
+        try {
+            return JSON.parse(text);
+        } catch {
+            return { message: text };
+        }
+    } catch (error) {
+        console.error("Error al solicitar restablecimiento de contraseña:", error);
+        return { message: "Error en la solicitud. Intenta de nuevo." };
+    }
+};
+
+
+export const resetPassword = async (token, newPassword) => {
+    try {
+        localStorage.clear();
+
+        const response = await fetch(`${API_URL}/auth/reset-password`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token, newPassword }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
+        }
+
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+            return await response.json();
+        } else {
+            return { message: await response.text() };
+        }
+    } catch (error) {
+        console.error("Error al restablecer la contraseña:", error);
+        return { message: "Error al actualizar la contraseña. Intenta de nuevo." };
+    }
+};

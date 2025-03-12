@@ -56,4 +56,14 @@ public class JWTUtil {
         return (username.equals(userDetails.getUsername()) && !isTokenExpired (token));
     }
 
+    public String generateTokenWithExpiration(String username, int expirationMinutes) {
+        return Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + expirationMinutes * 60 * 1000)) // Expiración en minutos
+                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .compact();
+    }
+
+
 }

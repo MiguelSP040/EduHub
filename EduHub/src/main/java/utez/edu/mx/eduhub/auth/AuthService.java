@@ -5,6 +5,8 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,6 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import utez.edu.mx.eduhub.auth.DTO.AuthLoginDto;
+import utez.edu.mx.eduhub.auth.DTO.PasswordResetDto;
+import utez.edu.mx.eduhub.auth.DTO.PasswordResetRequestDto;
 import utez.edu.mx.eduhub.modules.entities.UserEntity;
 import utez.edu.mx.eduhub.modules.repositories.UserRepository;
 import utez.edu.mx.eduhub.utils.security.JWTUtil;
@@ -28,6 +32,9 @@ public class AuthService {
 
     @Autowired
     private UserRepository repository;
+
+    @Autowired
+    private JavaMailSender mailSender;
 
     @Autowired
     private JWTUtil jwtUtil;
@@ -71,12 +78,10 @@ public class AuthService {
 
         UserEntity found = optionalUser.get();
 
-        // 🔹 Primero verificar la contraseña antes de validar el estado del usuario
         if (!passwordEncoder.matches(authLoginDto.getPassword(), found.getPassword())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("statusCode", "UNAUTHORIZED", "message", "Usuario o contraseña incorrectos"));
         }
 
-        // 🔹 Luego verificar si el usuario está activo
         if (!found.isActive()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("statusCode", "FORBIDDEN", "message", "Tu cuenta no ha sido verificada por un administrador."));
         }
@@ -109,5 +114,47 @@ public class AuthService {
             logger.error("Error al iniciar sesión: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("statusCode", "INTERNAL_SERVER_ERROR", "message", "Error interno del servidor al intentar autenticar"));
         }
+    }
+
+    // Metodo para generar un token y enviar un correo con el enlace de recuperación
+    public boolean sendPasswordResetEmail(PasswordResetRequestDto requestDto) {
+        Optional<UserEntity> optionalUser = repository.findByEmail(requestDto.getEmail());
+
+        if (optionalUser.isEmpty()) {
+            return false;
+        }
+
+        UserEntity user = optionalUser.get();
+        String token = jwtUtil.generateTokenWithExpiration(user.getUsername(), 15);
+
+        String resetLink = "http://localhost:5173/reset-password?token=" + token;
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(user.getEmail());
+        message.setSubject("Recuperación de contraseña");
+        message.setText("Hola, " + user.getName() + ".\n\nPara restablecer tu contraseña, haz clic en el siguiente enlace:\n"
+                + resetLink + "\n\nEste enlace expirará en 15 minutos.");
+
+        mailSender.send(message);
+        return true;
+    }
+
+    // Metodo para validar el token y actualizar la contraseña
+    public boolean resetPassword(PasswordResetDto resetDto) {
+        String username = jwtUtil.extractUsername(resetDto.getToken());
+
+        if (username == null) {
+            return false;
+        }
+
+        Optional<UserEntity> optionalUser = repository.findByUsername(username);
+        if (optionalUser.isEmpty()) {
+            return false;
+        }
+
+        UserEntity user = optionalUser.get();
+        user.setPassword(passwordEncoder.encode(resetDto.getNewPassword()));
+        repository.save(user);
+        return true;
     }
 }
