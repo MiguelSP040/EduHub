@@ -48,7 +48,7 @@ const Login = ({ setView }) => {
             return;
         }
 
-        const { token, user: userData } = response;
+        const { token, user: userData } = response.body;
 
         if (!token || !userData) {
             alert("Error en la autenticación. Intenta de nuevo.");
