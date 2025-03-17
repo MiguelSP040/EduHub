@@ -37,10 +37,11 @@ public class SessionService {
     public ResponseEntity<?> update(Session session) {
         Session currentSession = sessionRepository.findById(session.getId())
         .orElseThrow(() -> new NotFoundException("Sesión no encontrada con ID: " + session.getId()));
-        currentSession.setNameSesion(null != session.getNameSesion() ? session.getNameSesion() : currentSession.getNameSesion());
-        currentSession.setDateStartSesion(null != session.getDateStartSesion() ? session.getDateStartSesion() : currentSession.getDateStartSesion());
-        currentSession.setDateEndSesion(null != session.getDateEndSesion() ? session.getDateEndSesion() : currentSession.getDateEndSesion());
-        currentSession.setChapter(session.getChapter());
+        currentSession.setNameSession(null != session.getNameSession() ? session.getNameSession() : currentSession.getNameSession());
+        currentSession.setDateStartSession(null != session.getDateStartSession() ? session.getDateStartSession() : currentSession.getDateStartSession());
+        currentSession.setDateEndSession(null != session.getDateEndSession() ? session.getDateEndSession() : currentSession.getDateEndSession());
+        currentSession.setMultimedia(null != session.getMultimedia() ? session.getMultimedia() : currentSession.getMultimedia());
+        currentSession.setContent(null != session.getContent() ? session.getContent() : currentSession.getContent());
         try {
             sessionRepository.save(currentSession);
             return ResponseEntity.ok("Sesión actualizada exitosamente");

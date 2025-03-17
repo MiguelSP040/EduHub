@@ -14,27 +14,32 @@ public class Session {
     private String id;
 
     @NotBlank(message = "Ingrese un nombre para la sesión")
-    private String nameSesion;
+    private String nameSession;
 
     @NotBlank(message = "Ingrese una fecha de inicio para la sesión")
     @DateTimeFormat(pattern = "dd-MM-yyyy")
-    private Date dateStartSesion;
+    private Date dateStartSession;
 
     @NotBlank(message = "Ingrese una fecha de fin para la sesión")
     @DateTimeFormat(pattern = "dd-MM-yyyy")
-    private Date dateEndSesion;
+    private Date dateEndSession;
 
-    //Relaciones
-    private List<Chapter> chapter; //Embebido: OneToMany
+    private List<String> multimedia;
+
+    private String content; 
 
     public Session() {}
 
-    public Session(String id, String nameSesion, Date dateStartSesion, Date dateEndSesion, List<Chapter> chapter) {
+    public Session(String id, @NotBlank(message = "Ingrese un nombre para la sesión") String nameSession,
+            @NotBlank(message = "Ingrese una fecha de inicio para la sesión") Date dateStartSession,
+            @NotBlank(message = "Ingrese una fecha de fin para la sesión") Date dateEndSession, List<String> multimedia,
+            String content) {
         this.id = id;
-        this.nameSesion = nameSesion;
-        this.dateStartSesion = dateStartSesion;
-        this.dateEndSesion = dateEndSesion;
-        this.chapter = chapter;
+        this.nameSession = nameSession;
+        this.dateStartSession = dateStartSession;
+        this.dateEndSession = dateEndSession;
+        this.multimedia = multimedia;
+        this.content = content;
     }
 
     public String getId() {
@@ -45,35 +50,43 @@ public class Session {
         this.id = id;
     }
 
-    public String getNameSesion() {
-        return nameSesion;
+    public String getNameSession() {
+        return nameSession;
     }
 
-    public void setNameSesion(String nameSesion) {
-        this.nameSesion = nameSesion;
+    public void setNameSession(String nameSession) {
+        this.nameSession = nameSession;
     }
 
-    public Date getDateStartSesion() {
-        return dateStartSesion;
+    public Date getDateStartSession() {
+        return dateStartSession;
     }
 
-    public void setDateStartSesion(Date dateStartSesion) {
-        this.dateStartSesion = dateStartSesion;
+    public void setDateStartSession(Date dateStartSession) {
+        this.dateStartSession = dateStartSession;
     }
 
-    public Date getDateEndSesion() {
-        return dateEndSesion;
+    public Date getDateEndSession() {
+        return dateEndSession;
     }
 
-    public void setDateEndSesion(Date dateEndSesion) {
-        this.dateEndSesion = dateEndSesion;
+    public void setDateEndSession(Date dateEndSession) {
+        this.dateEndSession = dateEndSession;
     }
 
-    public List<Chapter> getChapter() {
-        return chapter;
+    public List<String> getMultimedia() {
+        return multimedia;
     }
 
-    public void setChapter(List<Chapter> chapter) {
-        this.chapter = chapter;
+    public void setMultimedia(List<String> multimedia) {
+        this.multimedia = multimedia;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
     }
 }
