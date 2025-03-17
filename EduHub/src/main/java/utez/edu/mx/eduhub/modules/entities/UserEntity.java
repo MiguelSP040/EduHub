@@ -23,6 +23,7 @@ public class UserEntity {
     private String lastname;
 
     @NotBlank(message = "El nombre de usuario no puede estar vacío")
+    @Indexed(unique = true)
     private String username;
 
     @NotBlank(message = "El correo no puede estar vacío")

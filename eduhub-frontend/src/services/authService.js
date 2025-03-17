@@ -20,13 +20,26 @@ export const login = async (user, password) => {
 };
 
 export const registerUser = async (userData) => {
-    const response = await fetch(`${API_URL}/api/user`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(userData),
-    });
-    return response;
+    try {
+        const response = await fetch(`${API_URL}/api/user`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(userData),
+        });
+
+        const text = await response.text();
+
+        if (!response.ok) {
+            return { status: response.status, message: text };
+        }
+
+        return { status: response.status, message: "Usuario registrado con éxito" };
+    } catch (error) {
+        console.error("Error en el registro:", error);
+        return { status: 500, message: "Error interno del servidor" };
+    }
 };
+
 
 export const checkEmail = async (email) => {
     const response = await fetch(`${API_URL}/auth/check-email?email=${email}`);

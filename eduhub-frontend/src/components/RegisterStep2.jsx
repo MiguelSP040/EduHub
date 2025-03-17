@@ -11,31 +11,34 @@ const RegisterStep2 = ({ setView, formData, setFormData }) => {
 
     const handleRegister = async () => {
         if (isDisabled) return;
-
         setLoading(true);
-
+    
         try {
             let userData = { ...formData };
-
             userData.isActive = formData.role !== "ROLE_INSTRUCTOR";
-
-            const response = await registerUser(userData);
-        
+    
+            const result = await registerUser(userData);
+    
             if (!formData.username || !formData.password || !confirmPassword || !formData.role) {
                 alert("Todos los campos son obligatorios");
                 return;
             }
-
+    
             if (formData.password !== confirmPassword) {
                 alert("Las contraseñas no coinciden");
                 return;
             }
-
-            if (!response.ok) {
+    
+            if (result.status === 409) {
+                alert(`Error: ${result.message}`);
+                return;
+            }
+    
+            if (result.status !== 200) {
                 alert("Error de conexión con el servidor.");
                 return;
             }
-
+    
             alert("Registro completado con éxito");
             console.log(userData);
             setFormData({
@@ -54,7 +57,7 @@ const RegisterStep2 = ({ setView, formData, setFormData }) => {
         } finally {
             setLoading(false);
         }
-    };
+    };      
 
     const handleBack = () => {
         setFormData({ 

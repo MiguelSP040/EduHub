@@ -1,10 +1,10 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import AuthLayout from "../components/AuthLayout";
-import Login from "../components/Login";
+import AuthLayout from "../components/AuthLayout"
 import RegisterStep1 from "../components/RegisterStep1";
 import RegisterStep2 from "../components/RegisterStep2";
+import Login from "../components/Login";
 import Recover from "../components/Recover";
-import ResetPassword from "../components/ResetPassword"; // 🔹 Importar la vista de reseteo de contraseña
+import ResetPassword from "../components/ResetPassword";
 import AdminDashboard from "../components/views/admin/AdminDashboard";
 import PrivateRoute from "./PrivateRouter";
 import { useState } from "react";

@@ -1,3 +1,8 @@
 .bg-main {
     background-color: #F9F9F9 !important; 
 }
+
+.course-body-height {
+    height: 10rem !important;
+    overflow-y: hidden;
+}

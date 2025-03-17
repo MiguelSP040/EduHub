@@ -33,9 +33,17 @@ public class UserService {
     }
 
     public ResponseEntity<?> save(UserEntity user) {
-        user.setActive(!"ROLE_INSTRUCTOR".equals(user.getRole()));
+        if (repository.existsByUsername(user.getUsername())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("El nombre de usuario ya está en uso");
+        }
 
+        if (repository.existsByEmail(user.getEmail())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("El correo electrónico ya está en uso");
+        }
+
+        user.setActive(!"ROLE_INSTRUCTOR".equals(user.getRole()));
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+
         try {
             repository.save(user);
             return ResponseEntity.ok("Usuario guardado exitosamente");
