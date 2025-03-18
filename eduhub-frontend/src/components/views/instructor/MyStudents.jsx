@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getStudentsByCourse, manageEnrollment } from "../../../services/courseService";
-import { CheckCircle, XCircle } from "react-feather";
+import { CheckCircle } from "react-feather";
 
 const MyStudents = ({ courseId }) => {
     const [students, setStudents] = useState([]);
@@ -20,12 +20,21 @@ const MyStudents = ({ courseId }) => {
 
     const handleManageEnrollment = async (studentId, accept) => {
         const response = await manageEnrollment(courseId, studentId, accept);
-        alert(response.message);
-        setStudents((prev) => prev.filter((s) => s.id !== studentId));
-    };
+    
+        if (response.status === 200) {
+            alert(response.message);
+            setStudents(prevStudents =>
+                prevStudents.map(student =>
+                    student.id === studentId ? { ...student, status: accept ? "Aceptado" : "Rechazado" } : student
+                )
+            );
+        } else {
+            alert(`Error: ${response.message}`);
+        }
+    };    
 
     return (
-        <div className="table-responsive">
+        <div className="table-responsive rounded-3">
             <table className="table table-striped text-nowrap">
                 <thead>
                     <tr>
@@ -44,34 +53,40 @@ const MyStudents = ({ courseId }) => {
                 <tbody>
                     {students.length > 0 ? (
                         students.map((student) => (
-                        <tr key={student.id}>
-                            <td>{student.name} {student.surname}</td>
-                            <td>{student.enrolledDate || "Fecha no disponible"}</td>
-                            <td>{student.attendance || "N/A"}</td>
-                            <td>
-                            {student.status === "Activo" ? <CheckCircle /> : <span>Pendiente</span>}
-                            </td>
-                            <td>
-                            <button 
-                                className="btn btn-purple-900 btn-sm me-2"
-                                onClick={() => handleManageEnrollment(student.id, true)}
-                            >
-                                Aceptar
-                            </button>
-                            <button 
-                                className="btn btn-purple-400 btn-sm"
-                                onClick={() => handleManageEnrollment(student.id, false)}
-                            >
-                                Rechazar
-                            </button>
-                            </td>
-                        </tr>
+                            <tr key={student.id}>
+                                <td>{student.name} {student.surname}</td>
+                                <td>{student.enrolledDate || "Fecha no disponible"}</td>
+                                <td>{student.status === "Aceptado" || student.status === "En progreso" ? `${student.progress || 0}%` : "N/A"}</td>
+                                <td>
+                                    {student.status === "Aceptado" ? (
+                                        <CheckCircle color="green" />
+                                    ) : (
+                                        <span className="text-warning">{student.status}</span>
+                                    )}
+                                </td>
+                                <td>
+                                    {student.status === "Pendiente" ? (
+                                        <>
+                                            <button className="btn btn-success btn-sm me-2" 
+                                                onClick={() => handleManageEnrollment(student.id, true)}>
+                                                Aceptar
+                                            </button>
+                                            <button className="btn btn-danger btn-sm" 
+                                                onClick={() => handleManageEnrollment(student.id, false)}>
+                                                Rechazar
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <span>Inscrito</span>
+                                    )}
+                                </td>
+                            </tr>
                         ))
                     ) : (
                         <tr>
-                        <td colSpan="5" className="text-center py-5 text-muted">
-                            <strong>No hay estudiantes inscritos</strong>
-                        </td>
+                            <td colSpan="5" className="text-center py-5 text-muted">
+                                <strong>No hay estudiantes inscritos</strong>
+                            </td>
                         </tr>
                     )}
                 </tbody>

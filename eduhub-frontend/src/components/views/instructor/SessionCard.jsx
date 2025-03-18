@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { updateSession, deleteSession } from "../../../services/sessionService";
-import { File } from "react-feather";
+import { Image } from "react-feather";
 
 const SessionCard = ({ session, refreshSessions }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -51,7 +51,7 @@ const SessionCard = ({ session, refreshSessions }) => {
                     onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/150x120/png"; }}
                 />
             </div>
-            <File className="d-block d-sm-none me-3" />
+            <Image className="d-block d-sm-none me-3" />
             {isEditing ? (
                 <textarea className="form-control w-100" rows={3}
                     value={editedSession.content}

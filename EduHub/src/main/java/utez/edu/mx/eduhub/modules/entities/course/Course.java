@@ -5,6 +5,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -45,13 +46,13 @@ public class Course {
 
     //Relaciones
     private String docenteId; //Referencia al Docente creador del curso
-    private List<String> studentsEnrolled; //Referencia: studentId
+    private List<StudentEnrollment> enrollments = new ArrayList<>();
     private List<Session> sessions; //Embebido: OneToMany
     private List<Rating> ratings; //Embebido: OneToMany
 
     public Course() {}
 
-    public Course(String id, String title, String description, double price, Date dateStart, Date dateEnd, String category, int studentsCount, String classTime, Boolean isArchived, Boolean isPublished, String status, String docenteId, List<String> studentsEnrolled, List<Session> sessions, List<Rating> ratings) {
+    public Course(String id, String title, String description, double price, Date dateStart, Date dateEnd, String category, int studentsCount, String classTime, Boolean isArchived, Boolean isPublished, String status, String docenteId, List<StudentEnrollment> enrollments, List<Session> sessions, List<Rating> ratings) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -65,7 +66,7 @@ public class Course {
         this.isPublished = isPublished;
         this.status = status;
         this.docenteId = docenteId;
-        this.studentsEnrolled = studentsEnrolled;
+        this.enrollments = new ArrayList<>();
         this.sessions = sessions;
         this.ratings = ratings;
     }
@@ -175,12 +176,12 @@ public class Course {
         this.docenteId = docenteId;
     }
 
-    public List<String> getStudentsEnrolled() {
-        return studentsEnrolled;
+    public List<StudentEnrollment> getEnrollments() {
+        return enrollments == null ? new ArrayList<>() : enrollments;
     }
 
-    public void setStudentsEnrolled(List<String> studentsEnrolled) {
-        this.studentsEnrolled = studentsEnrolled;
+    public void setEnrollments(List<StudentEnrollment> enrollments) {
+        this.enrollments = enrollments;
     }
 
     public List<Session> getSessions() {

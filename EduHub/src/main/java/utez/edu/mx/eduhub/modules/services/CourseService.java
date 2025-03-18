@@ -6,12 +6,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import utez.edu.mx.eduhub.modules.entities.UserEntity;
 import utez.edu.mx.eduhub.modules.entities.course.Course;
+import utez.edu.mx.eduhub.modules.entities.course.Session;
+import utez.edu.mx.eduhub.modules.entities.course.StudentEnrollment;
 import utez.edu.mx.eduhub.modules.repositories.CourseRepository;
 import utez.edu.mx.eduhub.modules.repositories.UserRepository;
+import utez.edu.mx.eduhub.modules.repositories.course.SessionRepository;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,6 +24,9 @@ public class CourseService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private SessionRepository sessionRepository;
+
     public ResponseEntity<?> findAll() {
         return ResponseEntity.ok(repository.findAll());
     }
@@ -30,7 +34,10 @@ public class CourseService {
     public ResponseEntity<?> findById(String id) {
         Optional<Course> existingCourse = repository.findById(id);
         if (existingCourse.isPresent()) {
-            return ResponseEntity.ok(existingCourse.get());
+            Course course = existingCourse.get();
+            List<Session> sessions = sessionRepository.findByCourseId(course.getId());
+            course.setSessions(sessions);
+            return ResponseEntity.ok(course);
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Curso no encontrado");
         }
@@ -38,9 +45,6 @@ public class CourseService {
 
     public ResponseEntity<?> findByInstructorId(String docenteId) {
         List<Course> courses = repository.findByDocenteId(docenteId);
-        if (courses.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontraron cursos para este instructor");
-        }
         return ResponseEntity.ok(courses);
     }
 
@@ -52,59 +56,97 @@ public class CourseService {
         }
 
         Course course = optionalCourse.get();
-        List<String> studentIds = course.getStudentsEnrolled();
+        List<StudentEnrollment> enrollments = course.getEnrollments();
 
-        if (studentIds.isEmpty()) {
-            return ResponseEntity.ok(List.of()); // Devolver lista vacía en vez de un error
+        if (enrollments.isEmpty()) {
+            return ResponseEntity.ok(List.of());
         }
 
-        // Obtener datos completos de los estudiantes desde la base de datos
-        List<UserEntity> students = studentIds.stream()
-                .map(userRepository::findById)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toList());
+        List<Map<String, Object>> students = enrollments.stream().map(enrollment -> {
+            Optional<UserEntity> studentOpt = userRepository.findById(enrollment.getStudentId());
+            if (studentOpt.isPresent()) {
+                UserEntity student = studentOpt.get();
+                Map<String, Object> studentData = new HashMap<>();
+                studentData.put("id", student.getId());
+                studentData.put("name", student.getName());
+                studentData.put("surname", student.getSurname());
+                studentData.put("status", enrollment.getStatus());
+                studentData.put("progress", enrollment.calculateProgress(course.getSessions().size()));
+                return studentData;
+            }
+            return null;
+        }).filter(Objects::nonNull).collect(Collectors.toList());
 
         return ResponseEntity.ok(students);
     }
 
     public ResponseEntity<?> requestEnrollment(String courseId, String studentId) {
-        Optional<Course> existingCourse = repository.findById(courseId);
-        if (existingCourse.isPresent()) {
-            Course course = existingCourse.get();
+        Optional<Course> courseOpt = repository.findById(courseId);
+        if (courseOpt.isPresent()) {
+            Course course = courseOpt.get();
 
-            // Evitar duplicados en solicitudes de inscripción
-            if (course.getStudentsEnrolled().contains(studentId)) {
-                return ResponseEntity.badRequest().body("El estudiante ya está inscrito en este curso.");
+            Date today = new Date();
+            if (!course.getPublished() || today.after(course.getDateEnd())) {
+                return ResponseEntity.badRequest().body("El curso no está disponible para inscripciones.");
             }
 
-            if (course.getStatus().equals("aceptado")) {
-                course.getStudentsEnrolled().add(studentId);
-                repository.save(course);
-                return ResponseEntity.ok("Solicitud de inscripción enviada.");
-            } else {
-                return ResponseEntity.badRequest().body("Este curso aún no ha sido aprobado.");
+            boolean alreadyEnrolled = course.getEnrollments().stream()
+                    .anyMatch(e -> e.getStudentId().equals(studentId));
+
+            if (alreadyEnrolled) {
+                return ResponseEntity.badRequest().body("Ya has solicitado la inscripción en este curso.");
             }
+
+            course.getEnrollments().add(new StudentEnrollment(studentId, "Pendiente"));
+            repository.save(course);
+
+            return ResponseEntity.ok("Solicitud enviada.");
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Curso no encontrado.");
     }
 
     public ResponseEntity<?> manageEnrollment(String courseId, String studentId, boolean accept) {
-        Optional<Course> existingCourse = repository.findById(courseId);
-        if (existingCourse.isPresent()) {
-            Course course = existingCourse.get();
-
-            if (accept) {
-                if (!course.getStudentsEnrolled().contains(studentId)) {
-                    course.getStudentsEnrolled().add(studentId);
+        Optional<Course> courseOpt = repository.findById(courseId);
+        if (courseOpt.isPresent()) {
+            Course course = courseOpt.get();
+            for (StudentEnrollment enrollment : course.getEnrollments()) {
+                if (enrollment.getStudentId().equals(studentId)) {
+                    enrollment.setStatus(accept ? "Aceptado" : "Rechazado");
+                    repository.save(course);
+                    return ResponseEntity.ok("Estado actualizado.");
                 }
-                repository.save(course);
-                return ResponseEntity.ok("Estudiante aceptado en el curso.");
-            } else {
-                course.getStudentsEnrolled().remove(studentId);
-                repository.save(course);
-                return ResponseEntity.ok("Estudiante rechazado.");
             }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Estudiante no encontrado.");
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Curso no encontrado.");
+    }
+
+    public ResponseEntity<?> completeSession(String courseId, String studentId, String sessionId) {
+        Optional<Course> courseOpt = repository.findById(courseId);
+        if (courseOpt.isPresent()) {
+            Course course = courseOpt.get();
+
+            List<Session> sessions = sessionRepository.findByCourseId(courseId);
+            course.setSessions(sessions);
+
+            for (StudentEnrollment enrollment : course.getEnrollments()) {
+                if (enrollment.getStudentId().equals(studentId) && enrollment.getStatus().equals("Aceptado")) {
+                    if (!enrollment.getCompletedSessions().contains(sessionId)) {
+                        enrollment.getCompletedSessions().add(sessionId);
+                    }
+
+                    int totalSessions = course.getSessions().size();
+                    int completedSessions = enrollment.getCompletedSessions().size();
+                    int progress = totalSessions > 0 ? (completedSessions * 100) / totalSessions : 0;
+
+                    String status = progress >= 80 ? "Completado" : "En progreso";
+                    enrollment.setStatus(status);
+
+                    repository.save(course);
+                    return ResponseEntity.ok("Progreso actualizado: " + progress + "% - Estado: " + status);
+                }
+            }
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No tienes acceso a este curso.");
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Curso no encontrado.");
     }
@@ -164,8 +206,10 @@ public class CourseService {
         Optional<Course> existingCourse = repository.findById(id);
         if (existingCourse.isPresent()) {
             try {
+                sessionRepository.deleteByCourseId(id);
+
                 repository.deleteById(id);
-                return ResponseEntity.ok("Curso eliminado exitosamente");
+                return ResponseEntity.ok("Curso eliminado exitosamente junto con sus sesiones.");
             } catch (Exception e) {
                 System.out.println("Error al eliminar el curso: " + e.getMessage());
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al eliminar el curso");

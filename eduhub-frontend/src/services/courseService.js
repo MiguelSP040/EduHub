@@ -87,20 +87,34 @@ export const requestEnrollment = async (courseId, studentId) => {
 
 export const manageEnrollment = async (courseId, studentId, accept) => {
   const token = localStorage.getItem("token");
+
+  if (!token) {
+    console.error("Error: No se encontró un token en localStorage.");
+    return { status: 401, message: "No autorizado: Token no encontrado" };
+  }
+
   try {
-    const response = await fetch(`${API_URL}/${courseId}/enrollment/${studentId}?accept=${accept}`, {
+    const response = await fetch(`${API_URL}/${courseId}/manage-enrollment/${studentId}/${accept}`, {
       method: "PUT",
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
     });
 
+    if (!response.ok) {
+      const errorMessage = await response.text();
+      console.error("Error en manageEnrollment:", errorMessage);
+      return { status: response.status, message: errorMessage };
+    }
+
     const message = await response.text();
-    return { status: response.status, message };
+    return { status: 200, message };
   } catch (error) {
     console.error("Error en manageEnrollment:", error);
     return { status: 500, message: "Error de conexión con el servidor" };
   }
 };
-
 
 export const getCoursesByInstructor = async (instructorId) => {
   const token = localStorage.getItem("token");
