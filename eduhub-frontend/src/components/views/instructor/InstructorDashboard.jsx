@@ -20,23 +20,34 @@ const InstructorDashboard = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            try {
-                if (user?.id) {
-                    const instructorCourses = await getCoursesByInstructor(user.id);
-                    setMyCourses(instructorCourses);
-                }
-                const allCourses = await getCourses();
-                setAvailableCourses(allCourses);
-            } catch (error) {
-                console.error("Error al obtener los cursos:", error);
+          try {
+            if (user?.id) {
+              let instructorCourses;
+              try {
+                instructorCourses = await getCoursesByInstructor(user.id);
+              } catch (err) {
+                instructorCourses = [];
+              }
+              setMyCourses(instructorCourses || []);
+      
+              let allCourses;
+              try {
+                allCourses = await getCourses();
+              } catch (err) {
+                allCourses = [];
+              }
+              setAvailableCourses(allCourses || []);
             }
+          } catch (error) {
+            console.error("Error al obtener los cursos:", error);
+          }
         };
-
+      
         fetchData();
-    }, [user]);
+      }, [user]);
 
     return (
-        <div className="d-flex">
+        <div className="">
             {/* SIDEBAR */}
             <Sidebar
                 isExpanded={isSidebarExpanded}

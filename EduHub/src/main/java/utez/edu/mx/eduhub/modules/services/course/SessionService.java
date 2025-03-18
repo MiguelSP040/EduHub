@@ -1,6 +1,7 @@
 package utez.edu.mx.eduhub.modules.services.course;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import utez.edu.mx.eduhub.modules.entities.course.Session;
@@ -24,13 +25,21 @@ public class SessionService {
         return ResponseEntity.ok(existingSession);
     }
 
+    public ResponseEntity<?> findByCourseId(String courseId) {
+        List<Session> sessions = sessionRepository.findByCourseId(courseId);
+        return ResponseEntity.ok(sessions);
+    }
+
     public ResponseEntity<?> save(Session session) {
-        try{
+        try {
+            if (session.getNameSession() == null || session.getNameSession().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("El nombre de la sesión es obligatorio");
+            }
             sessionRepository.save(session);
             return ResponseEntity.ok("Sesión guardada exitosamente");
-        }catch(Exception e){
-            System.out.println(e.getMessage());
-            return ResponseEntity.status(400).body("Error al guardar la sesión");
+        } catch (Exception e) {
+            System.out.println("Error al guardar sesión: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error interno del servidor al guardar sesión");
         }
     }
 
@@ -38,8 +47,6 @@ public class SessionService {
         Session currentSession = sessionRepository.findById(session.getId())
         .orElseThrow(() -> new NotFoundException("Sesión no encontrada con ID: " + session.getId()));
         currentSession.setNameSession(null != session.getNameSession() ? session.getNameSession() : currentSession.getNameSession());
-        currentSession.setDateStartSession(null != session.getDateStartSession() ? session.getDateStartSession() : currentSession.getDateStartSession());
-        currentSession.setDateEndSession(null != session.getDateEndSession() ? session.getDateEndSession() : currentSession.getDateEndSession());
         currentSession.setMultimedia(null != session.getMultimedia() ? session.getMultimedia() : currentSession.getMultimedia());
         currentSession.setContent(null != session.getContent() ? session.getContent() : currentSession.getContent());
         try {
@@ -52,14 +59,17 @@ public class SessionService {
     }
 
     public ResponseEntity<?> deleteById(String id) {
-        sessionRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Sesión no encontrada con ID: " + id));
-        try {
-            sessionRepository.deleteById(id);
-            return ResponseEntity.ok("Sesión eliminada exitosamente");
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return ResponseEntity.status(400).body("Error al eliminar la sesión");
+        Optional<Session> session = sessionRepository.findById(id);
+        if (session.isPresent()) {
+            try {
+                sessionRepository.deleteById(id);
+                return ResponseEntity.ok("Sesión eliminada exitosamente");
+            } catch (Exception e) {
+                System.out.println("Error al eliminar sesión: " + e.getMessage());
+                return ResponseEntity.status(500).body("Error interno del servidor al eliminar sesión");
+            }
+        } else {
+            return ResponseEntity.status(404).body("Sesión no encontrada");
         }
     }
 }

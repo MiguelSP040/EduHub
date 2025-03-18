@@ -4,17 +4,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import utez.edu.mx.eduhub.modules.entities.UserEntity;
 import utez.edu.mx.eduhub.modules.entities.course.Course;
 import utez.edu.mx.eduhub.modules.repositories.CourseRepository;
+import utez.edu.mx.eduhub.modules.repositories.UserRepository;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CourseService {
 
     @Autowired
     private CourseRepository repository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     public ResponseEntity<?> findAll() {
         return ResponseEntity.ok(repository.findAll());
@@ -35,6 +42,71 @@ public class CourseService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontraron cursos para este instructor");
         }
         return ResponseEntity.ok(courses);
+    }
+
+    public ResponseEntity<?> getStudentsByCourse(String courseId) {
+        Optional<Course> optionalCourse = repository.findById(courseId);
+
+        if (optionalCourse.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Curso no encontrado");
+        }
+
+        Course course = optionalCourse.get();
+        List<String> studentIds = course.getStudentsEnrolled();
+
+        if (studentIds.isEmpty()) {
+            return ResponseEntity.ok(List.of()); // Devolver lista vacía en vez de un error
+        }
+
+        // Obtener datos completos de los estudiantes desde la base de datos
+        List<UserEntity> students = studentIds.stream()
+                .map(userRepository::findById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(students);
+    }
+
+    public ResponseEntity<?> requestEnrollment(String courseId, String studentId) {
+        Optional<Course> existingCourse = repository.findById(courseId);
+        if (existingCourse.isPresent()) {
+            Course course = existingCourse.get();
+
+            // Evitar duplicados en solicitudes de inscripción
+            if (course.getStudentsEnrolled().contains(studentId)) {
+                return ResponseEntity.badRequest().body("El estudiante ya está inscrito en este curso.");
+            }
+
+            if (course.getStatus().equals("aceptado")) {
+                course.getStudentsEnrolled().add(studentId);
+                repository.save(course);
+                return ResponseEntity.ok("Solicitud de inscripción enviada.");
+            } else {
+                return ResponseEntity.badRequest().body("Este curso aún no ha sido aprobado.");
+            }
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Curso no encontrado.");
+    }
+
+    public ResponseEntity<?> manageEnrollment(String courseId, String studentId, boolean accept) {
+        Optional<Course> existingCourse = repository.findById(courseId);
+        if (existingCourse.isPresent()) {
+            Course course = existingCourse.get();
+
+            if (accept) {
+                if (!course.getStudentsEnrolled().contains(studentId)) {
+                    course.getStudentsEnrolled().add(studentId);
+                }
+                repository.save(course);
+                return ResponseEntity.ok("Estudiante aceptado en el curso.");
+            } else {
+                course.getStudentsEnrolled().remove(studentId);
+                repository.save(course);
+                return ResponseEntity.ok("Estudiante rechazado.");
+            }
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Curso no encontrado.");
     }
 
     public ResponseEntity<?> save(Course course) {
@@ -68,13 +140,17 @@ public class CourseService {
                 return ResponseEntity.badRequest().body("La fecha de fin no puede ser menor a la de inicio");
             }
 
-            existingCourse.setArchived(course.getArchived() != null ? course.getArchived() : existingCourse.getArchived());
-            existingCourse.setPublished(course.getPublished() != null ? course.getPublished() : existingCourse.getPublished());
-            existingCourse.setStatus(course.getStatus() != null ? course.getStatus() : existingCourse.getStatus());
+            existingCourse.setCategory(course.getCategory() != null ? course.getCategory() : existingCourse.getCategory());
+
+            if (course.getStudentsCount() >= 0) {
+                existingCourse.setStudentsCount(course.getStudentsCount());
+            }
+
+            existingCourse.setClassTime(course.getClassTime() != null ? course.getClassTime() : existingCourse.getClassTime());
 
             try {
                 repository.save(existingCourse);
-                return ResponseEntity.ok("Curso actualizado exitosamente");
+                return ResponseEntity.ok(existingCourse);
             } catch (Exception e) {
                 System.out.println("Error al actualizar el curso: " + e.getMessage());
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al actualizar el curso");

@@ -29,6 +29,21 @@ public class CourseController {
         return courseService.findByInstructorId(docenteId);
     }
 
+    @GetMapping("/{courseId}/students")
+    public ResponseEntity<?> getStudents(@PathVariable String courseId) {
+        return courseService.getStudentsByCourse(courseId);
+    }
+
+    @PostMapping("/{courseId}/enroll/{studentId}")
+    public ResponseEntity<?> requestEnrollment(@PathVariable String courseId, @PathVariable String studentId) {
+        return courseService.requestEnrollment(courseId, studentId);
+    }
+
+    @PutMapping("/{courseId}/enrollment/{studentId}")
+    public ResponseEntity<?> manageEnrollment(@PathVariable String courseId, @PathVariable String studentId, @RequestParam boolean accept) {
+        return courseService.manageEnrollment(courseId, studentId, accept);
+    }
+
     @PostMapping
     public ResponseEntity<?> createCourse(@RequestBody Course course) {
         return courseService.save(course);

@@ -148,7 +148,7 @@ const InstructorProfile = () => {
     };    
 
     return (
-        <div className="d-flex">
+        <div>
             {/* SIDEBAR */}
             <Sidebar
                 isExpanded={isSidebarExpanded}

@@ -13,31 +13,22 @@ public class Session {
     @Id
     private String id;
 
+    private String courseId;
+
     @NotBlank(message = "Ingrese un nombre para la sesión")
     private String nameSession;
 
-    @NotBlank(message = "Ingrese una fecha de inicio para la sesión")
-    @DateTimeFormat(pattern = "dd-MM-yyyy")
-    private Date dateStartSession;
-
-    @NotBlank(message = "Ingrese una fecha de fin para la sesión")
-    @DateTimeFormat(pattern = "dd-MM-yyyy")
-    private Date dateEndSession;
-
     private List<String> multimedia;
 
+    @NotBlank(message = "El contenido de la sesión es obligatoria")
     private String content; 
 
     public Session() {}
 
-    public Session(String id, @NotBlank(message = "Ingrese un nombre para la sesión") String nameSession,
-            @NotBlank(message = "Ingrese una fecha de inicio para la sesión") Date dateStartSession,
-            @NotBlank(message = "Ingrese una fecha de fin para la sesión") Date dateEndSession, List<String> multimedia,
-            String content) {
+    public Session(String id, String courseId, String nameSession, List<String> multimedia, String content) {
         this.id = id;
+        this.courseId = courseId;
         this.nameSession = nameSession;
-        this.dateStartSession = dateStartSession;
-        this.dateEndSession = dateEndSession;
         this.multimedia = multimedia;
         this.content = content;
     }
@@ -50,28 +41,20 @@ public class Session {
         this.id = id;
     }
 
-    public String getNameSession() {
+    public String getCourseId() {
+        return courseId;
+    }
+
+    public void setCourseId(String courseId) {
+        this.courseId = courseId;
+    }
+
+    public @NotBlank(message = "Ingrese un nombre para la sesión") String getNameSession() {
         return nameSession;
     }
 
-    public void setNameSession(String nameSession) {
+    public void setNameSession(@NotBlank(message = "Ingrese un nombre para la sesión") String nameSession) {
         this.nameSession = nameSession;
-    }
-
-    public Date getDateStartSession() {
-        return dateStartSession;
-    }
-
-    public void setDateStartSession(Date dateStartSession) {
-        this.dateStartSession = dateStartSession;
-    }
-
-    public Date getDateEndSession() {
-        return dateEndSession;
-    }
-
-    public void setDateEndSession(Date dateEndSession) {
-        this.dateEndSession = dateEndSession;
     }
 
     public List<String> getMultimedia() {
@@ -82,11 +65,11 @@ public class Session {
         this.multimedia = multimedia;
     }
 
-    public String getContent() {
+    public @NotBlank(message = "El contenido de la sesión es obligatoria") String getContent() {
         return content;
     }
 
-    public void setContent(String content) {
+    public void setContent(@NotBlank(message = "El contenido de la sesión es obligatoria") String content) {
         this.content = content;
     }
 }

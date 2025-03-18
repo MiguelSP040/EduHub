@@ -23,6 +23,11 @@ public class SessionController {
         return sessionService.findById(id);
     }
 
+    @GetMapping("/course/{courseId}")
+    public ResponseEntity<?> getSessionsByCourse(@PathVariable String courseId) {
+        return sessionService.findByCourseId(courseId);
+    }
+
     @PostMapping("")
     public ResponseEntity<?> save(@RequestBody Session session) {
         return sessionService.save(session);

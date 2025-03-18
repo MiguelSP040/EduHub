@@ -29,6 +29,15 @@ public class Course {
     @DateTimeFormat(pattern = "dd-MM-yyyy")
     private Date dateEnd;
 
+    @NotBlank(message = "Ingrese una categoría para el curso")
+    private String category;
+
+    @NotBlank(message = "Ingrese una cantidad de estudiantes")
+    private int studentsCount;
+
+    @NotBlank(message = "Ingrese un horario para el curso")
+    private String classTime;
+
     //Acciones del ROLE_ADMIN
     private Boolean isArchived;
     private Boolean isPublished;
@@ -42,12 +51,16 @@ public class Course {
 
     public Course() {}
 
-    public Course(String id, String title, String description, Date dateStart, Date dateEnd, Boolean isArchived, Boolean isPublished, String status, String docenteId, List<String> studentsEnrolled, List<Session> sessions, List<Rating> ratings) {
+    public Course(String id, String title, String description, double price, Date dateStart, Date dateEnd, String category, int studentsCount, String classTime, Boolean isArchived, Boolean isPublished, String status, String docenteId, List<String> studentsEnrolled, List<Session> sessions, List<Rating> ratings) {
         this.id = id;
         this.title = title;
         this.description = description;
+        this.price = price;
         this.dateStart = dateStart;
         this.dateEnd = dateEnd;
+        this.category = category;
+        this.studentsCount = studentsCount;
+        this.classTime = classTime;
         this.isArchived = isArchived;
         this.isPublished = isPublished;
         this.status = status;
@@ -103,6 +116,31 @@ public class Course {
 
     public void setDateEnd(@NotBlank(message = "Ingrese una fecha de fin para el curso") Date dateEnd) {
         this.dateEnd = dateEnd;
+    }
+
+    public @NotBlank(message = "Ingrese una categoría para el curso") String getCategory() {
+        return category;
+    }
+
+    public void setCategory(@NotBlank(message = "Ingrese una categoría para el curso") String category) {
+        this.category = category;
+    }
+
+    @NotBlank(message = "Ingrese una cantidad de estudiantes")
+    public int getStudentsCount() {
+        return studentsCount;
+    }
+
+    public void setStudentsCount(@NotBlank(message = "Ingrese una cantidad de estudiantes") int studentsCount) {
+        this.studentsCount = studentsCount;
+    }
+
+    public @NotBlank(message = "Ingrese un horario para el curso") String getClassTime() {
+        return classTime;
+    }
+
+    public void setClassTime(@NotBlank(message = "Ingrese un horario para el curso") String classTime) {
+        this.classTime = classTime;
     }
 
     public Boolean getArchived() {
