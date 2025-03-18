@@ -130,7 +130,7 @@ public class CourseService {
             course.setSessions(sessions);
 
             for (StudentEnrollment enrollment : course.getEnrollments()) {
-                if (enrollment.getStudentId().equals(studentId) && enrollment.getStatus().equals("Aceptado")) {
+                if (enrollment.getStudentId().equals(studentId) && enrollment.getStatus().equals("Aceptado") || enrollment.getStatus().equals("En progreso")) {
                     if (!enrollment.getCompletedSessions().contains(sessionId)) {
                         enrollment.getCompletedSessions().add(sessionId);
                     }

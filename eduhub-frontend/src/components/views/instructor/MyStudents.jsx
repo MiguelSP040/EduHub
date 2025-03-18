@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getStudentsByCourse, manageEnrollment } from "../../../services/courseService";
-import { CheckCircle } from "react-feather";
+import { CheckCircle, AlertCircle } from "react-feather";
 
 const MyStudents = ({ courseId }) => {
     const [students, setStudents] = useState([]);
@@ -54,14 +54,14 @@ const MyStudents = ({ courseId }) => {
                     {students.length > 0 ? (
                         students.map((student) => (
                             <tr key={student.id}>
-                                <td>{student.name} {student.surname}</td>
+                                <td>{student.name} {student.surname} </td>
                                 <td>{student.enrolledDate || "Fecha no disponible"}</td>
-                                <td>{student.status === "Aceptado" || student.status === "En progreso" ? `${student.progress || 0}%` : "N/A"}</td>
+                                <td>{student.status === "Aceptado" || student.status === "En progreso" || student.status === "Completado" ? `${student.progress || 0}%` : "N/A"}</td>
                                 <td>
-                                    {student.status === "Aceptado" ? (
-                                        <CheckCircle color="green" />
+                                    {student.status === "Aceptado" || student.status === "Completado" ? (
+                                        <span className="fw-semibold text-success">{student.status} <CheckCircle color="green" /></span>
                                     ) : (
-                                        <span className="text-warning">{student.status}</span>
+                                        <span className="text-warning">{student.status} <AlertCircle color="orange"/></span>
                                     )}
                                 </td>
                                 <td>
@@ -77,7 +77,7 @@ const MyStudents = ({ courseId }) => {
                                             </button>
                                         </>
                                     ) : (
-                                        <span>Inscrito</span>
+                                        <span>Inscrito </span>
                                     )}
                                 </td>
                             </tr>
