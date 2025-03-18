@@ -67,11 +67,11 @@ const MyStudents = ({ courseId }) => {
                                 <td>
                                     {student.status === "Pendiente" ? (
                                         <>
-                                            <button className="btn btn-success btn-sm me-2" 
+                                            <button className="btn btn-purple-900 btn-sm me-2" 
                                                 onClick={() => handleManageEnrollment(student.id, true)}>
                                                 Aceptar
                                             </button>
-                                            <button className="btn btn-danger btn-sm" 
+                                            <button className="btn btn-purple-400 btn-sm" 
                                                 onClick={() => handleManageEnrollment(student.id, false)}>
                                                 Rechazar
                                             </button>
