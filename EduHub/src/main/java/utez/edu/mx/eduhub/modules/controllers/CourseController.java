@@ -2,9 +2,12 @@ package utez.edu.mx.eduhub.modules.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import utez.edu.mx.eduhub.modules.entities.course.Course;
 import utez.edu.mx.eduhub.modules.services.CourseService;
+import utez.edu.mx.eduhub.utils.security.JWTUtil;
+import utez.edu.mx.eduhub.utils.security.UserDetailsImpl;
 
 @RestController
 @RequestMapping("/eduhub/api/courses")
@@ -13,6 +16,9 @@ public class CourseController {
 
     @Autowired
     private CourseService courseService;
+
+    @Autowired
+    private JWTUtil jwtUtil;
 
     @GetMapping
     public ResponseEntity<?> getAllCourses() {
@@ -52,6 +58,21 @@ public class CourseController {
     @PostMapping
     public ResponseEntity<?> createCourse(@RequestBody Course course) {
         return courseService.save(course);
+    }
+
+    @PutMapping("/{courseId}/publish")
+    public ResponseEntity<?> publishCourse(@PathVariable String courseId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return courseService.publishCourse(courseId, userDetails.getId());
+    }
+
+    @PutMapping("/{courseId}/approve")
+    public ResponseEntity<?> approveCourse(@PathVariable String courseId, @RequestParam boolean approve, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return courseService.approveCourse(courseId, approve, userDetails.getId());
+    }
+
+    @PutMapping("/{courseId}/modify")
+    public ResponseEntity<?> requestModification(@PathVariable String courseId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return courseService.requestModification(courseId, userDetails.getId());
     }
 
     @PutMapping

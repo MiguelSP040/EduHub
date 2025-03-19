@@ -24,6 +24,10 @@ public class UserDetailsImpl implements UserDetails {
         this.authorities = Collections.singletonList(new SimpleGrantedAuthority(user.getRole()));
     }
 
+    public String getId() {
+        return id;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;

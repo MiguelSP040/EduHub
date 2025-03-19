@@ -69,64 +69,86 @@ const CourseConfig = ({ course, setCourse }) => {
     return (
         <div className="px-3 px-md-5 pt-3 text-start">
             <h2 className="mb-4 text-center">Configuración del Curso</h2>
-
+    
             {errorMsg && <div className="alert alert-danger">{errorMsg}</div>}
-
+    
             <div className="mb-3 fw-bold">
                 <label>Título del curso</label>
-                <input type="text" className="form-control" value={title} onChange={(e) => setTitle(e.target.value)} />
+                <input 
+                    type="text" 
+                    className="form-control" 
+                    value={title} 
+                    onChange={(e) => setTitle(e.target.value)} 
+                    disabled={course && course.status !== "Creado"} 
+                />
             </div>
+    
             <div className="mb-3 fw-bold">
                 <label>Descripción</label>
-                <textarea className="form-control" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
+                <textarea 
+                    className="form-control" 
+                    rows={3} 
+                    value={description} 
+                    onChange={(e) => setDescription(e.target.value)} 
+                    disabled={course && course.status !== "Creado"} 
+                />
             </div>
-
+    
             <div className="row">
                 <div className="col-12 col-md-6">
                     <div className="mb-3 fw-bold">
                         <label>Cantidad de estudiantes</label>
-                        <input type="number" className="form-control" value={studentsCount} onChange={(e) => setStudentsCount(e.target.value)} />
+                        <input 
+                            type="number" 
+                            className="form-control" 
+                            value={studentsCount} 
+                            onChange={(e) => setStudentsCount(e.target.value)} 
+                            disabled={course && course.status !== "Creado"} 
+                        />
                     </div>
                 </div>
                 <div className="col-12 col-md-6">
                     <div className="mb-3 fw-bold">
                         <label>Horario de clases</label>
-                        <input type="time" className="form-control" value={classTime} onChange={(e) => setClassTime(e.target.value)} />
+                        <input 
+                            type="time" 
+                            className="form-control" 
+                            value={classTime} 
+                            onChange={(e) => setClassTime(e.target.value)} 
+                            disabled={course && course.status !== "Creado"} 
+                        />
                     </div>
                 </div>
             </div>
-
+    
             <div className="row">
                 <div className="col-12 col-md-6">
                     <div className="mb-3 fw-bold">
                         <label>Precio del curso</label>
-                        <input type="text" className="form-control" value={price} onChange={(e) => setPrice(e.target.value)} />
+                        <input 
+                            type="text" 
+                            className="form-control" 
+                            value={price} 
+                            onChange={(e) => setPrice(e.target.value)} 
+                            disabled={course && course.status !== "Creado"} 
+                        />
                     </div>
                 </div>
                 <div className="col-12 col-md-6">
                     <div className="mb-3 fw-bold">
                         <label>Categoría del curso</label>
-                        <input type="text" className="form-control" value={category} onChange={(e) => setCategory(e.target.value)} />
+                        <input 
+                            type="text" 
+                            className="form-control" 
+                            value={category} 
+                            onChange={(e) => setCategory(e.target.value)} 
+                            disabled={course && course.status !== "Creado"} 
+                        />
                     </div>
                 </div>
             </div>
-
-            <div className="row">
-                <div className="col-12 col-md-6">
-                    <div className="mb-3 fw-bold">
-                        <label>Fecha de Inicio</label>
-                        <input type="date" className="form-control" value={dateStart} onChange={(e) => setDateStart(e.target.value)} />
-                    </div>
-                </div>
-                <div className="col-12 col-md-6">
-                    <div className="mb-3 fw-bold">
-                        <label>Fecha de Fin</label>
-                        <input type="date" className="form-control" value={dateEnd} onChange={(e) => setDateEnd(e.target.value)} />
-                    </div>
-                </div>
-            </div>
-
-            <button className="btn btn-purple-900 mt-3" onClick={handleSave} disabled={isSaving}>
+    
+            <button className="btn btn-purple-900 mt-3" onClick={handleSave} disabled={isSaving || course.status !== "Creado"}>
                 {isSaving ? <div className="spinner-border text-light"></div> : "Guardar Cambios"}
             </button>
         </div>

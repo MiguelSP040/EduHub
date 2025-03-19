@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getStudentsByCourse, manageEnrollment } from "../../../services/courseService";
 import { CheckCircle, AlertCircle } from "react-feather";
 
-const MyStudents = ({ courseId }) => {
+const MyStudents = ({ courseId, courseLenght, courseStartDate }) => {
     const [students, setStudents] = useState([]);
 
     useEffect(() => {
@@ -18,9 +18,17 @@ const MyStudents = ({ courseId }) => {
         fetchStudents();
     }, [courseId]);
 
+    const today = new Date();
+    const isEnrollmentAllowed = today < new Date(courseStartDate);
+
     const handleManageEnrollment = async (studentId, accept) => {
+        if (!isEnrollmentAllowed) {
+            alert("No se pueden aceptar nuevos estudiantes, el curso ya comenzó.");
+            return;
+        }
+
         const response = await manageEnrollment(courseId, studentId, accept);
-    
+
         if (response.status === 200) {
             alert(response.message);
             setStudents(prevStudents =>
@@ -31,15 +39,15 @@ const MyStudents = ({ courseId }) => {
         } else {
             alert(`Error: ${response.message}`);
         }
-    };    
+    };
 
     return (
-        <div className="table-responsive rounded-3">
-            <table className="table table-striped text-nowrap">
-                <thead>
+        <div className="table-responsive rounded-3" style={{ maxHeight: "35rem" }}>
+            <table className="table table-striped text-nowrap" >
+                <thead className="position-sticky top-0">
                     <tr>
                         <th colSpan="5" className="text-center">
-                            <h4 className="mb-0">Estudiantes Inscritos</h4>
+                            <h4 className="mb-0">Estudiantes Inscritos - {students.length}/{courseLenght}</h4>
                         </th>
                     </tr>
                     <tr>

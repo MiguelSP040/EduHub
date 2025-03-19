@@ -87,7 +87,7 @@ const InstructorDashboard = () => {
                                                         </span>
                                                     </div>
                                                     <p className="card-text text-truncate">{course.description}</p>
-                                                    <span className={`badge text-bg-${course.status === 'pendiente' ? "warning": "primary"} mb-3`}>
+                                                    <span className={`badge text-bg-${course.status === 'Pendiente' ? "warning": "primary"} mb-3`}>
                                                         {course.status}
                                                     </span>
                                                     <div className="d-flex justify-content-between">
@@ -112,6 +112,7 @@ const InstructorDashboard = () => {
                             <div className="row">
                                 {availableCourses.length > 0 ? (
                                     availableCourses.map((course) => (
+                                        course.status === 'Aceptado' ? (
                                         <div key={course.id} className="col-12 col-md-5 col-lg-3 mb-4">
                                             <div className="card p-0 text-start">
                                                 <img src="https://placehold.co/300x200.png" className="card-img-top" alt={course.title} />
@@ -123,7 +124,7 @@ const InstructorDashboard = () => {
                                                         </span>
                                                     </div>
                                                     <p className="card-text text-truncate">{course.description}</p>
-                                                    <span className={`badge text-bg-${course.status === 'pendiente' ? "warning": "primary"} mb-3`}>
+                                                    <span className={`badge text-bg-${course.status === 'Pendiente' ? "warning": "primary"} mb-3`}>
                                                         {course.status}
                                                     </span>
                                                     <div className="d-flex justify-content-between">
@@ -136,7 +137,7 @@ const InstructorDashboard = () => {
                                                 </div>
                                             </div>
                                         </div>
-                                    ))
+                                    ): null))
                                 ) : (
                                     <p className="text-muted">No hay cursos disponibles.</p>
                                 )}

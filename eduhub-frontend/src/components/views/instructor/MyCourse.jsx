@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Navbar from "../Navbar";
 import { getSessionsByCourse, createSession } from "../../../services/sessionService";
+import { publishCourse, requestModification, getCourseById } from "../../../services/courseService";
 import SessionCard from "./SessionCard";
 import MyStudents from "./MyStudents";
 import CourseConfig from "./CourseConfig";
@@ -24,6 +25,7 @@ const MyCourse = () => {
     const [loading, setLoading] = useState(false);
     const [activeTab, setActiveTab] = useState("material");
 
+
     useEffect(() => {
         const data = location.state?.course;
         if (!data) {
@@ -38,17 +40,20 @@ const MyCourse = () => {
         if (course?.id) {
             fetchSessions();
         }
+        console.log(course);
+        
     }, [course]);
+
 
     const fetchSessions = async () => {
         try {
             const sessions = await getSessionsByCourse(course.id);
-            //console.log("Sesiones recibidas:", sessions);
             setSessions(sessions.reverse());
         } catch (error) {
             console.error("Error al obtener sesiones:", error);
         }
     };
+
 
     const handleCreateSession = async () => {
         if (!newSession.nameSession.trim()) return;
@@ -65,6 +70,30 @@ const MyCourse = () => {
         }
     };
 
+
+    const handlePublishCourse = async () => {
+        const response = await publishCourse(course.id);
+        alert(response.message);
+        
+        if (response.status === 200) {
+            const updatedCourse = await getCourseById(course.id);
+            setCourse(updatedCourse);
+        }
+    };    
+
+      
+    const handleRequestModification = async () => {
+        const response = await requestModification(course.id);
+        alert(response.message);
+    
+        if (response.status === 200) {
+            const updatedCourse = await getCourseById(course.id);
+            setCourse(updatedCourse);
+        }
+    };
+    
+
+
     const openModal = (modalRef) => {
         if (modalRef.current) {
             const modal = new Modal(modalRef.current);
@@ -72,12 +101,19 @@ const MyCourse = () => {
         }
     };
 
+
     const closeModal = (modalRef) => {
         if (modalRef.current) {
             const modal = Modal.getInstance(modalRef.current);
             if (modal) modal.hide();
         }
     };
+
+
+    const today = new Date();
+    const courseStartDate = new Date(course?.dateStart);
+    const canModify = course?.status === "Creado" || (course?.status === "Aprobado" && today < courseStartDate);
+
 
     return (
         <div>
@@ -100,7 +136,6 @@ const MyCourse = () => {
                             <div className="container-fluid px-4 py-2">
                                 <div className="row gx-3 align-items-center">
                                     
-                                    {/* Contenedor de los botones centrados en móviles */}
                                     <div className="col-12 col-sm d-flex justify-content-center justify-content-sm-start">
                                         <div className="d-flex flex-row flex-sm-row w-100 justify-content-around justify-content-sm-start">
                                             <button type="button" className={`btn border-0 ${activeTab === "material" ? "border-bottom border-purple border-3" : ""}`} onClick={() => setActiveTab("material")}>
@@ -120,9 +155,30 @@ const MyCourse = () => {
 
                                     {activeTab === "material" && (
                                         <div className="col-12 col-sm-auto mt-2 mt-sm-0 text-center text-sm-end">
-                                            <button className="btn btn-purple-900" onClick={() => openModal(addSessionModalRef)}>
-                                                Añadir Sesión
-                                            </button>
+
+                                            {course?.status === "Creado" && !course?.published && (
+                                                <button className="btn btn-success me-2" onClick={handlePublishCourse}>
+                                                    Publicar Curso
+                                                </button>
+                                            )}
+
+                                            {course?.status === "Pendiente" && course?.published && (
+                                                <button className="btn btn-warning me-2" onClick={handleRequestModification}>
+                                                    Modificar Curso
+                                                </button>
+                                            )}
+
+                                            {course?.status === "Aprobado" && course?.published && new Date() < new Date(course?.dateStart) && (
+                                                <button className="btn btn-warning me-2" onClick={handleRequestModification}>
+                                                    Modificar Curso
+                                                </button>
+                                            )}
+
+                                            {(course?.status === "Creado" && new Date() < new Date(course?.dateStart)) && (
+                                                <button className="btn btn-purple-900" onClick={() => openModal(addSessionModalRef)}>
+                                                    Añadir Sesión
+                                                </button>
+                                            )}
                                         </div>
                                     )}
                                 </div>
@@ -133,15 +189,15 @@ const MyCourse = () => {
                         {activeTab === "material" && (
                             sessions.length > 0 ? (
                                 sessions.map((session) => (
-                                    <SessionCard key={session.id} session={session} refreshSessions={fetchSessions} />
+                                    <SessionCard key={session.id} session={session} refreshSessions={fetchSessions} isPublished={course.published} courseStatus={course.status} />
                                 ))
                             ) : (
                                 <p className="text-muted text-center mt-5">No hay sesiones registradas aún.</p>
                             )
                         )}
 
-                        {activeTab === "students" && <MyStudents courseId={course.id} />}
-                        {activeTab === "config" && <CourseConfig course={course} setCourse={setCourse} />}
+                        {activeTab === "students" && <MyStudents courseId={course.id} courseLenght={course.studentsCount} courseStartDate={course.dateStart} />}
+                        {activeTab === "config" && <CourseConfig course={course} setCourse={setCourse} canModify={canModify} />}
                     </main>
                 </div>
             </div>
