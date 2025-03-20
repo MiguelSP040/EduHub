@@ -75,32 +75,58 @@ const InstructorDashboard = () => {
                             <h3>Mis cursos</h3>
                             <div className="row">
                                 {myCourses.length > 0 ? (
-                                    myCourses.map((course) => (
-                                        <div key={course.id} className="col-12 col-md-5 col-lg-3 mb-4">
-                                            <div className="card p-0 text-start">
-                                                <img src="https://placehold.co/300x200.png" className="card-img-top" alt={course.title} />
-                                                <div className="card-body course-body-height">
-                                                    <div className="d-flex justify-content-between align-items-center mb-2">
-                                                        <h5 className="card-title text-truncate">{course.title}</h5>
-                                                        <span className="badge text-bg-primary">
-                                                            {course.price === 0 ? "GRATIS" : `$${course.price}`}
+                                    myCourses.map((course) => {
+                                        // Definir color de badge basado en el estado del curso
+                                        let statusBadge = "";
+                                        switch (course.status) {
+                                            case "Creado":
+                                                statusBadge = "secondary"; // Gris
+                                                break;
+                                            case "Pendiente":
+                                                statusBadge = "warning"; // Amarillo
+                                                break;
+                                            case "Aprobado":
+                                                statusBadge = "success"; // Verde
+                                                break;
+                                            case "Rechazado":
+                                                statusBadge = "danger"; // Rojo
+                                                break;
+                                            default:
+                                                statusBadge = "primary"; // Azul (fallback)
+                                        }
+
+                                        return (
+                                            <div key={course.id} className="col-12 col-md-5 col-lg-3 mb-4">
+                                                <div className="card p-0 text-start">
+                                                    <img src="https://placehold.co/300x200.png" className="card-img-top" alt={course.title} />
+                                                    <div className="card-body course-body-height">
+                                                        <div className="d-flex justify-content-between align-items-center mb-2">
+                                                            <h5 className="card-title text-truncate">{course.title}</h5>
+                                                            <span className="badge text-bg-primary">
+                                                                {course.price === 0 ? "GRATIS" : `$${course.price}`}
+                                                            </span>
+                                                        </div>
+                                                        <p className="card-text text-truncate">{course.description}</p>
+
+                                                        {/* Badge de estado del curso con colores dinámicos */}
+                                                        <span className={`badge text-bg-${statusBadge} mb-3`}>
+                                                            {course.status}
                                                         </span>
+
+                                                        <div className="d-flex justify-content-between">
+                                                            <span className="text-muted">Inicio: {new Date(course.dateStart).toLocaleDateString()}</span>
+                                                            <span className="text-muted">Fin: {new Date(course.dateEnd).toLocaleDateString()}</span>
+                                                        </div>
                                                     </div>
-                                                    <p className="card-text text-truncate">{course.description}</p>
-                                                    <span className={`badge text-bg-${course.status === 'Pendiente' ? "warning": "primary"} mb-3`}>
-                                                        {course.status}
-                                                    </span>
-                                                    <div className="d-flex justify-content-between">
-                                                        <span className="text-muted">Inicio: {new Date(course.dateStart).toLocaleDateString()}</span>
-                                                        <span className="text-muted">Fin: {new Date(course.dateEnd).toLocaleDateString()}</span>
+                                                    <div className="card-footer bg-white border-0">
+                                                        <button className="btn rounded-5 btn-purple-900" onClick={() => navigate("/instructor/course", { state: { course } })}>
+                                                            Ver curso
+                                                        </button>
                                                     </div>
-                                                </div>
-                                                <div className="card-footer bg-white border-0">
-                                                <button className="btn rounded-5 btn-purple-900" onClick={() => navigate("/instructor/course", { state: { course } })}>Ver curso</button>
                                                 </div>
                                             </div>
-                                        </div>
-                                    ))
+                                        );
+                                    })
                                 ) : (
                                     <p className="text-muted">No tienes cursos registrados.</p>
                                 )}

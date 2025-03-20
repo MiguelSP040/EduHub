@@ -46,8 +46,8 @@ public class CourseController {
     }
 
     @PutMapping("/{courseId}/manage-enrollment/{studentId}/{accept}")
-    public ResponseEntity<?> manageEnrollment(@PathVariable String courseId, @PathVariable String studentId, @PathVariable boolean accept) {
-        return courseService.manageEnrollment(courseId, studentId, accept);
+    public ResponseEntity<?> manageEnrollment(@PathVariable String courseId, @PathVariable String studentId, @PathVariable boolean accept, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return courseService.manageEnrollment(courseId, studentId, accept, userDetails.getId());
     }
 
     @PutMapping("/{courseId}/complete-session/{studentId}/{sessionId}")

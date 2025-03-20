@@ -1,7 +1,7 @@
 import { useContext, useRef, useEffect } from "react";
 import { AuthContext } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { Home, User, DollarSign, FileText, LogOut } from "react-feather";
+import { Home, User, DollarSign, FileText, Users, LogOut } from "react-feather";
 
 const Sidebar = ({ isExpanded, setIsExpanded, navbarRef }) => {
     const { logoutUser } = useContext(AuthContext);
@@ -60,6 +60,11 @@ const Sidebar = ({ isExpanded, setIsExpanded, navbarRef }) => {
                     className="btn btn-outline-secondary my-1 d-flex align-items-center col-12" onClick={ isExpanded ? (e) => { e.stopPropagation(); navigate("/profileAdmin"); } : null }>
                     <User size={24} className="flex-shrink-0" />
                     <div className="ms-2">{isExpanded && "Perfil"}</div>
+                </button>
+
+                <button className="btn btn-outline-secondary my-1 d-flex align-items-center col-12" onClick={ isExpanded ? (e) => { e.stopPropagation(); navigate("/students"); } : null }>
+                    <Users size={24} className="flex-shrink-0" />
+                    <div className="ms-2">{isExpanded && "Estudiantes"}</div>
                 </button>
 
                 <button className="btn btn-outline-secondary my-1 d-flex align-items-center col-12" onClick={ isExpanded ? (e) => { e.stopPropagation(); navigate("/finance"); } : null }>

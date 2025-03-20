@@ -90,8 +90,7 @@ public class CourseService {
         if (courseOpt.isPresent()) {
             Course course = courseOpt.get();
 
-            Date today = new Date();
-            if (!course.getPublished() || !"Aprobado".equals(course.getStatus()) || !today.before(course.getDateStart())) {
+            if (!course.getPublished() || !"Aprobado".equals(course.getStatus()) || new Date().after(course.getDateStart())) {
                 return ResponseEntity.badRequest().body("El curso no está disponible para inscripciones.");
             }
 
@@ -106,18 +105,27 @@ public class CourseService {
                 return ResponseEntity.badRequest().body("Ya has solicitado la inscripción en este curso.");
             }
 
-            course.getEnrollments().add(new StudentEnrollment(studentId, "Pendiente"));
+            String enrollmentStatus = course.getPrice() == 0 ? "Aceptado" : "Pendiente";
+            course.getEnrollments().add(new StudentEnrollment(studentId, enrollmentStatus));
+
             repository.save(course);
-            return ResponseEntity.ok("Solicitud enviada.");
+            return ResponseEntity.ok(enrollmentStatus.equals("Aceptado") ? "Inscripción completada." : "Solicitud enviada.");
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Curso no encontrado.");
     }
 
     // GESTIONAR SOLICITUD DE INSCRIPCIÓN
-    public ResponseEntity<?> manageEnrollment(String courseId, String studentId, boolean accept) {
+    public ResponseEntity<?> manageEnrollment(String courseId, String studentId, boolean accept, String adminId) {
         Optional<Course> courseOpt = repository.findById(courseId);
         if (courseOpt.isPresent()) {
             Course course = courseOpt.get();
+
+            // Validación de permisos: Solo el ADMIN puede gestionar inscripciones
+            Optional<UserEntity> adminOpt = userRepository.findById(adminId);
+            if (adminOpt.isEmpty() || !adminOpt.get().getRole().equals("ADMIN")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permisos para gestionar inscripciones.");
+            }
+
             for (StudentEnrollment enrollment : course.getEnrollments()) {
                 if (enrollment.getStudentId().equals(studentId)) {
                     enrollment.setStatus(accept ? "Aceptado" : "Rechazado");
@@ -238,6 +246,11 @@ public class CourseService {
 
         if (!course.getDocenteId().equals(instructorId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permisos para modificar este curso");
+        }
+
+        // **Evitar modificación si el curso ya fue aprobado**
+        if ("Aprobado".equals(course.getStatus())) {
+            return ResponseEntity.badRequest().body("No se pueden solicitar modificaciones en un curso aprobado.");
         }
 
         Date today = new Date();

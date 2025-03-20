@@ -16,7 +16,7 @@ const Navbar = ({ toggleSidebar }) => {
                         <img src="../../../src/assets/img/eduhub-icon.png" alt="brand" height={40} />
                     </a>
                     <a className="text-black" href="" onClick={ (e) => { e.stopPropagation(); navigate("/instructor");} }>
-                        <h5 className="user-select-none">EduHub Admin</h5>
+                        <h5 className="user-select-none">EduHub</h5>
                     </a>
                 </div>
 

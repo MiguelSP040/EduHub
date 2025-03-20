@@ -15,6 +15,7 @@ import InstructorProfile from "../components/views/instructor/InstructorProfile"
 import NewCourse from "../components/views/instructor/newCourse";
 import MyStudents from "../components/views/instructor/MyStudents";
 import MyCourse from "../components/views/instructor/MyCourse";
+import AdminEnrollments from "../components/views/admin/AdminEnrollments";
 
 const AppRouter = () => {
     const [view, setView] = useState("login");
@@ -64,6 +65,11 @@ const AppRouter = () => {
                 <Route path="/finance" element={
                     <PrivateRoute>
                         <AdminFinance/>
+                    </PrivateRoute>
+                } />
+                <Route path="/students" element={
+                    <PrivateRoute>
+                        <AdminEnrollments/>
                     </PrivateRoute>
                 } />
                 <Route path="/instructor" element={

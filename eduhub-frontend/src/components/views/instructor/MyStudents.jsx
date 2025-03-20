@@ -19,27 +19,6 @@ const MyStudents = ({ courseId, courseLenght, courseStartDate }) => {
     }, [courseId]);
 
     const today = new Date();
-    const isEnrollmentAllowed = today < new Date(courseStartDate);
-
-    const handleManageEnrollment = async (studentId, accept) => {
-        if (!isEnrollmentAllowed) {
-            alert("No se pueden aceptar nuevos estudiantes, el curso ya comenzó.");
-            return;
-        }
-
-        const response = await manageEnrollment(courseId, studentId, accept);
-
-        if (response.status === 200) {
-            alert(response.message);
-            setStudents(prevStudents =>
-                prevStudents.map(student =>
-                    student.id === studentId ? { ...student, status: accept ? "Aceptado" : "Rechazado" } : student
-                )
-            );
-        } else {
-            alert(`Error: ${response.message}`);
-        }
-    };
 
     return (
         <div className="table-responsive rounded-3" style={{ maxHeight: "35rem" }}>
@@ -55,7 +34,6 @@ const MyStudents = ({ courseId, courseLenght, courseStartDate }) => {
                         <th>Fecha de Inscripción</th>
                         <th>Asistencias</th>
                         <th>Estado</th>
-                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -70,22 +48,6 @@ const MyStudents = ({ courseId, courseLenght, courseStartDate }) => {
                                         <span className="fw-semibold text-success">{student.status} <CheckCircle color="green" /></span>
                                     ) : (
                                         <span className="text-warning">{student.status} <AlertCircle color="orange"/></span>
-                                    )}
-                                </td>
-                                <td>
-                                    {student.status === "Pendiente" ? (
-                                        <>
-                                            <button className="btn btn-purple-900 btn-sm me-2" 
-                                                onClick={() => handleManageEnrollment(student.id, true)}>
-                                                Aceptar
-                                            </button>
-                                            <button className="btn btn-purple-400 btn-sm" 
-                                                onClick={() => handleManageEnrollment(student.id, false)}>
-                                                Rechazar
-                                            </button>
-                                        </>
-                                    ) : (
-                                        <span>Inscrito </span>
                                     )}
                                 </td>
                             </tr>

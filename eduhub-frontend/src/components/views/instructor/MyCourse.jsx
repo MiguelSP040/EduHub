@@ -168,10 +168,8 @@ const MyCourse = () => {
                                                 </button>
                                             )}
 
-                                            {course?.status === "Aprobado" && course?.published && new Date() < new Date(course?.dateStart) && (
-                                                <button className="btn btn-warning me-2" onClick={handleRequestModification}>
-                                                    Modificar Curso
-                                                </button>
+                                            {course?.status === "Aprobado" && (
+                                                <span className="text-success fw-semibold">Curso Aprobado - No editable</span>
                                             )}
 
                                             {(course?.status === "Creado" && new Date() < new Date(course?.dateStart)) && (
