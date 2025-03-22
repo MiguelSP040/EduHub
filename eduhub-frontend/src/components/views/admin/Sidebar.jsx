@@ -72,11 +72,6 @@ const Sidebar = ({ isExpanded, setIsExpanded, navbarRef }) => {
                     <div className="ms-2">{isExpanded && "Finanzas"}</div>
                 </button>
 
-                <button className="btn btn-outline-secondary my-1 d-flex align-items-center col-12" onClick={ isExpanded ? (e) => { e.stopPropagation(); navigate("/metrics"); } : null }>
-                    <FileText size={24} className="flex-shrink-0" />
-                    <div className="ms-2">{isExpanded && "Métricas"}</div>
-                </button>
-
                 <div className="mt-auto">
                     <button className="btn btn-danger d-flex align-items-center col-12" onClick={ isExpanded ? (e) => { e.stopPropagation(); handleLogout(); } : null }>
                         <LogOut size={24} className="flex-shrink-0" />

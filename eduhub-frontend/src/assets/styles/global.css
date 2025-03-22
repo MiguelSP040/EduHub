@@ -3,7 +3,7 @@
 }
 
 .course-body-height {
-    height: 10rem !important;
+    height: 12rem !important;
     overflow-y: hidden;
 }
 
@@ -21,5 +21,9 @@ body {
     .img-container {
         width: 10rem;
         justify-items: center;
+    }
+
+    .course-width {
+        width: 18rem !important;
     }
 }

@@ -1,173 +1,129 @@
-import { useState, useRef, useEffect, useContext } from "react";
+import { useState, useRef, useEffect, useContext, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Navbar from "../Navbar";
 import { AuthContext } from "../../../context/AuthContext";
 import { getCourses, getCoursesByInstructor } from "../../../services/courseService";
+import { BookOpen, User } from "react-feather";
 
 const InstructorDashboard = () => {
     const navigate = useNavigate();
-    const { user } = useContext(AuthContext); // Usuario autenticado
-
-    const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
-    const [myCourses, setMyCourses] = useState([]); // Cursos del instructor
-    const [availableCourses, setAvailableCourses] = useState([]); // Todos los cursos
+    const { user } = useContext(AuthContext);
     const navbarRef = useRef(null);
-
-    const toggleSidebar = () => {
-        setIsSidebarExpanded(!isSidebarExpanded);
-    };
+    const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
+    const [activeTab, setActiveTab] = useState("myCourses");
+    const [myCourses, setMyCourses] = useState([]);
+    const [courses, setCourses] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
-          try {
-            if (user?.id) {
-              let instructorCourses;
-              try {
-                instructorCourses = await getCoursesByInstructor(user.id);
-              } catch (err) {
-                instructorCourses = [];
-              }
-              setMyCourses(instructorCourses || []);
-      
-              let allCourses;
-              try {
-                allCourses = await getCourses();
-              } catch (err) {
-                allCourses = [];
-              }
-              setAvailableCourses(allCourses || []);
+            try {
+                if (!user?.id) return;
+                const instructorCourses = await getCoursesByInstructor(user.id);
+                let allCourses = await getCourses();
+                allCourses = allCourses.filter(course => course.published);
+                setCourses([...allCourses]);
+                setMyCourses([...instructorCourses]);
+
+            } catch (error) {
+                console.error("Error al obtener cursos:", error);
+                setCourses([]);
             }
-          } catch (error) {
-            console.error("Error al obtener los cursos:", error);
-          }
         };
-      
         fetchData();
-      }, [user]);
+    }, [user]);
+
+    const coursesByTab = useMemo(() => {
+        return activeTab === "myCourses"
+            ? myCourses
+            : courses;
+    }, [activeTab, courses, user]);
+
+    const getStatusBadgeClass = (status) => {
+        switch (status) {
+            case "Creado": return "secondary";
+            case "Pendiente": return "warning";
+            case "Aprobado": return "success";
+            case "Rechazado": return "danger";
+            default: return "primary";
+        }
+    };
+
+    const renderCourses = () => (
+        coursesByTab.length > 0 ? (
+            coursesByTab.map((course) => (
+                <div key={course.id} className="col-12 col-md-5 col-lg-4 course-width mb-4">
+                    <div className="card p-0 text-start">
+                        <img src="https://placehold.co/300x200.png" className="card-img-top" alt={course.title} />
+                        <div className="card-body course-body-height">
+                            <div className="d-flex justify-content-between align-items-center mb-2">
+                                <h5 className="card-title text-truncate">{course.title}</h5>
+                                <span className="badge text-bg-primary">
+                                    {course.price === 0 ? "GRATIS" : `$${course.price}`}
+                                </span>
+                            </div>
+                            <p className="card-text text-truncate">{course.description}</p>
+                            <span className={`badge text-bg-${getStatusBadgeClass(course.status)} mb-3`}>
+                                {course.status}
+                            </span>
+                            <div className="d-flex justify-content-between">
+                                <span className="text-muted">Inicio: {new Date(course.dateStart).toLocaleDateString()}</span>
+                                <span className="text-muted">Fin: {new Date(course.dateEnd).toLocaleDateString()}</span>
+                            </div>
+                        </div>
+                        <div className="card-footer bg-white border-0">
+                            <button className="btn rounded-5 btn-purple-900" onClick={() => navigate("/instructor/course", { state: { course } })}>
+                                Ver curso
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            ))
+        ) : (
+            <p className="text-muted">No hay cursos disponibles.</p>
+        )
+    );
 
     return (
-        <div className="">
+        <div className="d-flex">
             {/* SIDEBAR */}
-            <Sidebar
-                isExpanded={isSidebarExpanded}
-                setIsExpanded={setIsSidebarExpanded}
-                navbarRef={navbarRef}
-            />
+            <Sidebar isExpanded={isSidebarExpanded} setIsExpanded={setIsSidebarExpanded} navbarRef={navbarRef} />
 
-            {/* CONTENEDOR PRINCIPAL (NAVBAR + MAIN) */}
+            {/* CONTENEDOR PRINCIPAL */}
             <div className="flex-grow-1">
-                {/* NAVBAR */}
                 <div ref={navbarRef}>
-                    <Navbar toggleSidebar={toggleSidebar} />
+                    <Navbar toggleSidebar={() => setIsSidebarExpanded(!isSidebarExpanded)} />
                 </div>
 
-                {/* CONTENIDO PRINCIPAL */}
                 <div className="overflow-auto vh-100">
-                    <main className={"px-3 px-md-5 pt-5 mt-5 ms-md-5"}>
-                        <section className="mb-4">
-                            <div className="col-12 text-end">
-                                <button className="btn-purple-900" onClick={() => navigate('/instructor/new-course')}>
-                                    Registrar curso
-                                </button>
-                            </div>
-
-                            <h3>Mis cursos</h3>
-                            <div className="row">
-                                {myCourses.length > 0 ? (
-                                    myCourses.map((course) => {
-                                        // Definir color de badge basado en el estado del curso
-                                        let statusBadge = "";
-                                        switch (course.status) {
-                                            case "Creado":
-                                                statusBadge = "secondary"; // Gris
-                                                break;
-                                            case "Pendiente":
-                                                statusBadge = "warning"; // Amarillo
-                                                break;
-                                            case "Aprobado":
-                                                statusBadge = "success"; // Verde
-                                                break;
-                                            case "Rechazado":
-                                                statusBadge = "danger"; // Rojo
-                                                break;
-                                            default:
-                                                statusBadge = "primary"; // Azul (fallback)
-                                        }
-
-                                        return (
-                                            <div key={course.id} className="col-12 col-md-5 col-lg-3 mb-4">
-                                                <div className="card p-0 text-start">
-                                                    <img src="https://placehold.co/300x200.png" className="card-img-top" alt={course.title} />
-                                                    <div className="card-body course-body-height">
-                                                        <div className="d-flex justify-content-between align-items-center mb-2">
-                                                            <h5 className="card-title text-truncate">{course.title}</h5>
-                                                            <span className="badge text-bg-primary">
-                                                                {course.price === 0 ? "GRATIS" : `$${course.price}`}
-                                                            </span>
-                                                        </div>
-                                                        <p className="card-text text-truncate">{course.description}</p>
-
-                                                        {/* Badge de estado del curso con colores dinámicos */}
-                                                        <span className={`badge text-bg-${statusBadge} mb-3`}>
-                                                            {course.status}
-                                                        </span>
-
-                                                        <div className="d-flex justify-content-between">
-                                                            <span className="text-muted">Inicio: {new Date(course.dateStart).toLocaleDateString()}</span>
-                                                            <span className="text-muted">Fin: {new Date(course.dateEnd).toLocaleDateString()}</span>
-                                                        </div>
-                                                    </div>
-                                                    <div className="card-footer bg-white border-0">
-                                                        <button className="btn rounded-5 btn-purple-900" onClick={() => navigate("/instructor/course", { state: { course } })}>
-                                                            Ver curso
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        );
-                                    })
-                                ) : (
-                                    <p className="text-muted">No tienes cursos registrados.</p>
-                                )}
-                            </div>
-                        </section>
-
-                        <section className="mb-4">
-                            <h3>Cursos disponibles</h3>
-                            <div className="row">
-                                {availableCourses.length > 0 ? (
-                                    availableCourses.map((course) => (
-                                        course.status === 'Aceptado' ? (
-                                        <div key={course.id} className="col-12 col-md-5 col-lg-3 mb-4">
-                                            <div className="card p-0 text-start">
-                                                <img src="https://placehold.co/300x200.png" className="card-img-top" alt={course.title} />
-                                                <div className="card-body course-body-height">
-                                                    <div className="d-flex justify-content-between align-items-center mb-2">
-                                                        <h5 className="card-title text-truncate">{course.title}</h5>
-                                                        <span className="badge text-bg-primary">
-                                                            {course.price === 0 ? "GRATIS" : `$${course.price}`}
-                                                        </span>
-                                                    </div>
-                                                    <p className="card-text text-truncate">{course.description}</p>
-                                                    <span className={`badge text-bg-${course.status === 'Pendiente' ? "warning": "primary"} mb-3`}>
-                                                        {course.status}
-                                                    </span>
-                                                    <div className="d-flex justify-content-between">
-                                                        <span className="text-muted">Inicio: {new Date(course.dateStart).toLocaleDateString()}</span>
-                                                        <span className="text-muted">Fin: {new Date(course.dateEnd).toLocaleDateString()}</span>
-                                                    </div>
-                                                </div>
-                                                <div className="card-footer bg-white border-0">
-                                                <button className="btn rounded-5 btn-purple-900" onClick={() => navigate("/instructor/course", { state: { course } })}>Ver curso</button>
-                                                </div>
-                                            </div>
+                    <main className="px-3 px-md-5 pt-5 mt-5 ms-md-5">
+                        {/* BARRA DE NAVEGACIÓN SECUNDARIA */}
+                        <div className="bg-white shadow-sm mb-4">
+                            <div className="container-fluid px-4 py-2">
+                                <div className="row gx-3 align-items-center">
+                                    <div className="col-12 col-sm d-flex justify-content-center justify-content-sm-start">
+                                        <div className="d-flex flex-row flex-sm-row w-100 justify-content-around justify-content-sm-start">
+                                            {["myCourses", "allCourses"].map((tab) => (
+                                                <button key={tab} type="button" className={`btn border-0 ${activeTab === tab ? "border-bottom border-purple border-3 fw-semibold" : ""}`} onClick={() => setActiveTab(tab)}>
+                                                    {tab === "myCourses" ? <User size={20} className="d-sm-none" /> : null}
+                                                    {tab === "allCourses" ? <BookOpen size={20} className="d-sm-none" /> : null}
+                                                    <span className="d-none d-sm-inline">{tab === "allCourses" ? "Todos" : "Mis Cursos"}</span>
+                                                </button>
+                                            ))}
                                         </div>
-                                    ): null))
-                                ) : (
-                                    <p className="text-muted">No hay cursos disponibles.</p>
-                                )}
+                                    </div>
+                                    <div className="col-12 col-sm text-md-end mt-3 mt-sm-0">
+                                        <button className="btn-purple-900" onClick={() => navigate('/instructor/new-course')}>
+                                            Registrar curso
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
+                        </div>
+
+                        {/* LISTADO DE CURSOS */}
+                        <section>
+                            <div className="row">{renderCourses()}</div>
                         </section>
                     </main>
                 </div>

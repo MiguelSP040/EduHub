@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import utez.edu.mx.eduhub.modules.entities.UserEntity;
 import utez.edu.mx.eduhub.modules.entities.course.Course;
+import utez.edu.mx.eduhub.modules.entities.course.Rating;
 import utez.edu.mx.eduhub.modules.entities.course.Session;
 import utez.edu.mx.eduhub.modules.entities.course.StudentEnrollment;
 import utez.edu.mx.eduhub.modules.repositories.CourseRepository;
@@ -16,7 +17,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class CourseService {
+public class
+CourseService {
 
     @Autowired
     private CourseRepository repository;
@@ -220,6 +222,10 @@ public class CourseService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Curso no encontrado");
         }
 
+        if (!optionalCourse.orElseThrow().getPublished()) {
+            return ResponseEntity.badRequest().body("El curso no está publicado");
+        }
+
         Course course = optionalCourse.get();
 
         if (approve) {
@@ -321,4 +327,40 @@ public class CourseService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Curso no encontrado");
         }
     }
+
+    public ResponseEntity<?> addRating(String courseId, Rating rating, String studentId) {
+        Optional<Course> optionalCourse = repository.findById(courseId);
+
+        if (optionalCourse.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Curso no encontrado");
+        }
+
+        Course course = optionalCourse.get();
+
+        /* Validar si el curso ya finalizó
+        if (new Date().before(course.getDateEnd())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El curso aún no ha finalizado.");
+        }*/
+
+        boolean isEnrolled = course.getEnrollments().stream()
+                .anyMatch(enrollment -> enrollment.getStudentId().equals(studentId));
+
+        if (!isEnrolled) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No estás inscrito en este curso.");
+        }
+
+        boolean alreadyRated = course.getRatings().stream()
+                .anyMatch(existingRating -> existingRating.getStudentId().equals(studentId));
+
+        if (alreadyRated) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Ya calificaste este curso.");
+        }
+
+        rating.setStudentId(studentId);
+        course.getRatings().add(rating);
+        repository.save(course);
+
+        return ResponseEntity.ok("Calificación agregada correctamente.");
+    }
+
 }

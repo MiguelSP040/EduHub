@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import utez.edu.mx.eduhub.modules.entities.course.Course;
+import utez.edu.mx.eduhub.modules.entities.course.Rating;
 import utez.edu.mx.eduhub.modules.services.CourseService;
 import utez.edu.mx.eduhub.utils.security.JWTUtil;
 import utez.edu.mx.eduhub.utils.security.UserDetailsImpl;
@@ -79,6 +80,12 @@ public class CourseController {
     public ResponseEntity<?> updateCourse(@RequestBody Course course) {
         return courseService.update(course);
     }
+
+    @PostMapping("/{courseId}/rate")
+    public ResponseEntity<?> rateCourse(@PathVariable String courseId, @RequestBody Rating rating, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return courseService.addRating(courseId, rating, userDetails.getId());
+    }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteCourse(@PathVariable String id) {

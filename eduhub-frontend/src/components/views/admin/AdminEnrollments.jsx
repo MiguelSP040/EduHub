@@ -72,21 +72,24 @@ const AdminEnrollments = () => {
                 {/* CONTENIDO PRINCIPAL */}
                 <div className="overflow-auto vh-100">
                     <main className="px-3 px-md-5 pt-5 mt-5 ms-md-5">
-                        <h2 className="mb-3">Gestión de Inscripciones</h2>
 
-                        {/* Selección de curso */}
                         <div className="bg-white shadow-sm mb-4">
                             <div className="container-fluid px-4 py-2">
                                 <div className="row gx-3 align-items-center">
-                                    <div className="col-12 col-md-5">
-                                    <select className="form-select" value={selectedCourse || ""} onChange={handleCourseChange}>
-                                        <option value="" disabled>Seleccione un curso</option>
-                                        {courses.map(course => (
-                                            <option key={course.id} value={course.id}>
-                                                {course.title} - ${course.price}
-                                            </option>
-                                        ))}
-                                    </select>
+                                    <div className="col-12 col-sm d-flex justify-content-center justify-content-sm-start">
+                                        <div className="d-flex flex-row flex-sm-row w-100 justify-content-around justify-content-sm-start">
+                                            <span className="fw-semibold fs-5">Gestión de Inscripciones</span>
+                                        </div>
+                                    </div>
+                                    <div className="col-12 col-sm text-md-end mt-3 mt-sm-0">
+                                        <select className="form-select" value={selectedCourse || ""} onChange={handleCourseChange}>
+                                            <option value="" disabled>Seleccione un curso</option>
+                                            {courses.map(course => (
+                                                <option key={course.id} value={course.id}>
+                                                    {course.title} - ${course.price}
+                                                </option>
+                                            ))}
+                                        </select>
                                     </div>
                                 </div>
                             </div>
