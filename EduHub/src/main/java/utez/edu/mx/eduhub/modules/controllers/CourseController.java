@@ -91,4 +91,10 @@ public class CourseController {
     public ResponseEntity<?> deleteCourse(@PathVariable String id) {
         return courseService.deleteById(id);
     }
+
+    //Get courses por estudiante
+    @GetMapping("/student/{studentId}")
+    public ResponseEntity<?> getCoursesByStudent(@PathVariable String studentId) {
+        return courseService.requestCourseStudent(studentId);
+    }
 }

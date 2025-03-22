@@ -17,8 +17,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class
-CourseService {
+public class CourseService {
 
     @Autowired
     private CourseRepository repository;
@@ -361,6 +360,28 @@ CourseService {
         repository.save(course);
 
         return ResponseEntity.ok("Calificación agregada correctamente.");
+    }
+
+
+    // OBTENER CURSOS POR ALUMNO
+    public ResponseEntity<?> requestCourseStudent(String studentId) {
+        // Obtener todos los cursos
+        List<Course> allCourses = repository.findAll();
+
+        // Filtrar los cursos en los que el estudiante está inscrito (sin importar el estado)
+        List<Course> enrolledCourses = allCourses.stream()
+                .filter(course -> course.getEnrollments().stream()
+                        .anyMatch(enrollment -> enrollment.getStudentId().equals(studentId)) // Solo verifica el ID del estudiante
+                )
+                .collect(Collectors.toList());
+
+        // Verificar si se encontraron cursos
+        if (enrolledCourses.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("El estudiante no está inscrito en ningún curso.");
+        }
+
+        // Devolver la lista de cursos
+        return ResponseEntity.ok(enrolledCourses);
     }
 
 }
