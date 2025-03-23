@@ -14,7 +14,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/eduhub/api/session")
 public class SessionController {
-    @Autowired 
+    @Autowired
     private SessionService sessionService;
 
     @GetMapping("")
@@ -33,7 +33,7 @@ public class SessionController {
     }
 
     // Endpoint modificado para aceptar session y archivos
-    @PostMapping(value = "", consumes = {"multipart/form-data"})
+    @PostMapping(value = "", consumes = { "multipart/form-data" })
     public ResponseEntity<?> save(
             @RequestPart("session") Session session,
             @RequestPart(value = "files", required = false) MultipartFile[] files) {
@@ -82,4 +82,22 @@ public class SessionController {
         }
         return ResponseEntity.status(404).body("Archivo no encontrado");
     }
+
+    @DeleteMapping("/{sessionId}/multimedia/{fileId}")
+    public ResponseEntity<?> removeFileFromSession(@PathVariable String sessionId, @PathVariable String fileId) {
+        // 1. Buscar la sesión
+        Session session = (Session) sessionService.findById(sessionId).getBody();
+        if (session == null) {
+            return ResponseEntity.status(404).body("Sesión no encontrada");
+        }
+        // 2. Eliminar el archivo de la lista multimedia
+        boolean removed = session.getMultimedia().removeIf(file -> file.getId().equals(fileId));
+        if (!removed) {
+            return ResponseEntity.status(404).body("Archivo no encontrado en la sesión");
+        }
+        // 3. Guardar cambios
+        sessionService.update(session);
+        return ResponseEntity.ok("Archivo eliminado de la sesión");
+    }
+
 }

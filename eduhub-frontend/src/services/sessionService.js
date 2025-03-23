@@ -9,7 +9,7 @@ export const createSession = async (sessionData) => {
     const headers = {
       Authorization: `Bearer ${token}`,
       // Si no es FormData, se indica el Content-Type para JSON
-      ...( !isFormData && { "Content-Type": "application/json" } )
+      ...(!isFormData && { "Content-Type": "application/json" })
     };
 
     const response = await fetch(API_URL, {
@@ -34,7 +34,7 @@ export const createSession = async (sessionData) => {
 
 export const getSessionsByCourse = async (courseId) => {
   const token = localStorage.getItem("token");
-  
+
   try {
     const response = await fetch(`${API_URL}/course/${courseId}`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -97,7 +97,7 @@ export const deleteSession = async (sessionId) => {
 
 export const downloadFile = async (sessionId, fileId, fileName) => {
   try {
-    const token = localStorage.getItem("token"); 
+    const token = localStorage.getItem("token");
     const response = await fetch(`${API_URL}/${sessionId}/multimedia/${fileId}`, {
       method: "GET",
       headers: {
@@ -114,5 +114,28 @@ export const downloadFile = async (sessionId, fileId, fileName) => {
   } catch (error) {
     console.error("Error en la descarga:", error);
     alert("Ocurrió un error al descargar el archivo.");
+  }
+};
+
+export const removeFileFromSession = async (sessionId, fileId) => {
+  const token = localStorage.getItem("token");
+  try {
+    const response = await fetch(`${API_URL}/${sessionId}/multimedia/${fileId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      // Si el backend retorna algún mensaje de error
+      const errorMessage = await response.text();
+      throw new Error(errorMessage || "Error al eliminar archivo");
+    }
+
+    return { status: 200, message: "Archivo eliminado correctamente" };
+  } catch (error) {
+    console.error("Error al eliminar archivo:", error);
+    return { status: 500, message: error.message };
   }
 };

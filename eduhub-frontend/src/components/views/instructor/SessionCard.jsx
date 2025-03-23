@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { updateSession, deleteSession, downloadFile } from "../../../services/sessionService";
-import { Image, FileText } from "react-feather"; 
+import { updateSession, deleteSession, downloadFile, removeFileFromSession } from "../../../services/sessionService";
+import { Image, FileText } from "react-feather";
 import { saveAs } from "file-saver";
 
 const SessionCard = ({ session, refreshSessions, isPublished, courseStatus }) => {
@@ -34,8 +34,19 @@ const SessionCard = ({ session, refreshSessions, isPublished, courseStatus }) =>
         downloadFile(session.id, fileId, fileName);
     };
 
-    const API_BASE_URL = "http://localhost:8080";
-    const getFileUrl = (sessionId, fileId) => `${API_BASE_URL}/eduhub/api/session/${sessionId}/multimedia/${fileId}`;
+    const handleRemoveFile = async (fileId) => {
+        const response = await removeFileFromSession(session.id, fileId);
+        if (response.status === 200) {
+            alert("Archivo eliminado correctamente");
+            // Actualizar el estado local para reflejar la eliminación del archivo
+            setEditedSession({
+                ...editedSession,
+                multimedia: editedSession.multimedia.filter(file => file.id !== fileId)
+            });
+        } else {
+            alert(`Error: ${response.message}`);
+        }
+    };
 
     return (
         <div className="card rounded-4 my-3 p-0">
@@ -60,55 +71,48 @@ const SessionCard = ({ session, refreshSessions, isPublished, courseStatus }) =>
                     </div>
                 )}
             </div>
-            <div className="card-body d-flex flex-wrap">
-                <div className="img-container">
-                    {session.multimedia && session.multimedia.length > 0 && session.multimedia.map((file) => {
-                        if (file.fileType && file.fileType.startsWith("image/")) {
-                            return (
-                                <a key={file.id} href={getFileUrl(session.id, file.id)} target="_blank" rel="noopener noreferrer">
-                                    <img
-                                        src={getFileUrl(session.id, file.id)}
-                                        alt={file.fileName}
-                                        className="me-3 rounded-3 img-fluid"
-                                        style={{ maxWidth: "150px", height: "120px", objectFit: "cover" }}
-                                    />
-                                </a>
-                            );
-                        } else {
-                            return (
-                                <div key={file.id} className="me-3 d-flex flex-column align-items-center">
-                                    <FileText size={40} />
-                                    <span style={{ fontSize: "0.8rem" }}>{file.fileName}</span>
-                                    <button
-                                        className="btn btn-sm btn-primary mt-2"
-                                        onClick={() => handleDownload(file.id, file.fileName)}
-                                    >
-                                        Descargar
-                                    </button>
-                                </div>
-                            );
-                        }
-                    })}
-                    {!session.multimedia || session.multimedia.length === 0 && (
-                        <img
-                            src="https://placehold.co/150x120/png"
-                            alt="multimedia"
-                            className="me-3 rounded-3 img-fluid"
-                            style={{ maxWidth: "150px", height: "120px", objectFit: "fill" }}
+            <div className="card-body">
+                <div className="row mb-3">
+                    {isEditing ? (
+                        <textarea
+                            className="form-control w-100"
+                            rows={3}
+                            value={editedSession.content}
+                            onChange={(e) => setEditedSession({ ...editedSession, content: e.target.value })}
+                            disabled={isPublished}
                         />
+                    ) : (
+                        <p className="text-truncate text-wrap">{session.content}</p>
                     )}
                 </div>
-                {isEditing ? (
-                    <textarea
-                        className="form-control w-100"
-                        rows={3}
-                        value={editedSession.content}
-                        onChange={(e) => setEditedSession({ ...editedSession, content: e.target.value })}
-                        disabled={isPublished}
-                    />
-                ) : (
-                    <p className="text-truncate text-wrap">{session.content}</p>
-                )}
+                <div className="row">
+                    <div className="col-12">
+                        <div className="img-container d-flex flex-wrap">
+                            {editedSession.multimedia && editedSession.multimedia.length > 0 && editedSession.multimedia.map((file) => {
+                                return (
+                                    <div key={file.id} className="me-3 d-flex flex-column align-items-center position-relative">
+                                        <FileText size={40} />
+                                        <span style={{ fontSize: "0.8rem" }}>{file.fileName}</span>
+                                        <button
+                                            className="btn btn-sm btn-primary mt-2"
+                                            onClick={() => handleDownload(file.id, file.fileName)}
+                                        >
+                                            Descargar
+                                        </button>
+                                        {isEditing && (
+                                            <button
+                                                className="btn btn-link text-danger position-absolute top-0 end-0"
+                                                onClick={() => handleRemoveFile(file.id)}
+                                            >
+                                                X
+                                            </button>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
             </div>
             <div className="card-footer text-end" style={{ display: courseStatus === "Aprobado" || courseStatus === "Empezado" ? "none" : "block" }}>
                 <div>
