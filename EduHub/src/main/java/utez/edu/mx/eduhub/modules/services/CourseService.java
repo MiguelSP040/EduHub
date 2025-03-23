@@ -189,9 +189,21 @@ public class CourseService {
     // CREAR UN CURSO
     public ResponseEntity<?> save(Course course) {
         try {
-            if (course.getDateEnd().before(course.getDateStart())) {
-                return ResponseEntity.badRequest().body("La fecha de fin no puede ser menor a la de inicio");
+            Date today = new Date();
+            Date tomorrow = new Date(today.getTime() + (1000 * 60 * 60 * 24)); // Suma 1 día
+
+            if (course.getStudentsCount() < 1) {
+                return ResponseEntity.badRequest().body("El curso debe permitir al menos 1 estudiante.");
             }
+
+            if (!course.getDateStart().after(tomorrow)) {
+                return ResponseEntity.badRequest().body("La fecha de inicio debe ser al menos un día después de la fecha actual.");
+            }
+
+            if (course.getDateEnd().before(course.getDateStart())) {
+                return ResponseEntity.badRequest().body("La fecha de fin no puede ser menor a la de inicio.");
+            }
+
             course.setArchived(false);
             course.setPublished(false);
             course.setStatus("Creado");
@@ -315,8 +327,6 @@ public class CourseService {
             if (course.getStudentsCount() >= 0) {
                 existingCourse.setStudentsCount(course.getStudentsCount());
             }
-
-            existingCourse.setClassTime(course.getClassTime() != null ? course.getClassTime() : existingCourse.getClassTime());
 
             try {
                 repository.save(existingCourse);

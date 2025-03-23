@@ -1,6 +1,8 @@
 package utez.edu.mx.eduhub.modules.entities.course;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -33,11 +35,9 @@ public class Course {
     @NotBlank(message = "Ingrese una categoría para el curso")
     private String category;
 
-    @NotBlank(message = "Ingrese una cantidad de estudiantes")
-    private int studentsCount;
-
-    @NotBlank(message = "Ingrese un horario para el curso")
-    private String classTime;
+    @Min(value = 1, message = "El curso debe permitir al menos 1 estudiante")
+    @NotNull(message = "Ingrese una cantidad de estudiantes")
+    private Integer studentsCount;
 
     //Acciones del ROLE_ADMIN
     private Boolean isArchived;
@@ -52,7 +52,7 @@ public class Course {
 
     public Course() {}
 
-    public Course(String id, String title, String description, double price, Date dateStart, Date dateEnd, String category, int studentsCount, String classTime, Boolean isArchived, Boolean isPublished, String status, String docenteId, List<StudentEnrollment> enrollments, List<Session> sessions, List<Rating> ratings) {
+    public Course(String id, String title, String description, double price, Date dateStart, Date dateEnd, String category, Integer studentsCount, Boolean isArchived, Boolean isPublished, String status, String docenteId, List<StudentEnrollment> enrollments, List<Session> sessions, List<Rating> ratings) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -61,12 +61,11 @@ public class Course {
         this.dateEnd = dateEnd;
         this.category = category;
         this.studentsCount = studentsCount;
-        this.classTime = classTime;
         this.isArchived = isArchived;
         this.isPublished = isPublished;
         this.status = status;
         this.docenteId = docenteId;
-        this.enrollments = new ArrayList<>();
+        this.enrollments = enrollments;
         this.sessions = sessions;
         this.ratings = ratings;
     }
@@ -127,21 +126,12 @@ public class Course {
         this.category = category;
     }
 
-    @NotBlank(message = "Ingrese una cantidad de estudiantes")
-    public int getStudentsCount() {
+    public @Min(value = 1, message = "El curso debe permitir al menos 1 estudiante") @NotNull(message = "Ingrese una cantidad de estudiantes") Integer getStudentsCount() {
         return studentsCount;
     }
 
-    public void setStudentsCount(@NotBlank(message = "Ingrese una cantidad de estudiantes") int studentsCount) {
+    public void setStudentsCount(@Min(value = 1, message = "El curso debe permitir al menos 1 estudiante") @NotNull(message = "Ingrese una cantidad de estudiantes") Integer studentsCount) {
         this.studentsCount = studentsCount;
-    }
-
-    public @NotBlank(message = "Ingrese un horario para el curso") String getClassTime() {
-        return classTime;
-    }
-
-    public void setClassTime(@NotBlank(message = "Ingrese un horario para el curso") String classTime) {
-        this.classTime = classTime;
     }
 
     public Boolean getArchived() {
@@ -177,7 +167,7 @@ public class Course {
     }
 
     public List<StudentEnrollment> getEnrollments() {
-        return enrollments == null ? new ArrayList<>() : enrollments;
+        return enrollments;
     }
 
     public void setEnrollments(List<StudentEnrollment> enrollments) {
