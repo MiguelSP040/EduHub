@@ -23,7 +23,8 @@ const MyCourse = () => {
     const [instructor, setInstructor] = useState(null);
     const [course, setCourse] = useState(null);
     const [sessions, setSessions] = useState([]);
-    const [newSession, setNewSession] = useState({ nameSession: "", multimedia: "", content: "" });
+    const [newSession, setNewSession] = useState({ nameSession: "", content: "" });
+    const [files, setFiles] = useState([]);
     const [loading, setLoading] = useState(false);
     const [activeTab, setActiveTab] = useState("material");
 
@@ -31,7 +32,7 @@ const MyCourse = () => {
     useEffect(() => {
         const fetchData = async () => {
             const data = location.state?.course;
-            
+
             if (!data) {
                 console.error("No se encontró la información del curso.");
                 navigate("/admin");
@@ -66,43 +67,60 @@ const MyCourse = () => {
     };
 
 
+    const handleFileChange = (e) => {
+        setFiles(e.target.files);
+    };
+
     const handleCreateSession = async () => {
         if (!newSession.nameSession.trim()) return;
         setLoading(true);
-        const response = await createSession({ ...newSession, courseId: course.id });
+
+        const formData = new FormData();
+        formData.append("session", new Blob([JSON.stringify({
+            ...newSession,
+            courseId: course.id
+        })], { type: "application/json" }));
+
+        if (files.length > 0) {
+            for (let i = 0; i < files.length; i++) {
+                formData.append("files", files[i]);
+            }
+        }
+
+        const response = await createSession(formData); 
         setLoading(false);
 
         if (response.status === 200) {
             closeModal(addSessionModalRef);
-            setNewSession({ nameSession: "", multimedia: "", content: "" });
+            setNewSession({ nameSession: "", content: "" });
+            setFiles([]);
             fetchSessions();
         } else {
             alert(response.message);
         }
     };
 
-
     const handlePublishCourse = async () => {
         const response = await publishCourse(course.id);
         alert(response.message);
-        
-        if (response.status === 200) {
-            const updatedCourse = await getCourseById(course.id);
-            setCourse(updatedCourse);
-        }
-    };    
 
-      
-    const handleRequestModification = async () => {
-        const response = await requestModification(course.id);
-        alert(response.message);
-    
         if (response.status === 200) {
             const updatedCourse = await getCourseById(course.id);
             setCourse(updatedCourse);
         }
     };
-    
+
+
+    const handleRequestModification = async () => {
+        const response = await requestModification(course.id);
+        alert(response.message);
+
+        if (response.status === 200) {
+            const updatedCourse = await getCourseById(course.id);
+            setCourse(updatedCourse);
+        }
+    };
+
 
 
     const openModal = (modalRef) => {
@@ -146,7 +164,7 @@ const MyCourse = () => {
                         <div className="bg-white shadow-sm mb-4">
                             <div className="container-fluid px-4 py-2">
                                 <div className="row gx-3 align-items-center">
-                                    
+
                                     <div className="col-12 col-sm d-flex justify-content-center justify-content-sm-start">
                                         <div className="d-flex flex-row flex-sm-row w-100 justify-content-around justify-content-sm-start">
                                             <button type="button" className={`btn border-0 ${activeTab === "material" ? "border-bottom border-purple border-3" : ""}`} onClick={() => setActiveTab("material")}>
@@ -211,19 +229,19 @@ const MyCourse = () => {
                         </div>
 
                         <div className="mx-md-5">
-                            
+
                             {/* RENDERIZADO DINÁMICO SEGÚN EL TAB SELECCIONADO */}
                             {activeTab === "material" && (
                                 <>
                                     <div className="position-relative w-100">
                                         {/* Imagen de portada */}
-                                        <img 
-                                            src="https://t3.ftcdn.net/jpg/04/67/96/14/360_F_467961418_UnS1ZAwAqbvVVMKExxqUNi0MUFTEJI83.jpg" 
+                                        <img
+                                            src="https://t3.ftcdn.net/jpg/04/67/96/14/360_F_467961418_UnS1ZAwAqbvVVMKExxqUNi0MUFTEJI83.jpg"
                                             className="w-100 rounded-4 object-fit-cover"
-                                            style={{ height: "250px" }} 
-                                            alt={course?.title} 
+                                            style={{ height: "250px" }}
+                                            alt={course?.title}
                                         />
-                                        
+
                                         {/* Contenido sobre la imagen */}
                                         <div className="position-absolute top-50 start-0 text-start text-white p-4 w-100">
                                             <div className="text-white">
@@ -237,12 +255,12 @@ const MyCourse = () => {
                                     {/* Renderizado de sesiones */}
                                     {sessions.length > 0 ? (
                                         sessions.map((session) => (
-                                            <SessionCard 
-                                                key={session.id} 
-                                                session={session} 
-                                                refreshSessions={fetchSessions} 
-                                                isPublished={course.published} 
-                                                courseStatus={course.status} 
+                                            <SessionCard
+                                                key={session.id}
+                                                session={session}
+                                                refreshSessions={fetchSessions}
+                                                isPublished={course.published}
+                                                courseStatus={course.status}
                                             />
                                         ))
                                     ) : (
@@ -265,12 +283,34 @@ const MyCourse = () => {
                     <div className="modal-content">
                         <div className="modal-body">
                             <h5 className="modal-title mb-3">Crear nueva Sesión</h5>
-                            <input type="text" className="form-control mb-2" placeholder="Título de la sesión" value={newSession.nameSession} onChange={(e) => setNewSession({ ...newSession, nameSession: e.target.value })} />
-                            <textarea className="form-control mb-2" placeholder="Contenido de la sesión" rows={3} value={newSession.content} onChange={(e) => setNewSession({ ...newSession, content: e.target.value })} />
-                            <input type="text" className="form-control mb-2" placeholder="URL de multimedia" value={newSession.multimedia} onChange={(e) => setNewSession({ ...newSession, multimedia: e.target.value })} />
+                            <input
+                                type="text"
+                                className="form-control mb-2"
+                                placeholder="Título de la sesión"
+                                value={newSession.nameSession}
+                                onChange={(e) => setNewSession({ ...newSession, nameSession: e.target.value })}
+                            />
+                            <textarea
+                                className="form-control mb-2"
+                                placeholder="Contenido de la sesión"
+                                rows={3}
+                                value={newSession.content}
+                                onChange={(e) => setNewSession({ ...newSession, content: e.target.value })}
+                            />
+                            {/* Input para múltiples archivos */}
+                            <input
+                                type="file"
+                                className="form-control mb-2"
+                                multiple
+                                onChange={handleFileChange}
+                            />
                             <div className="text-end">
-                                <button className="btn btn-purple-900 me-2" onClick={handleCreateSession}>{loading ? "Guardando..." : "Guardar"}</button>
-                                <button className="btn btn-outline-secondary" onClick={() => closeModal(addSessionModalRef)}>Cancelar</button>
+                                <button className="btn btn-purple-900 me-2" onClick={handleCreateSession}>
+                                    {loading ? "Guardando..." : "Guardar"}
+                                </button>
+                                <button className="btn btn-outline-secondary" onClick={() => closeModal(addSessionModalRef)}>
+                                    Cancelar
+                                </button>
                             </div>
                         </div>
                     </div>
