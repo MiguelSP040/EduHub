@@ -39,6 +39,11 @@ public class UserController {
         return service.save(user);
     }
 
+    @PutMapping("/activate/{instructorId}")
+    public ResponseEntity<?> activateInstructor(@PathVariable String instructorId) {
+        return service.activateInstructor(instructorId);
+    }
+
     // Actualizar un usuario existente
     @PutMapping
     @Secured({"ROLE_ADMIN", "ROLE_INSTRUCTOR", "ROLE_STUDENT"})

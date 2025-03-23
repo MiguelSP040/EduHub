@@ -53,6 +53,30 @@ public class UserService {
         }
     }
 
+    public ResponseEntity<?> activateInstructor(String instructorId) {
+        Optional<UserEntity> instructorOpt = repository.findById(instructorId);
+
+        if (instructorOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Instructor no encontrado.");
+        }
+
+        UserEntity instructor = instructorOpt.get();
+
+        if (!"ROLE_INSTRUCTOR".equals(instructor.getRole())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El usuario no es un instructor.");
+        }
+
+        if (instructor.isActive()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El instructor ya está activado.");
+        }
+
+        instructor.setActive(true);
+        repository.save(instructor);
+
+        return ResponseEntity.ok("Instructor activado correctamente.");
+    }
+
+
     public ResponseEntity<?> update(UserEntity user) {
         Optional<UserEntity> existingUserOptional = repository.findById(user.getId());
         if (existingUserOptional.isPresent()) {

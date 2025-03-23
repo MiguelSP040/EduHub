@@ -2,6 +2,7 @@ import { useContext, useRef, useEffect } from "react";
 import { AuthContext } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { Home, User, DollarSign, FileText, Users, LogOut } from "react-feather";
+import { SlGraduation } from "react-icons/sl";
 
 const Sidebar = ({ isExpanded, setIsExpanded, navbarRef }) => {
     const { logoutUser } = useContext(AuthContext);
@@ -63,8 +64,13 @@ const Sidebar = ({ isExpanded, setIsExpanded, navbarRef }) => {
                 </button>
 
                 <button className="btn btn-outline-secondary my-1 d-flex align-items-center col-12" onClick={ isExpanded ? (e) => { e.stopPropagation(); navigate("/students"); } : null }>
-                    <Users size={24} className="flex-shrink-0" />
+                    <SlGraduation size={24} className="flex-shrink-0" />
                     <div className="ms-2">{isExpanded && "Estudiantes"}</div>
+                </button>
+
+                <button className="btn btn-outline-secondary my-1 d-flex align-items-center col-12" onClick={ isExpanded ? (e) => { e.stopPropagation(); navigate("/instructors"); } : null }>
+                    <Users size={24} className="flex-shrink-0" />
+                    <div className="ms-2">{isExpanded && "Instructores"}</div>
                 </button>
 
                 <button className="btn btn-outline-secondary my-1 d-flex align-items-center col-12" onClick={ isExpanded ? (e) => { e.stopPropagation(); navigate("/finance"); } : null }>
