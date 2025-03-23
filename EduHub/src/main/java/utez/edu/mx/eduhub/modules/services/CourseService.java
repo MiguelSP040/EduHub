@@ -3,6 +3,7 @@ package utez.edu.mx.eduhub.modules.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import utez.edu.mx.eduhub.modules.entities.UserEntity;
 import utez.edu.mx.eduhub.modules.entities.course.Course;
@@ -91,7 +92,7 @@ public class CourseService {
         if (courseOpt.isPresent()) {
             Course course = courseOpt.get();
 
-            if (!course.getPublished() || !"Aprobado".equals(course.getStatus()) || new Date().after(course.getDateStart())) {
+            if (!course.getPublished() || !"Aprobado".equals(course.getStatus())) {
                 return ResponseEntity.badRequest().body("El curso no está disponible para inscripciones.");
             }
 
@@ -118,25 +119,40 @@ public class CourseService {
     // GESTIONAR SOLICITUD DE INSCRIPCIÓN
     public ResponseEntity<?> manageEnrollment(String courseId, String studentId, boolean accept, String adminId) {
         Optional<Course> courseOpt = repository.findById(courseId);
-        if (courseOpt.isPresent()) {
-            Course course = courseOpt.get();
-
-            // Validación de permisos: Solo el ADMIN puede gestionar inscripciones
-            Optional<UserEntity> adminOpt = userRepository.findById(adminId);
-            if (adminOpt.isEmpty() || !adminOpt.get().getRole().equals("ADMIN")) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permisos para gestionar inscripciones.");
-            }
-
-            for (StudentEnrollment enrollment : course.getEnrollments()) {
-                if (enrollment.getStudentId().equals(studentId)) {
-                    enrollment.setStatus(accept ? "Aceptado" : "Rechazado");
-                    repository.save(course);
-                    return ResponseEntity.ok("Estado actualizado.");
-                }
-            }
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Estudiante no encontrado.");
+        if (courseOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Curso no encontrado.");
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Curso no encontrado.");
+
+        Course course = courseOpt.get();
+
+        Optional<UserEntity> adminOpt = userRepository.findById(adminId);
+        if (adminOpt.isEmpty() || !"ROLE_ADMIN".equals(adminOpt.get().getRole())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permisos para gestionar inscripciones.");
+        }
+
+        if (!"Aprobado".equals(course.getStatus())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Solo se pueden gestionar inscripciones en cursos aprobados.");
+        }
+
+        if ("Empezado".equals(course.getStatus()) || "Finalizado".equals(course.getStatus())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No se pueden gestionar inscripciones en cursos que ya han empezado o finalizado.");
+        }
+
+        Optional<StudentEnrollment> enrollmentOpt = course.getEnrollments().stream()
+                .filter(e -> e.getStudentId().equals(studentId))
+                .findFirst();
+
+        if (enrollmentOpt.isPresent()) {
+            if (accept) {
+                enrollmentOpt.get().setStatus("Aceptado");
+            } else {
+                course.getEnrollments().remove(enrollmentOpt.get());
+            }
+            repository.save(course);
+            return ResponseEntity.ok("Estado del estudiante actualizado correctamente.");
+        }
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Estudiante no encontrado en el curso.");
     }
 
     // COMPLETAR SESIONES DEL ESTUDIANTE
@@ -202,6 +218,11 @@ public class CourseService {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permisos para publicar este curso");
         }
 
+        Date today = new Date();
+        if (today.after(course.getDateStart())) {
+            return ResponseEntity.badRequest().body("No puedes solicitar la aprobación el curso después de su inicio. Intenta cambiar la fecha de inicio.");
+        }
+
         if (course.getPublished()) {
             return ResponseEntity.badRequest().body("El curso ya está publicado");
         }
@@ -232,7 +253,7 @@ public class CourseService {
             course.setPublished(true);
         } else {
             course.setStatus("Rechazado");
-            course.setPublished(false);
+            course.setPublished(true);
         }
 
         repository.save(course);
@@ -258,10 +279,10 @@ public class CourseService {
             return ResponseEntity.badRequest().body("No se pueden solicitar modificaciones en un curso aprobado.");
         }
 
-        Date today = new Date();
+        /*Date today = new Date();
         if (today.after(course.getDateStart())) {
-            return ResponseEntity.badRequest().body("No puedes modificar el curso después de su inicio.");
-        }
+            return ResponseEntity.badRequest().body("No puedes modificar el curso después de su inicio. Intenta cambiar la fecha de inicio.");
+        }*/
 
         course.setStatus("Creado");
         course.setPublished(false);
@@ -276,8 +297,8 @@ public class CourseService {
         if (existingCourseOptional.isPresent()) {
             Course existingCourse = existingCourseOptional.get();
 
-            if (new Date().after(existingCourse.getDateStart())) {
-                return ResponseEntity.badRequest().body("No se pueden hacer cambios, el curso ya ha comenzado.");
+            if (existingCourse.getStatus().equals("Empezado")) {
+                return ResponseEntity.badRequest().body("No se pueden hacer cambios en un curso que ya ha empezado.");
             }
 
             existingCourse.setTitle(course.getTitle() != null ? course.getTitle() : existingCourse.getTitle());
@@ -363,25 +384,38 @@ public class CourseService {
     }
 
 
-    // OBTENER CURSOS POR ALUMNO
+    // OBTENER CURSOS DEL ALUMNO
     public ResponseEntity<?> requestCourseStudent(String studentId) {
-        // Obtener todos los cursos
         List<Course> allCourses = repository.findAll();
 
-        // Filtrar los cursos en los que el estudiante está inscrito (sin importar el estado)
         List<Course> enrolledCourses = allCourses.stream()
                 .filter(course -> course.getEnrollments().stream()
-                        .anyMatch(enrollment -> enrollment.getStudentId().equals(studentId)) // Solo verifica el ID del estudiante
+                        .anyMatch(enrollment -> enrollment.getStudentId().equals(studentId))
                 )
                 .collect(Collectors.toList());
 
-        // Verificar si se encontraron cursos
         if (enrolledCourses.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("El estudiante no está inscrito en ningún curso.");
         }
 
-        // Devolver la lista de cursos
         return ResponseEntity.ok(enrolledCourses);
     }
 
+    @Scheduled(fixedRate = 3600000) // Cada hora
+    public void updateCourseStatuses() {
+        List<Course> courses = repository.findAll();
+        Date today = new Date();
+
+        for (Course course : courses) {
+            if (course.getPublished() != null && course.getPublished()) {
+                if ("Aprobado".equals(course.getStatus()) && course.getDateStart().before(today) && course.getDateEnd().after(today)) {
+                    course.setStatus("Empezado");
+                }
+                else if ("Empezado".equals(course.getStatus()) && course.getDateEnd().before(today)) {
+                    course.setStatus("Finalizado");
+                }
+                repository.save(course);
+            }
+        }
+    }
 }

@@ -25,7 +25,7 @@ const AdminProfile = () => {
     useEffect(() => {
         const fetchUserData = async () => {
             if (user?.id) {
-                const response = await findUserById(user.id, token);
+                const response = await findUserById(user.id);
                 if (response.ok) {
                     const data = await response.json();
                     setUserLogger(data);

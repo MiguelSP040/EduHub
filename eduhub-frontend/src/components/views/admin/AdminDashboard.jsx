@@ -4,6 +4,7 @@ import Navbar from "./Navbar";
 import { BookOpen, Clock, CheckCircle, XCircle} from "react-feather";
 import { AuthContext } from "../../../context/AuthContext";
 import { getCourses } from "../../../services/courseService";
+import { useNavigate } from "react-router-dom";
 
 const AdminDashboard = () => {
     const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
@@ -11,6 +12,7 @@ const AdminDashboard = () => {
     const navbarRef = useRef(null);
     const [availableCourses, setAvailableCourses] = useState([]);
     const [activeTab, setActiveTab] = useState("allCourses");
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -36,8 +38,8 @@ const AdminDashboard = () => {
             case "Creado": return "secondary";
             case "Pendiente": return "warning";
             case "Aprobado": return "success";
-            case "Rechazado": return "danger";
-            default: return "primary";
+            case "Empezado": return "primary";
+            default: return "secondary";
         }
     };
 
@@ -64,7 +66,8 @@ const AdminDashboard = () => {
                             </div>
                         </div>
                         <div className="card-footer bg-white border-0">
-                            <button className="btn rounded-5 btn-purple-900">
+                            <button className="btn rounded-5 btn-purple-900"
+                                onClick={() => navigate("/admin/course", { state: { course } })}>
                                 Gestionar
                             </button>
                         </div>
@@ -95,15 +98,15 @@ const AdminDashboard = () => {
                                 <div className="row gx-3 align-items-center">
                                     <div className="col-12 col-sm d-flex justify-content-center justify-content-sm-start">
                                         <div className="d-flex flex-row flex-sm-row w-100 justify-content-around justify-content-sm-start">
-                                            {["allCourses", "Pendiente", "Aprobado", "Rechazado"].map((tab) => (
+                                            {["allCourses", "Pendiente", "Aprobado", "Empezado"].map((tab) => (
                                                 <button key={tab} type="button" className={`btn border-0 ${activeTab === tab ? "border-bottom border-purple border-3 fw-semibold" : ""}`}
                                                     onClick={() => setActiveTab(tab)} >
                                                     {tab === "allCourses" ? <BookOpen size={20} className="d-sm-none" /> : null}
                                                     {tab === "Pendiente" ? <Clock size={20} className="d-sm-none" /> : null}
                                                     {tab === "Aprobado" ? <CheckCircle size={20} className="d-sm-none" /> : null}
-                                                    {tab === "Rechazado" ? <XCircle size={20} className="d-sm-none" /> : null}
+                                                    {tab === "Empezado" ? <XCircle size={20} className="d-sm-none" /> : null}
                                                     <span className="d-none d-sm-inline">
-                                                        {tab === "allCourses" ? "Todos" : tab === "Pendiente" ? "Pendientes" : tab === "Aprobado" ? "Aprobados" : "Rechazados"}
+                                                        {tab === "allCourses" ? "Todos" : tab === "Pendiente" ? "Pendientes" : tab === "Aprobado" ? "Aprobados" : "Empezados"}
                                                     </span>
                                                 </button>
                                             ))}

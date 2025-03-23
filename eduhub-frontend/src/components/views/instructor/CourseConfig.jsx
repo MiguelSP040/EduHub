@@ -64,7 +64,7 @@ const CourseConfig = ({ course, setCourse }) => {
         } finally {
             setIsSaving(false);
         }
-    };    
+    };
 
     return (
         <div className="px-3 px-md-5 pt-3 text-start">
@@ -147,10 +147,39 @@ const CourseConfig = ({ course, setCourse }) => {
                     </div>
                 </div>
             </div>
+
+            <div className="row">
+                <div className="col-12 col-md-6">
+                    <div className="mb-3 fw-bold">
+                        <label>Fecha de inicio</label>
+                        <input 
+                            type="date" 
+                            className="form-control" 
+                            value={dateStart} 
+                            onChange={(e) => setDateStart(e.target.value)} 
+                            disabled={course && course.status !== "Creado"} 
+                        />
+                    </div>
+                </div>
+                <div className="col-12 col-md-6">
+                    <div className="mb-3 fw-bold">
+                        <label>Fecha de fin</label>
+                        <input 
+                            type="date" 
+                            className="form-control" 
+                            value={dateEnd} 
+                            onChange={(e) => setDateEnd(e.target.value)} 
+                            disabled={course && course.status !== "Creado"} 
+                        />
+                    </div>
+                </div>
+            </div>
     
+            {course.status !== "Aprobado" || course.status !== "Empezado" && (
             <button className="btn btn-purple-900 mt-3" onClick={handleSave} disabled={isSaving || course.status !== "Creado"}>
                 {isSaving ? <div className="spinner-border text-light"></div> : "Guardar Cambios"}
             </button>
+            )}
         </div>
     );
 };

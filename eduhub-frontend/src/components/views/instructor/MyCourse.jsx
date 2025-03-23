@@ -10,6 +10,7 @@ import CourseConfig from "./CourseConfig";
 import { AuthContext } from "../../../context/AuthContext";
 import { Modal } from "bootstrap";
 import { BookOpen, Users, Settings } from "react-feather";
+import { findUserById } from "../../../services/userService";
 
 const MyCourse = () => {
     const navigate = useNavigate();
@@ -19,6 +20,7 @@ const MyCourse = () => {
     const addSessionModalRef = useRef(null);
 
     const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
+    const [instructor, setInstructor] = useState(null);
     const [course, setCourse] = useState(null);
     const [sessions, setSessions] = useState([]);
     const [newSession, setNewSession] = useState({ nameSession: "", multimedia: "", content: "" });
@@ -27,21 +29,30 @@ const MyCourse = () => {
 
 
     useEffect(() => {
-        const data = location.state?.course;
-        if (!data) {
-            console.error("No se encontró la información del curso.");
-            navigate("/instructor");
-            return;
+        const fetchData = async () => {
+            const data = location.state?.course;
+            
+            if (!data) {
+                console.error("No se encontró la información del curso.");
+                navigate("/admin");
+                return;
+            }
+            try {
+                const response = await findUserById(data.docenteId);
+                const instructorData = await response.json();
+                setInstructor(instructorData);
+                setCourse(data);
+            } catch (error) {
+                console.error("Error al obtener el instructor:", error);
+            }
         }
-        setCourse(data);
+        fetchData();
     }, [location, navigate]);
 
     useEffect(() => {
         if (course?.id) {
             fetchSessions();
         }
-        console.log(course);
-        
     }, [course]);
 
 
@@ -163,13 +174,29 @@ const MyCourse = () => {
                                             )}
 
                                             {course?.status === "Pendiente" && course?.published && (
-                                                <button className="btn btn-warning me-2" onClick={handleRequestModification}>
-                                                    Modificar Curso
-                                                </button>
+                                                <div>
+                                                    <span className="text-warning fw-semibold me-3">Curso Pendiente de Aprobación</span>
+                                                    <button className="btn btn-warning me-2" onClick={handleRequestModification}>
+                                                        Modificar Curso
+                                                    </button>
+                                                </div>
+                                            )}
+
+                                            {course?.status === "Rechazado" && course?.published && (
+                                                <div>
+                                                    <span className="text-danger fw-semibold me-3">Curso Rechazado</span>
+                                                    <button className="btn btn-warning me-2" onClick={handleRequestModification}>
+                                                        Modificar Curso
+                                                    </button>
+                                                </div>
                                             )}
 
                                             {course?.status === "Aprobado" && (
                                                 <span className="text-success fw-semibold">Curso Aprobado - No editable</span>
+                                            )}
+
+                                            {course?.status === "Empezado" && (
+                                                <span className="text-primary fw-semibold">Curso Empezado - No editable</span>
                                             )}
 
                                             {(course?.status === "Creado" && new Date() < new Date(course?.dateStart)) && (
@@ -182,20 +209,52 @@ const MyCourse = () => {
                                 </div>
                             </div>
                         </div>
-                        
-                        {/* RENDERIZADO DINÁMICO SEGÚN EL TAB SELECCIONADO */}
-                        {activeTab === "material" && (
-                            sessions.length > 0 ? (
-                                sessions.map((session) => (
-                                    <SessionCard key={session.id} session={session} refreshSessions={fetchSessions} isPublished={course.published} courseStatus={course.status} />
-                                ))
-                            ) : (
-                                <p className="text-muted text-center mt-5">No hay sesiones registradas aún.</p>
-                            )
-                        )}
 
-                        {activeTab === "students" && <MyStudents courseId={course.id} courseLenght={course.studentsCount} courseStartDate={course.dateStart} />}
-                        {activeTab === "config" && <CourseConfig course={course} setCourse={setCourse} canModify={canModify} />}
+                        <div className="mx-md-5">
+                            
+                            {/* RENDERIZADO DINÁMICO SEGÚN EL TAB SELECCIONADO */}
+                            {activeTab === "material" && (
+                                <>
+                                    <div className="position-relative w-100">
+                                        {/* Imagen de portada */}
+                                        <img 
+                                            src="https://t3.ftcdn.net/jpg/04/67/96/14/360_F_467961418_UnS1ZAwAqbvVVMKExxqUNi0MUFTEJI83.jpg" 
+                                            className="w-100 rounded-4 object-fit-cover"
+                                            style={{ height: "250px" }} 
+                                            alt={course?.title} 
+                                        />
+                                        
+                                        {/* Contenido sobre la imagen */}
+                                        <div className="position-absolute top-50 start-0 text-start text-white p-4 w-100">
+                                            <div className="text-white">
+                                                <h3 className="fw-bold">{course?.title}</h3>
+                                                <h6>{instructor?.name} {instructor?.surname} {instructor?.lastname}</h6>
+                                                <p>{course?.description}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Renderizado de sesiones */}
+                                    {sessions.length > 0 ? (
+                                        sessions.map((session) => (
+                                            <SessionCard 
+                                                key={session.id} 
+                                                session={session} 
+                                                refreshSessions={fetchSessions} 
+                                                isPublished={course.published} 
+                                                courseStatus={course.status} 
+                                            />
+                                        ))
+                                    ) : (
+                                        <p className="text-muted text-center mt-5">No hay sesiones registradas aún.</p>
+                                    )}
+                                </>
+                            )}
+
+
+                            {activeTab === "students" && <MyStudents courseId={course.id} courseLenght={course.studentsCount} courseStartDate={course.dateStart} />}
+                            {activeTab === "config" && <CourseConfig course={course} setCourse={setCourse} canModify={canModify} />}
+                        </div>
                     </main>
                 </div>
             </div>

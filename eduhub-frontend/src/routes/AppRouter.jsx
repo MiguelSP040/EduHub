@@ -17,6 +17,7 @@ import MyStudents from "../components/views/instructor/MyStudents";
 import MyCourse from "../components/views/instructor/MyCourse";
 import AdminEnrollments from "../components/views/admin/AdminEnrollments";
 import InstructorRatings from "../components/views/instructor/InstructorRatings";
+import AdminCourseSessions from "../components/views/admin/AdminCourseSession";
 
 const AppRouter = () => {
     const [view, setView] = useState("login");
@@ -56,6 +57,11 @@ const AppRouter = () => {
                 <Route path="/admin" element={
                     <PrivateRoute>
                         <AdminDashboard />
+                    </PrivateRoute>
+                } />
+                <Route path="/admin/course" element={
+                    <PrivateRoute>
+                        <AdminCourseSessions />
                     </PrivateRoute>
                 } />
                 <Route path="/profileAdmin" element={

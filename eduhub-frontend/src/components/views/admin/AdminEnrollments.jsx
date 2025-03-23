@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
 import { getCourses, getStudentsByCourse, manageEnrollment } from "../../../services/courseService";
-import { CheckCircle, AlertCircle } from "react-feather";
+import { CheckCircle, AlertCircle, FileText } from "react-feather";
 
 const AdminEnrollments = () => {
     const navbarRef = useRef(null);
@@ -43,19 +43,24 @@ const AdminEnrollments = () => {
 
     const handleManageEnrollment = async (studentId, accept) => {
         if (!selectedCourse) return;
-
+    
         const response = await manageEnrollment(selectedCourse, studentId, accept);
         if (response.status === 200) {
             alert(response.message);
+    
             setStudents(prevStudents =>
-                prevStudents.map(student =>
-                    student.id === studentId ? { ...student, status: accept ? "Aceptado" : "Rechazado" } : student
-                )
+                accept
+                    ? prevStudents.map(student =>
+                        student.id === studentId ? { ...student, status: "Aceptado" } : student
+                    )
+                    : prevStudents.map(student =>
+                        student.id === studentId ? { ...student, status: "Rechazado", tempRejected: true } : student
+                    )
             );
         } else {
             alert(`Error: ${response.message}`);
         }
-    };
+    };    
 
     return (
         <div>
@@ -104,6 +109,7 @@ const AdminEnrollments = () => {
                                             <th>Nombre</th>
                                             <th>Fecha de Inscripción</th>
                                             <th>Estado</th>
+                                            <th>Archivo</th>
                                             <th>Acciones</th>
                                         </tr>
                                     </thead>
@@ -119,6 +125,9 @@ const AdminEnrollments = () => {
                                                         ) : (
                                                             <span className="text-warning">{student.status} <AlertCircle color="orange" /></span>
                                                         )}
+                                                    </td>
+                                                    <td>
+                                                        <FileText/>
                                                     </td>
                                                     <td>
                                                         {student.status === "Pendiente" && (
@@ -138,7 +147,7 @@ const AdminEnrollments = () => {
                                             ))
                                         ) : (
                                             <tr>
-                                                <td colSpan="4" className="text-center py-5 text-muted">No hay estudiantes inscritos en este curso.</td>
+                                                <td colSpan="5" className="text-center py-5 text-muted">No hay estudiantes inscritos en este curso.</td>
                                             </tr>
                                         )}
                                     </tbody>

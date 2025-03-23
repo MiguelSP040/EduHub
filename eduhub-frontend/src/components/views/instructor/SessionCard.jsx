@@ -76,8 +76,8 @@ const SessionCard = ({ session, refreshSessions, isPublished, courseStatus  }) =
                 <p className="text-truncate text-wrap">{session.content}</p>
             )}
         </div>
-        <div className="card-footer text-end">
-            <div style={{ display: courseStatus === "Aprobado" ? "none" : "block"}}>
+        <div className="card-footer text-end" style={{ display: courseStatus === "Aprobado" || courseStatus === "Empezado" ? "none" : "block"}}>
+            <div>
                 {isEditing ? (
                     <div>
                         <button className="btn btn-purple-900 btn-sm mx-2" onClick={handleUpdateSession} disabled={isPublished}>
@@ -97,9 +97,6 @@ const SessionCard = ({ session, refreshSessions, isPublished, courseStatus  }) =
                         </button>
                     </div>
                 )}
-            </div>
-            <div style={{ display: courseStatus === "Aprobado" ? "block" : "none"}}>
-                <span>El curso ha sido aprobado</span>
             </div>
         </div>
     </div>

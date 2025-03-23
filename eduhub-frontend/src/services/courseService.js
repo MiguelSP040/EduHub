@@ -178,7 +178,7 @@ export const manageEnrollment = async (courseId, studentId, accept) => {
 
   if (!token) {
     console.error("Error: No se encontró un token en localStorage.");
-    return { status: 401, message: "No autorizado: Token no encontrado" };
+    return { status: 401, message: "No autorizado: Token no encontrado." };
   }
 
   try {
@@ -190,17 +190,17 @@ export const manageEnrollment = async (courseId, studentId, accept) => {
       },
     });
 
+    const message = await response.text();
+
     if (!response.ok) {
-      const errorMessage = await response.text();
-      console.error("Error en manageEnrollment:", errorMessage);
-      return { status: response.status, message: errorMessage };
+      console.error("Error en manageEnrollment:", message);
+      return { status: response.status, message };
     }
 
-    const message = await response.text();
     return { status: 200, message };
   } catch (error) {
     console.error("Error en manageEnrollment:", error);
-    return { status: 500, message: "Error de conexión con el servidor" };
+    return { status: 500, message: "Error de conexión con el servidor." };
   }
 };
 
