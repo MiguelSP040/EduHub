@@ -65,11 +65,11 @@ const NewCourse = () => {
       docenteId: user.id,
       studentsEnrolled: [],
       sessions: [],
-      ratings: [],
+      ratings: []
     };
 
     try {
-      const resp = await createCourse(newCourse, coverImage /* <-- PASA AQUÍ EL File */);
+      const resp = await createCourse(newCourse, coverImage);
       if (resp.status !== 200) {
         setErrorMsg(resp.message || 'Error al crear el curso');
         setLoading(false);

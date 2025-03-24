@@ -66,29 +66,23 @@ export const getCoursesByInstructor = async (instructorId) => {
   }
 };
 
-export const createCourse = async (courseData) => {
+export const createCourse = async (courseData, file) => {
   const token = localStorage.getItem("token");
-
   try {
-    // Construimos siempre FormData
+    // Armamos FormData
     const body = new FormData();
+    // El JSON del curso sin coverImage
+    body.append("course", new Blob([JSON.stringify(courseData)], { type: "application/json" }));
 
-    // Adjuntamos la parte JSON del curso en el campo "course"
-    body.append(
-      "course",
-      new Blob([JSON.stringify(courseData)], { type: "application/json" })
-    );
-
-    // Si hay una imagen, la adjuntamos también
-    if (courseData.coverImage) {
-      body.append("coverImage", courseData.coverImage);
+    // Si hay archivo, lo agregamos
+    if (file) {
+      body.append("coverImage", file);
     }
 
-    // No seteamos Content-Type; fetch y el browser se encargan
     const response = await fetch(API_URL, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
-      body, // multipart/form-data
+      body
     });
 
     const text = await response.text();
@@ -101,6 +95,7 @@ export const createCourse = async (courseData) => {
     return { status: 500, message: "Error de conexión con el servidor" };
   }
 };
+
 
 export const publishCourse = async (courseId) => {
   const token = localStorage.getItem("token");
