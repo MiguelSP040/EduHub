@@ -150,7 +150,19 @@ const NewCourse = () => {
                 <div className="col-12 col-md-6">
                   <div className="mb-3 fw-bold">
                     <label>Precio del curso</label>
-                    <input type="text" className="form-control" value={price} onChange={(e) => setPrice(e.target.value)} />
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={price === "0" ? "Gratis" : price}
+                      onChange={(e) => {
+                        let value = e.target.value;
+                        if (value.toLowerCase() === "gratis") {
+                          setPrice("0");
+                        } else if (/^\d*\.?\d*$/.test(value)) {
+                          setPrice(value);
+                        }
+                      }}
+                    />
                   </div>
                 </div>
               </div>

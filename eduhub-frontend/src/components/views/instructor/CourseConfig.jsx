@@ -101,7 +101,20 @@ const CourseConfig = ({ course, setCourse }) => {
         <div className="col-12 col-md-6">
           <div className="mb-3 fw-bold">
             <label>Precio del curso</label>
-            <input type="text" className="form-control" value={price} onChange={(e) => setPrice(e.target.value)} disabled={course && course.status !== 'Creado'} />
+            <input
+              type="text"
+              className="form-control"
+              value={price === "0" ? "Gratis" : price}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value.toLowerCase() === "gratis") {
+                  setPrice("0");
+                } else if (/^\d*\.?\d*$/.test(value)) {
+                  setPrice(value);
+                }
+              }}
+              disabled={course && course.status !== "Creado"}
+            />
           </div>
         </div>
         <div className="col-12 col-md-6">
