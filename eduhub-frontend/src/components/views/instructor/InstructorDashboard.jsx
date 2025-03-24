@@ -24,7 +24,6 @@ const InstructorDashboard = () => {
         allCourses = allCourses.filter((course) => course.published && course.status !== 'Pendiente');
         setCourses([...allCourses]);
         setMyCourses([...instructorCourses]);
-        console.log(allCourses);
       } catch (error) {
         console.error('Error al obtener cursos:', error);
         setCourses([]);

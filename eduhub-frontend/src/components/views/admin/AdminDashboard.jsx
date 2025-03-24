@@ -33,6 +33,16 @@ const AdminDashboard = () => {
         return availableCourses.filter((course) => course.status === activeTab);
     }, [activeTab, availableCourses]);
 
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return new Intl.DateTimeFormat('es-ES', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          timeZone: 'America/Mexico_City',
+        }).format(date);
+    };
+
     const getStatusBadgeClass = (status) => {
         switch (status) {
             case "Creado": return "secondary";
@@ -61,8 +71,8 @@ const AdminDashboard = () => {
                                 {course.status}
                             </span>
                             <div className="d-flex justify-content-between">
-                                <span className="text-muted">Inicio: {new Date(course.dateStart).toLocaleDateString()}</span>
-                                <span className="text-muted">Fin: {new Date(course.dateEnd).toLocaleDateString()}</span>
+                                <span className="text-muted">Inicio: {formatDate(course.dateStart)}</span>
+                                <span className="text-muted">Fin: {formatDate(course.dateEnd)}</span>
                             </div>
                         </div>
                         <div className="card-footer bg-white border-0">

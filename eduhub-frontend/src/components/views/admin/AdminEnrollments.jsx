@@ -15,8 +15,7 @@ const AdminEnrollments = () => {
         const fetchCourses = async () => {
             try {
                 const data = await getCourses();
-                // Filtramos solo cursos con precio mayor a 0
-                const paidCourses = data.filter(course => course.price > 0);
+                const paidCourses = data.filter(course => course.price > 0 && course.status === "Aprobado");
                 setCourses(paidCourses);
             } catch (error) {
                 console.error("Error al obtener cursos:", error);
