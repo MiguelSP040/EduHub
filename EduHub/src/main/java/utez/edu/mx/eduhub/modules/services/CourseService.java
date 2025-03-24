@@ -331,7 +331,7 @@ public class CourseService {
             existingCourse.setDescription(course.getDescription() != null ? course.getDescription() : existingCourse.getDescription());
             existingCourse.setDateStart(course.getDateStart() != null ? course.getDateStart() : existingCourse.getDateStart());
             existingCourse.setDateEnd(course.getDateEnd() != null ? course.getDateEnd() : existingCourse.getDateEnd());
-            existingCourse.setPrice(course.getPrice() != 0 ? course.getPrice() : existingCourse.getPrice());
+            existingCourse.setPrice(course.getPrice());
 
             if (existingCourse.getDateEnd().before(existingCourse.getDateStart())) {
                 return ResponseEntity.badRequest().body("La fecha de fin no puede ser menor a la de inicio");
