@@ -70,24 +70,25 @@ export const createCourse = async (courseData) => {
   const token = localStorage.getItem("token");
 
   try {
-    let body;
-    let headers = {
-      Authorization: `Bearer ${token}`,
-    };
+    // Construimos siempre FormData
+    const body = new FormData();
 
+    // Adjuntamos la parte JSON del curso en el campo "course"
+    body.append(
+      "course",
+      new Blob([JSON.stringify(courseData)], { type: "application/json" })
+    );
+
+    // Si hay una imagen, la adjuntamos también
     if (courseData.coverImage) {
-      body = new FormData();
-      body.append("course", new Blob([JSON.stringify(courseData)], { type: "application/json" }));
       body.append("coverImage", courseData.coverImage);
-    } else {
-      headers["Content-Type"] = "application/json";
-      body = JSON.stringify(courseData);
     }
 
+    // No seteamos Content-Type; fetch y el browser se encargan
     const response = await fetch(API_URL, {
       method: "POST",
-      headers,
-      body,
+      headers: { Authorization: `Bearer ${token}` },
+      body, // multipart/form-data
     });
 
     const text = await response.text();

@@ -59,7 +59,6 @@ const NewCourse = () => {
       dateEnd: end.toISOString(),
       category,
       studentsCount: Number(studentsCount),
-      coverImage, 
       isArchived: false,
       isPublished: false,
       status: 'pendiente',
@@ -70,7 +69,7 @@ const NewCourse = () => {
     };
 
     try {
-      const resp = await createCourse(newCourse);
+      const resp = await createCourse(newCourse, coverImage /* <-- PASA AQUÍ EL File */);
       if (resp.status !== 200) {
         setErrorMsg(resp.message || 'Error al crear el curso');
         setLoading(false);

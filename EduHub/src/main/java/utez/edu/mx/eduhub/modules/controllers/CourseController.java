@@ -65,8 +65,11 @@ public class CourseController {
         return courseService.completeSession(courseId, studentId, sessionId);
     }
 
-    @PostMapping(value = "", consumes = { "multipart/form-data" })
-    public ResponseEntity<?> createCourse(@RequestPart("course") Course course, @RequestPart(value = "coverImage", required = false) MultipartFile coverImage) {
+    @PostMapping(value = "", consumes = {"multipart/form-data", "application/json"})
+    public ResponseEntity<?> createCourse(
+            @RequestPart("course") Course course,
+            @RequestPart(value = "coverImage", required = false) MultipartFile coverImage
+    ) {
         return courseService.save(course, coverImage);
     }
 
