@@ -3,18 +3,20 @@ const API_URL = "http://localhost:8080/eduhub/api/session";
 export const createSession = async (sessionData) => {
   const token = localStorage.getItem("token");
 
-  if (typeof sessionData.multimedia === "string") {
-    sessionData.multimedia = [sessionData.multimedia];
-  }
-
   try {
+    // Si sessionData es un FormData, se envía tal cual
+    const isFormData = sessionData instanceof FormData;
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      // Si no es FormData, se indica el Content-Type para JSON
+      ...(!isFormData && { "Content-Type": "application/json" })
+    };
+
     const response = await fetch(API_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(sessionData),
+      headers,
+      // Si es FormData se envía directamente; si no, se convierte a JSON
+      body: isFormData ? sessionData : JSON.stringify(sessionData)
     });
 
     const text = await response.text();
@@ -32,8 +34,7 @@ export const createSession = async (sessionData) => {
 
 export const getSessionsByCourse = async (courseId) => {
   const token = localStorage.getItem("token");
-  //console.log("Obteniendo sesiones para el curso:", courseId);
-  
+
   try {
     const response = await fetch(`${API_URL}/course/${courseId}`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -91,5 +92,50 @@ export const deleteSession = async (sessionId) => {
   } catch (error) {
     console.error("Error al eliminar sesión:", error);
     return { status: 500, message: "Error de conexión con el servidor" };
+  }
+};
+
+export const downloadFile = async (sessionId, fileId, fileName) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`${API_URL}/${sessionId}/multimedia/${fileId}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error al descargar el archivo: ${response.statusText}`);
+    }
+
+    const blob = await response.blob();
+    saveAs(blob, fileName);
+  } catch (error) {
+    console.error("Error en la descarga:", error);
+    alert("Ocurrió un error al descargar el archivo.");
+  }
+};
+
+export const removeFileFromSession = async (sessionId, fileId) => {
+  const token = localStorage.getItem("token");
+  try {
+    const response = await fetch(`${API_URL}/${sessionId}/multimedia/${fileId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      // Si el backend retorna algún mensaje de error
+      const errorMessage = await response.text();
+      throw new Error(errorMessage || "Error al eliminar archivo");
+    }
+
+    return { status: 200, message: "Archivo eliminado correctamente" };
+  } catch (error) {
+    console.error("Error al eliminar archivo:", error);
+    return { status: 500, message: error.message };
   }
 };
