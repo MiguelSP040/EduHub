@@ -1,5 +1,7 @@
 package utez.edu.mx.eduhub.utils.security;
 
+import jakarta.servlet.MultipartConfigElement;
+import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -14,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.util.unit.DataSize;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -60,6 +63,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/eduhub/api/user").permitAll()
                         .requestMatchers(HttpMethod.POST, "/eduhub/api/courses").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/eduhub/api/courses/**").hasAnyAuthority("ROLE_INSTRUCTOR", "ROLE_ADMIN")
                         .requestMatchers("/eduhub/auth/**").permitAll()
                         .requestMatchers("/eduhub/api/user/**").authenticated()
                         .requestMatchers("/eduhub/api/courses/**").authenticated()
@@ -90,4 +94,13 @@ public class SecurityConfig {
     public CorsFilter corsFilter() {
         return new CorsFilter(corsConfigurationSource());
     }
+
+    @Bean
+    public MultipartConfigElement multipartConfigElement() {
+        MultipartConfigFactory factory = new MultipartConfigFactory();
+        factory.setMaxFileSize(DataSize.ofMegabytes(10)); // Máximo 10MB por archivo
+        factory.setMaxRequestSize(DataSize.ofMegabytes(15)); // Máximo 15MB en la solicitud
+        return factory.createMultipartConfig();
+    }
+
 }

@@ -52,6 +52,36 @@ public class SessionController {
         return sessionService.update(session);
     }
 
+    @PutMapping(value = "", consumes = { "multipart/form-data" })
+    public ResponseEntity<?> updateMultipart(
+            @RequestPart("session") Session updatedSession,
+            @RequestPart(value = "files", required = false) MultipartFile[] files) {
+        try {
+            Session currentSession = (Session) sessionService.findById(updatedSession.getId()).getBody();
+            if (currentSession == null) {
+                return ResponseEntity.status(404).body("Sesión no encontrada con ID: " + updatedSession.getId());
+            }
+
+            List<MultimediaFile> newFiles = multimediaService.processFiles(files);
+            if (newFiles != null && !newFiles.isEmpty()) {
+                currentSession.getMultimedia().addAll(newFiles);
+            }
+
+            if (updatedSession.getNameSession() != null && !updatedSession.getNameSession().trim().isEmpty()) {
+                currentSession.setNameSession(updatedSession.getNameSession());
+            }
+            if (updatedSession.getContent() != null && !updatedSession.getContent().trim().isEmpty()) {
+                currentSession.setContent(updatedSession.getContent());
+            }
+
+            return sessionService.update(currentSession);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al actualizar la sesión: " + e.getMessage());
+        }
+    }
+
+
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteById(@PathVariable String id) {
         return sessionService.deleteById(id);

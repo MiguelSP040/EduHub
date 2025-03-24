@@ -68,16 +68,28 @@ export const getCoursesByInstructor = async (instructorId) => {
 
 export const createCourse = async (courseData) => {
   const token = localStorage.getItem("token");
+
   try {
+    let body;
+    let headers = {
+      Authorization: `Bearer ${token}`,
+    };
+
+    if (courseData.coverImage) {
+      body = new FormData();
+      body.append("course", new Blob([JSON.stringify(courseData)], { type: "application/json" }));
+      body.append("coverImage", courseData.coverImage);
+    } else {
+      headers["Content-Type"] = "application/json";
+      body = JSON.stringify(courseData);
+    }
+
     const response = await fetch(API_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(courseData),
+      headers,
+      body,
     });
-    
+
     const text = await response.text();
     if (!response.ok) {
       return { status: response.status, message: text };
@@ -206,14 +218,24 @@ export const manageEnrollment = async (courseId, studentId, accept) => {
 
 export const updateCourse = async (courseData) => {
   const token = localStorage.getItem("token");
+
   try {
+    let body;
+    let headers = {
+      Authorization: `Bearer ${token}`,
+    };
+
+    if (courseData instanceof FormData) {
+      body = courseData;
+    } else {
+      headers["Content-Type"] = "application/json";
+      body = JSON.stringify(courseData);
+    }
+
     const response = await fetch(`${API_URL}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(courseData),
+      headers,
+      body,
     });
 
     const text = await response.text();
@@ -226,4 +248,3 @@ export const updateCourse = async (courseData) => {
     return { status: 500, message: "Error de conexión con el servidor" };
   }
 };
-

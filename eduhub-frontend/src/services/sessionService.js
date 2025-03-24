@@ -4,18 +4,15 @@ export const createSession = async (sessionData) => {
   const token = localStorage.getItem("token");
 
   try {
-    // Si sessionData es un FormData, se envía tal cual
     const isFormData = sessionData instanceof FormData;
     const headers = {
       Authorization: `Bearer ${token}`,
-      // Si no es FormData, se indica el Content-Type para JSON
       ...(!isFormData && { "Content-Type": "application/json" })
     };
 
     const response = await fetch(API_URL, {
       method: "POST",
       headers,
-      // Si es FormData se envía directamente; si no, se convierte a JSON
       body: isFormData ? sessionData : JSON.stringify(sessionData)
     });
 
@@ -55,20 +52,27 @@ export const getSessionsByCourse = async (courseId) => {
 
 export const updateSession = async (sessionData) => {
   const token = localStorage.getItem("token");
+
   try {
+    const isFormData = sessionData instanceof FormData;
+
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      ...(!isFormData && { "Content-Type": "application/json" }),
+    };
+
     const response = await fetch(API_URL, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(sessionData),
+      headers,
+      body: isFormData ? sessionData : JSON.stringify(sessionData),
     });
 
+    const text = await response.text();
     if (!response.ok) {
-      return { status: response.status, message: await response.text() };
+      return { status: response.status, message: text };
     }
-    return { status: 200, message: "Sesión actualizada correctamente" };
+
+    return { status: 200, message: text || "Sesión actualizada correctamente" };
   } catch (error) {
     console.error("Error al actualizar sesión:", error);
     return { status: 500, message: "Error de conexión con el servidor" };

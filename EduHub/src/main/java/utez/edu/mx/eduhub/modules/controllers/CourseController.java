@@ -1,14 +1,20 @@
 package utez.edu.mx.eduhub.modules.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import utez.edu.mx.eduhub.modules.entities.UserEntity;
 import utez.edu.mx.eduhub.modules.entities.course.Course;
 import utez.edu.mx.eduhub.modules.entities.course.Rating;
+import utez.edu.mx.eduhub.modules.repositories.UserRepository;
 import utez.edu.mx.eduhub.modules.services.CourseService;
 import utez.edu.mx.eduhub.utils.security.JWTUtil;
 import utez.edu.mx.eduhub.utils.security.UserDetailsImpl;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/eduhub/api/courses")
@@ -17,6 +23,9 @@ public class CourseController {
 
     @Autowired
     private CourseService courseService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private JWTUtil jwtUtil;
@@ -56,9 +65,9 @@ public class CourseController {
         return courseService.completeSession(courseId, studentId, sessionId);
     }
 
-    @PostMapping
-    public ResponseEntity<?> createCourse(@RequestBody Course course) {
-        return courseService.save(course);
+    @PostMapping(value = "", consumes = { "multipart/form-data" })
+    public ResponseEntity<?> createCourse(@RequestPart("course") Course course, @RequestPart(value = "coverImage", required = false) MultipartFile coverImage) {
+        return courseService.save(course, coverImage);
     }
 
     @PutMapping("/{courseId}/publish")
@@ -76,10 +85,25 @@ public class CourseController {
         return courseService.requestModification(courseId, userDetails.getId());
     }
 
-    @PutMapping
-    public ResponseEntity<?> updateCourse(@RequestBody Course course) {
-        return courseService.update(course);
+    @PutMapping(value = "", consumes = { "multipart/form-data" })
+    public ResponseEntity<?> updateCourse(
+            @RequestPart("course") Course course,
+            @RequestPart(value = "coverImage", required = false) MultipartFile coverImage,
+            @RequestHeader("Authorization") String token
+    ) {
+        String username = jwtUtil.extractUsername(token.substring(7));
+
+        Optional<UserEntity> instructorOpt = userRepository.findByUsername(username);
+        if (instructorOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Usuario no encontrado.");
+        }
+
+        UserEntity instructorEntity = instructorOpt.get();
+        String instructorId = instructorEntity.getId();
+
+        return courseService.update(course, coverImage, instructorId);
     }
+
 
     @PostMapping("/{courseId}/rate")
     public ResponseEntity<?> rateCourse(@PathVariable String courseId, @RequestBody Rating rating, @AuthenticationPrincipal UserDetailsImpl userDetails) {

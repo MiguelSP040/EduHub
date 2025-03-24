@@ -14,9 +14,23 @@
 
 body {
     overflow-x: hidden;
-  }
-  
+}
 
+.session-content {
+/* Restablece la alineación por defecto del navegador */
+text-align: initial !important;
+}
+/* Y aplica la alineación que Quill genera en sus clases */
+.session-content .ql-align-center {
+text-align: center !important;
+}
+.session-content .ql-align-right {
+text-align: right !important;
+}
+.session-content .ql-align-justify {
+text-align: justify !important;
+}
+  
 @media screen and (min-width: 576px) {
     .img-container {
         width: 10rem;

@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { getStudentsByCourse, manageEnrollment } from "../../../services/courseService";
+import { getStudentsByCourse } from "../../../services/courseService";
 import { CheckCircle, AlertCircle } from "react-feather";
 
-const MyStudents = ({ courseId, courseLenght, courseStartDate }) => {
+const MyStudents = ({ courseId, courseLenght }) => {
     const [students, setStudents] = useState([]);
 
     useEffect(() => {

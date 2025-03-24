@@ -109,7 +109,7 @@ const NewCourse = () => {
             <div className="card mx-md-5 px-md-5">
               {errorMsg && <div className="alert alert-danger">{errorMsg}</div>}
 
-              <div className="mb-5 bg-light text-center">
+              <div className="bg-light text-center">
                 <h3>Nuevo Curso</h3>
               </div>
               <hr />
@@ -124,7 +124,7 @@ const NewCourse = () => {
                 <textarea className="form-control" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
               </div>
 
-              {/* Cantidad de estudiantes y Precio */}
+              {/* Cantidad de estudiantes e Imagen de Portada */}
               <div className="row">
                 <div className="col-12 col-md-6">
                   <div className="mb-3 fw-bold">
@@ -140,7 +140,7 @@ const NewCourse = () => {
                 </div>
               </div>
 
-              {/* Categoría y Imagen de Portada */}
+              {/* Categoría y Precio del curso */}
               <div className="row">
                 <div className="col-12 col-md-6">
                   <div className="mb-3 fw-bold">

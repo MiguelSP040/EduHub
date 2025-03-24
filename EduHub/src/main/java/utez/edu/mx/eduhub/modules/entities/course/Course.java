@@ -39,6 +39,8 @@ public class Course {
     @NotNull(message = "Ingrese una cantidad de estudiantes")
     private Integer studentsCount;
 
+    private String coverImage;
+
     //Acciones del ROLE_ADMIN
     private Boolean isArchived;
     private Boolean isPublished;
@@ -52,7 +54,7 @@ public class Course {
 
     public Course() {}
 
-    public Course(String id, String title, String description, double price, Date dateStart, Date dateEnd, String category, Integer studentsCount, Boolean isArchived, Boolean isPublished, String status, String docenteId, List<StudentEnrollment> enrollments, List<Session> sessions, List<Rating> ratings) {
+    public Course(String id, String title, String description, double price, Date dateStart, Date dateEnd, String category, Integer studentsCount, String coverImage, Boolean isArchived, Boolean isPublished, String status, String docenteId, List<StudentEnrollment> enrollments, List<Session> sessions, List<Rating> ratings) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -61,6 +63,7 @@ public class Course {
         this.dateEnd = dateEnd;
         this.category = category;
         this.studentsCount = studentsCount;
+        this.coverImage = coverImage;
         this.isArchived = isArchived;
         this.isPublished = isPublished;
         this.status = status;
@@ -132,6 +135,14 @@ public class Course {
 
     public void setStudentsCount(@Min(value = 1, message = "El curso debe permitir al menos 1 estudiante") @NotNull(message = "Ingrese una cantidad de estudiantes") Integer studentsCount) {
         this.studentsCount = studentsCount;
+    }
+
+    public String getCoverImage() {
+        return coverImage;
+    }
+
+    public void setCoverImage(String coverImage) {
+        this.coverImage = coverImage;
     }
 
     public Boolean getArchived() {

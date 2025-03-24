@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import utez.edu.mx.eduhub.modules.entities.UserEntity;
 import utez.edu.mx.eduhub.modules.entities.course.Course;
 import utez.edu.mx.eduhub.modules.entities.course.Rating;
@@ -14,6 +15,7 @@ import utez.edu.mx.eduhub.modules.repositories.CourseRepository;
 import utez.edu.mx.eduhub.modules.repositories.UserRepository;
 import utez.edu.mx.eduhub.modules.repositories.course.SessionRepository;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -187,7 +189,7 @@ public class CourseService {
     }
 
     // CREAR UN CURSO
-    public ResponseEntity<?> save(Course course) {
+    public ResponseEntity<?> save(Course course, MultipartFile coverImage) {
         try {
             Date today = new Date();
             Date tomorrow = new Date(today.getTime() + (1000 * 60 * 60 * 24)); // Suma 1 día
@@ -208,8 +210,15 @@ public class CourseService {
             course.setPublished(false);
             course.setStatus("Creado");
 
+            if (coverImage != null && !coverImage.isEmpty()) {
+                course.setCoverImage(Base64.getEncoder().encodeToString(coverImage.getBytes()));
+            }
+
             repository.save(course);
             return ResponseEntity.ok("Curso registrado exitosamente.");
+        } catch (IOException e) {
+            System.out.println("Error al procesar la imagen: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al procesar la imagen.");
         } catch (Exception e) {
             System.out.println("Error al guardar el curso: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar el curso.");
@@ -304,10 +313,15 @@ public class CourseService {
     }
 
     // ACTUALIZAR CURSO
-    public ResponseEntity<?> update(Course course) {
+    public ResponseEntity<?> update(Course course, MultipartFile coverImage, String instructorId) {
         Optional<Course> existingCourseOptional = repository.findById(course.getId());
+
         if (existingCourseOptional.isPresent()) {
             Course existingCourse = existingCourseOptional.get();
+
+            if (!existingCourse.getDocenteId().equals(instructorId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para modificar este curso.");
+            }
 
             if (existingCourse.getStatus().equals("Empezado")) {
                 return ResponseEntity.badRequest().body("No se pueden hacer cambios en un curso que ya ha empezado.");
@@ -329,11 +343,14 @@ public class CourseService {
             }
 
             try {
+                if (coverImage != null && !coverImage.isEmpty()) {
+                    existingCourse.setCoverImage(Base64.getEncoder().encodeToString(coverImage.getBytes()));
+                }
+
                 repository.save(existingCourse);
                 return ResponseEntity.ok(existingCourse);
-            } catch (Exception e) {
-                System.out.println("Error al actualizar el curso: " + e.getMessage());
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al actualizar el curso");
+            } catch (IOException e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al procesar la imagen.");
             }
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Curso no encontrado");
@@ -358,6 +375,7 @@ public class CourseService {
         }
     }
 
+    // INGRESAR RATING
     public ResponseEntity<?> addRating(String courseId, Rating rating, String studentId) {
         Optional<Course> optionalCourse = repository.findById(courseId);
 
@@ -392,7 +410,6 @@ public class CourseService {
 
         return ResponseEntity.ok("Calificación agregada correctamente.");
     }
-
 
     // OBTENER CURSOS DEL ALUMNO
     public ResponseEntity<?> requestCourseStudent(String studentId) {
