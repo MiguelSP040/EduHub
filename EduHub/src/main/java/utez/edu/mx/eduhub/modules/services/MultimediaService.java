@@ -24,4 +24,13 @@ public class MultimediaService {
         }
         return multimediaFiles;
     }
+
+    public MultimediaFile processPaymentProof(MultipartFile file) throws Exception {
+        MultimediaFile paymentProof = new MultimediaFile();
+        paymentProof.setId(UUID.randomUUID().toString());
+        paymentProof.setFileName(file.getOriginalFilename());
+        paymentProof.setFileType(file.getContentType());
+        paymentProof.setData(file.getBytes());
+        return paymentProof;
+    }
 }

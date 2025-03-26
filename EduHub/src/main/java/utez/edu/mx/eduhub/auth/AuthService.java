@@ -33,7 +33,7 @@ public class AuthService {
     @Autowired
     private UserRepository repository;
 
-    @Autowired
+    
     private JavaMailSender mailSender;
 
     @Autowired
