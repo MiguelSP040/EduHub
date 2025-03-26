@@ -123,13 +123,13 @@ const MyCourse = () => {
                   {activeTab === 'material' && (
                     <div className="col-12 col-sm-auto mt-2 px-0 mt-sm-0 text-center text-sm-end">
                       {selectedSession ? (
-                        <button className="btn btn-outline-dark" onClick={() => setSelectedSession(null)}>
+                        <button className="btn btn-purple-400" onClick={() => setSelectedSession(null)}>
                           Volver al curso
                         </button>
                       ) : (
                         <>
                           {course?.status === 'Creado' && !course?.published && (
-                            <button className="btn btn-success me-2" onClick={handlePublishCourse}>
+                            <button className="btn btn-purple-400 me-2" onClick={handlePublishCourse}>
                               Publicar Curso
                             </button>
                           )}
@@ -137,7 +137,7 @@ const MyCourse = () => {
                           {(course?.status === 'Pendiente' || course?.status === 'Rechazado') && course?.published && (
                             <div>
                               <span className={`text-${course.status === 'Pendiente' ? 'warning' : 'danger'} fw-semibold me-3`}>Curso {course.status}</span>
-                              <button className="btn btn-warning me-2" onClick={handleRequestModification}>
+                              <button className="btn btn-purple-400 me-2" onClick={handleRequestModification}>
                                 Modificar Curso
                               </button>
                             </div>
@@ -168,9 +168,13 @@ const MyCourse = () => {
                         {/* Imagen de portada */}
                         <img
                           src={course?.coverImage ? `data:image/jpeg;base64,${course.coverImage}` : 'https://t3.ftcdn.net/jpg/04/67/96/14/360_F_467961418_UnS1ZAwAqbvVVMKExxqUNi0MUFTEJI83.jpg'}
-                          className="w-100 rounded-4 object-fit-cover"
+                          className="w-100 rounded-4 object-fit-cover image-gradient"
                           style={{ height: '250px' }}
                           alt={course?.title}
+                        />
+
+                        <div
+                          className="position-absolute image-overlay top-0 start-0 w-100 h-100 rounded-4"
                         />
 
                         <div className="position-absolute top-50 start-0 text-start text-white p-4 w-100">

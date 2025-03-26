@@ -1,32 +1,42 @@
+// AdminSessionCard.jsx
 import React from "react";
-import { Image } from "react-feather";
+import { Clipboard, FileText } from "react-feather";
 
-const AdminSessionCard = ({ session }) => {
+const AdminSessionCard = ({ session, instructor, onSelect }) => {
   return (
-    <div className="card rounded-4 my-3 p-0">
-      <div className="card-header bg-none d-flex align-items-center">
-        <div className="d-flex align-items-center">
-          <img 
-            src="https://randomuser.me/api/portraits/men/22.jpg" 
-            alt="Usuario" 
-            className="rounded-circle d-none d-md-block user-select-none" 
-            width="40" height="40" 
-          />
-          <p className="fw-semibold ms-2 my-0 text-wrap">{session.nameSession}</p>
+    <div
+      className="card p-3 mb-3 shadow-sm d-flex align-items-center"
+      style={{ cursor: "pointer" }}
+      onClick={onSelect}
+    >
+      <div className="d-flex w-100">
+        {/* Ícono a la izquierda */}
+        <div className="d-flex align-items-center pe-3 border-end">
+          <Clipboard size={40} className="text-primary" />
         </div>
-      </div>
-      <div className="card-body d-flex flex-wrap">
-        <div className="img-container">
-          <img 
-            src={session.multimedia} 
-            alt="multimedia" 
-            className="me-3 rounded-3 img-fluid d-none d-sm-block"
-            style={{ maxWidth: "150px", height: "120px", objectFit: "fill" }}
-            onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/150x120/png"; }}
-          />
+
+        {/* Contenido a la derecha */}
+        <div className="ps-3 flex-grow-1 text-truncate overflow-auto">
+          <div className="d-flex align-items-center justify-content-between">
+            <h4 className="mb-0 fw-semibold">
+              {instructor?.username} publicó: {session.nameSession}
+            </h4>
+          </div>
+
+          {/* Etiquetas de archivos adjuntos */}
+          <div className="mt-2 d-flex flex-wrap gap-2">
+            {session.multimedia &&
+              session.multimedia.map((file) => (
+                <span
+                  key={file.id}
+                  className="badge bg-secondary text-white d-flex align-items-center p-2"
+                >
+                  <FileText size={16} className="me-1" />
+                  {file.fileName}
+                </span>
+              ))}
+          </div>
         </div>
-        <Image className="d-block d-sm-none me-3" />
-        <p className="text-truncate text-wrap">{session.content}</p>
       </div>
     </div>
   );

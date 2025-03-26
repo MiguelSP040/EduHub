@@ -274,7 +274,7 @@ public class CourseService {
             course.setPublished(true);
         } else {
             course.setStatus("Rechazado");
-            course.setPublished(true);
+            course.setPublished(false);
         }
 
         repository.save(course);

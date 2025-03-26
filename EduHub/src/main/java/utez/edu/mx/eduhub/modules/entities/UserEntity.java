@@ -26,6 +26,8 @@ public class UserEntity {
     @Indexed(unique = true)
     private String username;
 
+    private String profileImage;
+
     @NotBlank(message = "El correo no puede estar vacío")
     @Email(message = "El correo debe tener un formato válido")
     @Indexed(unique = true)
@@ -45,12 +47,13 @@ public class UserEntity {
     public UserEntity() {
     }
 
-    public UserEntity(String id, String name, String surname, String lastname, String username, String email, String password, String role, String description, boolean isActive) {
+    public UserEntity(String id, String name, String surname, String lastname, String username, String profileImage, String email, String password, String role, String description, boolean isActive) {
         this.id = id;
         this.name = name;
         this.surname = surname;
         this.lastname = lastname;
         this.username = username;
+        this.profileImage = profileImage;
         this.email = email;
         this.password = password;
         this.role = role;
@@ -96,6 +99,14 @@ public class UserEntity {
 
     public void setUsername(@NotBlank(message = "El nombre de usuario no puede estar vacío") String username) {
         this.username = username;
+    }
+
+    public String getProfileImage() {
+        return profileImage;
+    }
+
+    public void setProfileImage(String profileImage) {
+        this.profileImage = profileImage;
     }
 
     public @NotBlank(message = "El correo no puede estar vacío") @Email(message = "El correo debe tener un formato válido") String getEmail() {

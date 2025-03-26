@@ -58,7 +58,15 @@ const AdminDashboard = () => {
             coursesByStatus.map((course) => (
                 <div key={course.id} className="col-12 col-md-5 col-lg-4 course-width mb-4">
                     <div className="card p-0 text-start">
-                        <img src="https://placehold.co/300x200.png" className="card-img-top" alt={course.title} />
+                    <img src={
+                            course?.coverImage
+                            ? `data:image/jpeg;base64,${course.coverImage}`
+                            : "https://t3.ftcdn.net/jpg/04/67/96/14/360_F_467961418_UnS1ZAwAqbvVVMKExxqUNi0MUFTEJI83.jpg"
+                        }
+                        height={120}
+                        className="card-img-top"
+                        alt={course.title}
+                        />
                         <div className="card-body course-body-height">
                             <div className="d-flex justify-content-between align-items-center mb-2">
                                 <h5 className="card-title text-truncate">{course.title}</h5>
