@@ -8,12 +8,14 @@ import org.springframework.web.bind.annotation.*;
 import utez.edu.mx.eduhub.modules.entities.UserEntity;
 import utez.edu.mx.eduhub.modules.entities.course.Course;
 import utez.edu.mx.eduhub.modules.entities.course.Rating;
+import utez.edu.mx.eduhub.modules.entities.dto.CertificateData;
 import utez.edu.mx.eduhub.modules.repositories.UserRepository;
 import utez.edu.mx.eduhub.modules.services.CourseService;
 import utez.edu.mx.eduhub.utils.security.JWTUtil;
 import utez.edu.mx.eduhub.utils.security.UserDetailsImpl;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -113,6 +115,12 @@ public class CourseController {
         return courseService.addRating(courseId, rating, userDetails.getId());
     }
 
+    @PostMapping("/{courseId}/deliver-certificates")
+    public ResponseEntity<?> deliverCertificates(
+            @PathVariable String courseId,
+            @RequestBody List<CertificateData> certificates) {
+        return courseService.deliverCertificates(courseId, certificates);
+    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteCourse(@PathVariable String id) {

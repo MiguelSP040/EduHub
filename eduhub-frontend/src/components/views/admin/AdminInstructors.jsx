@@ -106,7 +106,7 @@ const AdminInstructors = () => {
                                                 </td>
                                                 <td>
                                                     {!instructor.active && (
-                                                        <button className="btn btn-success btn-sm"
+                                                        <button className="btn btn-success btn-sm me-2"
                                                             onClick={() => handleActivateInstructor(instructor.id)}>
                                                             Activar
                                                         </button>

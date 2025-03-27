@@ -11,6 +11,7 @@ import utez.edu.mx.eduhub.modules.entities.course.Course;
 import utez.edu.mx.eduhub.modules.entities.course.Rating;
 import utez.edu.mx.eduhub.modules.entities.course.Session;
 import utez.edu.mx.eduhub.modules.entities.course.StudentEnrollment;
+import utez.edu.mx.eduhub.modules.entities.dto.CertificateData;
 import utez.edu.mx.eduhub.modules.repositories.CourseRepository;
 import utez.edu.mx.eduhub.modules.repositories.UserRepository;
 import utez.edu.mx.eduhub.modules.repositories.course.SessionRepository;
@@ -410,6 +411,38 @@ public class CourseService {
         repository.save(course);
 
         return ResponseEntity.ok("Calificación agregada correctamente.");
+    }
+
+    // ENTREGAR CERTIFICADOS
+    public ResponseEntity<?> deliverCertificates(String courseId, List<CertificateData> certificates) {
+        Optional<Course> courseOpt = repository.findById(courseId);
+
+        if (courseOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Curso no encontrado.");
+        }
+
+        Course course = courseOpt.get();
+
+        if (!Boolean.TRUE.equals(course.getHasCertificate()) || !"Finalizado".equalsIgnoreCase(course.getStatus())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El curso no está en condiciones de entregar certificados.");
+        }
+
+        int totalSessions = course.getSessions() != null ? course.getSessions().size() : 0;
+
+        for (CertificateData certData : certificates) {
+            for (StudentEnrollment enrollment : course.getEnrollments()) {
+                if (enrollment.getStudentId().equals(certData.getStudentId())) {
+                    int progress = enrollment.calculateProgress(totalSessions);
+                    if (progress >= 80) {
+                        enrollment.setCertificateDelivered(true);
+                        enrollment.setCertificateFile(certData.getBase64());
+                    }
+                }
+            }
+        }
+
+        repository.save(course);
+        return ResponseEntity.ok("Certificados guardados correctamente.");
     }
 
     // OBTENER CURSOS DEL ALUMNO

@@ -8,6 +8,7 @@ const CourseConfig = ({ course, setCourse }) => {
   const [price, setPrice] = useState(course.price === 0 ? 'Gratis' : course.price.toString());
   const [category, setCategory] = useState(course.category || '');
   const [coverImage, setCoverImage] = useState('');
+  const [hasCertificate, setHasCertificate] = useState(course.hasCertificate || false);
   const [dateStart, setDateStart] = useState(new Date(course.dateStart).toISOString().split('T')[0]);
   const [dateEnd, setDateEnd] = useState(new Date(course.dateEnd).toISOString().split('T')[0]);
   const [errorMsg, setErrorMsg] = useState(null);
@@ -36,6 +37,7 @@ const CourseConfig = ({ course, setCourse }) => {
       price: price === '0' ? 0 : Number(price) || 0,
       dateStart: start,
       dateEnd: end,
+      hasCertificate,
       category,
       studentsCount: Number(studentsCount),
     };
@@ -63,8 +65,9 @@ const CourseConfig = ({ course, setCourse }) => {
     }
   };
 
-  (()=>{console.log(course);
-  })()
+  (() => {
+    console.log(course);
+  })();
 
   return (
     <div className="px-3 px-md-5 pt-3 text-start">
@@ -104,16 +107,16 @@ const CourseConfig = ({ course, setCourse }) => {
             <input
               type="text"
               className="form-control"
-              value={price === "0" ? "Gratis" : price}
+              value={price === '0' ? 'Gratis' : price}
               onChange={(e) => {
                 const value = e.target.value;
-                if (value.toLowerCase() === "gratis") {
-                  setPrice("0");
+                if (value.toLowerCase() === 'gratis') {
+                  setPrice('0');
                 } else if (/^\d*\.?\d*$/.test(value)) {
                   setPrice(value);
                 }
               }}
-              disabled={course && course.status !== "Creado"}
+              disabled={course && course.status !== 'Creado'}
             />
           </div>
         </div>
@@ -140,11 +143,18 @@ const CourseConfig = ({ course, setCourse }) => {
         </div>
       </div>
 
+      <div className="form-check mb-3 fw-bold">
+        <input type="checkbox" className="form-check-input" id="editHasCertificate" checked={hasCertificate} onChange={(e) => setHasCertificate(e.target.checked)} disabled={course && course.status !== 'Creado'} />
+        <label className="form-check-label" htmlFor="editHasCertificate">
+          ¿Este curso incluye certificado?
+        </label>
+      </div>
+
       {course.status === 'Creado' && (
-          <button className="btn btn-purple-900 mt-3" onClick={handleSave} disabled={isSaving || course.status !== 'Creado'}>
-            {isSaving ? <div className="spinner-border text-light"></div> : 'Guardar Cambios'}
-          </button>
-        )}
+        <button className="btn btn-purple-900 mt-3" onClick={handleSave} disabled={isSaving || course.status !== 'Creado'}>
+          {isSaving ? <div className="spinner-border text-light"></div> : 'Guardar Cambios'}
+        </button>
+      )}
     </div>
   );
 };

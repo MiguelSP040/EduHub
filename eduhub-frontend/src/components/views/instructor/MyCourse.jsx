@@ -25,6 +25,7 @@ const MyCourse = () => {
   const [sessions, setSessions] = useState([]);
   const [activeTab, setActiveTab] = useState('material');
   const [selectedSession, setSelectedSession] = useState(null);
+  const [deliverCertificatesTrigger, setDeliverCertificatesTrigger] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -123,37 +124,46 @@ const MyCourse = () => {
                   {activeTab === 'material' && (
                     <div className="col-12 col-sm-auto mt-2 px-0 mt-sm-0 text-center text-sm-end">
                       {course?.status === 'Aprobado' && (
-                      <button className="btn btn-warning me-2" onClick={async () => {
-                        const response = await startCourse(course.id);
-                        alert(response.message);
-                        const updated = await getCourseById(course.id);
-                        setCourse(updated);
-                      }}>
-                        Empezar Curso (Prueba)
-                      </button>
-                    )}
+                        <button
+                          className="btn btn-warning me-2"
+                          onClick={async () => {
+                            const response = await startCourse(course.id);
+                            alert(response.message);
+                            const updated = await getCourseById(course.id);
+                            setCourse(updated);
+                          }}
+                        >
+                          Empezar Curso (Prueba)
+                        </button>
+                      )}
 
-                    {course?.status === 'Empezado' && (
-                      <button className="btn btn-danger me-2" onClick={async () => {
-                        const response = await finishCourse(course.id);
-                        alert(response.message);
-                        const updated = await getCourseById(course.id);
-                        setCourse(updated);
-                      }}>
-                        Finalizar Curso (Prueba)
-                      </button>
-                    )}
+                      {course?.status === 'Empezado' && (
+                        <button
+                          className="btn btn-danger me-2"
+                          onClick={async () => {
+                            const response = await finishCourse(course.id);
+                            alert(response.message);
+                            const updated = await getCourseById(course.id);
+                            setCourse(updated);
+                          }}
+                        >
+                          Finalizar Curso (Prueba)
+                        </button>
+                      )}
 
-                    {course?.status === 'Finalizado' && (
-                      <button className="btn btn-danger me-2" onClick={async () => {
-                        const response = await resetCourseToApproved(course.id);
-                        alert(response.message);
-                        const updated = await getCourseById(course.id);
-                        setCourse(updated);
-                      }}>
-                        Finalizar Curso (Prueba)
-                      </button>
-                    )}
+                      {course?.status === 'Finalizado' && (
+                        <button
+                          className="btn btn-success me-2"
+                          onClick={async () => {
+                            const response = await resetCourseToApproved(course.id);
+                            alert(response.message);
+                            const updated = await getCourseById(course.id);
+                            setCourse(updated);
+                          }}
+                        >
+                          Reiniciar Curso (Prueba)
+                        </button>
+                      )}
 
                       {selectedSession ? (
                         <button className="btn btn-purple-400" onClick={() => setSelectedSession(null)}>
@@ -187,6 +197,18 @@ const MyCourse = () => {
                       )}
                     </div>
                   )}
+                  {activeTab === 'students' && course?.status === 'Finalizado' && course?.hasCertificate && (
+                    <div className="col-12 col-sm-auto mt-2 px-0 mt-sm-0 text-center text-sm-end">
+                      <button
+                        className="btn btn-outline-primary me-2"
+                        onClick={() => {
+                          setDeliverCertificatesTrigger(true);
+                        }}
+                      >
+                        Entregar Certificados
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -208,9 +230,7 @@ const MyCourse = () => {
                           alt={course?.title}
                         />
 
-                        <div
-                          className="position-absolute image-overlay top-0 start-0 w-100 h-100 rounded-4"
-                        />
+                        <div className="position-absolute image-overlay top-0 start-0 w-100 h-100 rounded-4" />
 
                         <div className="position-absolute top-50 start-0 text-start text-white p-4 w-100">
                           <h3 className="fw-bold">{course?.title}</h3>
@@ -231,7 +251,7 @@ const MyCourse = () => {
                 </>
               )}
 
-              {activeTab === 'students' && <MyStudents courseId={course.id} courseLenght={course.studentsCount} />}
+              {activeTab === 'students' && <MyStudents courseId={course.id} courseLenght={course.studentsCount} deliverCertificatesTrigger={deliverCertificatesTrigger} course={course} instructor={instructor} />}
               {activeTab === 'config' && <CourseConfig course={course} setCourse={setCourse} canModify={canModify} />}
             </div>
           </main>
