@@ -1,4 +1,3 @@
-// AdminCourseSessions.jsx
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
@@ -10,6 +9,8 @@ import AdminSessionView from './AdminSessionView'; // <-- Importamos la vista de
 import AdminCourseDetails from './AdminCourseDetails';
 import { BookOpen, Settings } from 'react-feather';
 import { findUserById } from '../../../services/userService';
+import CourseStepProgress from './CourseStepProgress';
+import SessionIndexAccordion from './SessionIndexAccordion';
 
 const AdminCourseSessions = () => {
   const navigate = useNavigate();
@@ -165,14 +166,15 @@ const AdminCourseSessions = () => {
                         </div>
                       </div>
 
+                      {course && <CourseStepProgress status={course?.status} />}
+
+                      {sessions.length > 0 && <SessionIndexAccordion sessions={sessions} />}
+
                       {sessions.length > 0 ? (
                         sessions.map((session) => (
-                          <AdminSessionCard
-                            key={session.id}
-                            session={session}
-                            instructor={instructor}
-                            onSelect={() => setSelectedSession(session)}
-                          />
+                          <div id={`session-${session.id}`} key={session.id}>
+                            <AdminSessionCard session={session} instructor={instructor} onSelect={() => setSelectedSession(session)} />
+                          </div>
                         ))
                       ) : (
                         <p className="text-muted text-center mt-5">No hay sesiones registradas aún.</p>

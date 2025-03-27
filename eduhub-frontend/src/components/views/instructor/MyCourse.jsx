@@ -12,6 +12,8 @@ import AddSessionModal from './AddSessionModal';
 import { AuthContext } from '../../../context/AuthContext';
 import { BookOpen, Users, Settings } from 'react-feather';
 import { findUserById } from '../../../services/userService';
+import CourseStepProgress from './CourseStepProgress';
+import SessionIndexAccordion from './SessionIndexAccordion';
 
 const MyCourse = () => {
   const navigate = useNavigate();
@@ -61,6 +63,24 @@ const MyCourse = () => {
       setSessions(sessionData.reverse());
     } catch (error) {
       console.error('Error al obtener sesiones:', error);
+    }
+  };
+
+  const getProgressStep = (status) => {
+    switch (status) {
+      case 'Creado':
+        return 0;
+      case 'Pendiente':
+      case 'Rechazado':
+        return 1;
+      case 'Aprobado':
+        return 2;
+      case 'Empezado':
+        return 3;
+      case 'Finalizado':
+        return 4;
+      default:
+        return 0;
     }
   };
 
@@ -237,12 +257,20 @@ const MyCourse = () => {
                           <h6>
                             {instructor?.name} {instructor?.surname} {instructor?.lastname}
                           </h6>
-                          <p>{course?.description}</p>
+                          <p className="text-truncate">{course?.description}</p>
                         </div>
                       </div>
 
+                      {course && <CourseStepProgress status={course?.status} />}
+
+                      {sessions.length > 0 && <SessionIndexAccordion sessions={sessions} />}
+
                       {sessions.length > 0 ? (
-                        sessions.map((session) => <SessionCard key={session.id} session={session} instructor={instructor} onSelect={() => setSelectedSession(session)} />)
+                        sessions.map((session) => (
+                          <div id={`session-${session.id}`} key={session.id}>
+                            <SessionCard session={session} instructor={instructor} onSelect={() => setSelectedSession(session)} />
+                          </div>
+                        ))
                       ) : (
                         <p className="text-muted text-center mt-5">No hay sesiones registradas aún.</p>
                       )}

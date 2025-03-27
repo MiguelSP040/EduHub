@@ -1,3 +1,7 @@
+html {
+    scroll-behavior: smooth;
+  }  
+
 .bg-main {
     background-color: #F9F9F9 !important; 
 }
@@ -34,6 +38,10 @@ text-align: right !important;
 }
 .session-content .ql-align-justify {
 text-align: justify !important;
+}
+
+.session-acordeon:hover {
+    border-left: 2px solid #6C63FF;
 }
   
 @media screen and (min-width: 576px) {

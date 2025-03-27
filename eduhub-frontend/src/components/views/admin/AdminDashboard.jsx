@@ -98,7 +98,7 @@ const AdminDashboard = () => {
     );
 
     return (
-        <div className="">
+        <div>
             {/* SIDEBAR */}
             <Sidebar isExpanded={isSidebarExpanded} setIsExpanded={setIsSidebarExpanded} navbarRef={navbarRef} />
 

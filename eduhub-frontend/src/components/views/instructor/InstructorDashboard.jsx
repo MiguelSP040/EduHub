@@ -94,7 +94,7 @@ const InstructorDashboard = () => {
     );
 
   return (
-    <div className="d-flex">
+    <div>
       {/* SIDEBAR */}
       <Sidebar isExpanded={isSidebarExpanded} setIsExpanded={setIsSidebarExpanded} navbarRef={navbarRef} />
 
