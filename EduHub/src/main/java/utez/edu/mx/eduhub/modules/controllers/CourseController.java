@@ -135,4 +135,9 @@ public class CourseController {
         return courseService.finishCourse(courseId);
     }
 
+    @PutMapping("/{courseId}/reset")
+    public ResponseEntity<?> resetCourseToApproved(@PathVariable String courseId) {
+        return courseService.resetCourseToApproved(courseId);
+    }
+
 }

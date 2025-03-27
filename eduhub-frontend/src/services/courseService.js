@@ -280,3 +280,24 @@ export const finishCourse = async (courseId) => {
     return { status: 500, message: "Error de conexión con el servidor." };
   }
 };
+
+export const resetCourseToApproved = async (courseId) => {
+  const token = localStorage.getItem("token");
+  try {
+    const response = await fetch(`${API_URL}/${courseId}/reset`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const text = await response.text();
+    if (!response.ok) {
+      return { status: response.status, message: text };
+    }
+    return { status: 200, message: "Curso reiniciado a estado Aprobado." };
+  } catch (error) {
+    console.error("Error al reiniciar curso:", error);
+    return { status: 500, message: "Error de conexión con el servidor." };
+  }
+};

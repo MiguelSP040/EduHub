@@ -56,6 +56,8 @@ const InstructorDashboard = () => {
         return 'success';
       case 'Rechazado':
         return 'danger';
+      case 'Finalizado':
+        return 'danger';
       default:
         return 'primary';
     }

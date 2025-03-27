@@ -516,4 +516,37 @@ public class CourseService {
         repository.save(course);
         return new ResponseEntity<>("Curso marcado como finalizado", HttpStatus.OK);
     }
+
+    public ResponseEntity<?> resetCourseToApproved(String courseId) {
+        Optional<Course> optionalCourse = repository.findById(courseId);
+        if (optionalCourse.isEmpty()) {
+            return new ResponseEntity<>("Curso no encontrado", HttpStatus.NOT_FOUND);
+        }
+
+        Course course = optionalCourse.get();
+
+        if (!"Finalizado".equalsIgnoreCase(course.getStatus())) {
+            return new ResponseEntity<>("El curso no está finalizado", HttpStatus.BAD_REQUEST);
+        }
+
+        long durationInMillis = course.getDateEnd().getTime() - course.getDateStart().getTime();
+        long durationInDays = Math.max(1, durationInMillis / (1000 * 60 * 60 * 24));
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.DAY_OF_YEAR, 2);
+        Date newStartDate = calendar.getTime();
+
+        calendar.setTime(newStartDate);
+        calendar.add(Calendar.DAY_OF_YEAR, (int) durationInDays);
+        Date newEndDate = calendar.getTime();
+
+        course.setDateStart(newStartDate);
+        course.setDateEnd(newEndDate);
+        course.setStatus("Aprobado");
+
+        repository.save(course);
+        return new ResponseEntity<>("Curso reiniciado como 'Aprobado'", HttpStatus.OK);
+    }
+
 }

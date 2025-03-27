@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Navbar from '../Navbar';
 import { getSessionsByCourse } from '../../../services/sessionService';
-import { publishCourse, requestModification, getCourseById, startCourse, finishCourse } from '../../../services/courseService';
+import { publishCourse, requestModification, getCourseById, startCourse, finishCourse, resetCourseToApproved } from '../../../services/courseService';
 import SessionCard from './SessionCard';
 import SessionView from './SessionView';
 import MyStudents from './MyStudents';
@@ -144,6 +144,17 @@ const MyCourse = () => {
                       </button>
                     )}
 
+                    {course?.status === 'Finalizado' && (
+                      <button className="btn btn-danger me-2" onClick={async () => {
+                        const response = await resetCourseToApproved(course.id);
+                        alert(response.message);
+                        const updated = await getCourseById(course.id);
+                        setCourse(updated);
+                      }}>
+                        Finalizar Curso (Prueba)
+                      </button>
+                    )}
+
                       {selectedSession ? (
                         <button className="btn btn-purple-400" onClick={() => setSelectedSession(null)}>
                           Volver al curso
@@ -168,6 +179,8 @@ const MyCourse = () => {
                           {course?.status === 'Aprobado' && <span className="text-success fw-semibold">Curso Aprobado - No editable</span>}
 
                           {course?.status === 'Empezado' && <span className="text-primary fw-semibold">Curso Empezado - No editable</span>}
+
+                          {course?.status === 'Finalizado' && <span className="text-danger fw-semibold">Curso Finalizado - No editable</span>}
 
                           {course?.status === 'Creado' && today < courseStartDate && <AddSessionModal courseId={course.id} fetchSessions={fetchSessions} />}
                         </>
