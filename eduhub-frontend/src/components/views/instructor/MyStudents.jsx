@@ -3,7 +3,7 @@ import { getStudentsByCourse, deliverCertificates } from '../../../services/cour
 import { CheckCircle, AlertCircle } from 'react-feather';
 import jsPDF from 'jspdf';
 
-const MyStudents = ({ courseId, courseLenght, deliverCertificatesTrigger, course, instructor }) => {
+const MyStudents = ({ courseId, courseLenght, deliverCertificatesTrigger, course, instructor, setCanDeliverCertificates }) => {
   const [students, setStudents] = useState([]);
   const [certificateStatus, setCertificateStatus] = useState({});
 
@@ -16,7 +16,7 @@ const MyStudents = ({ courseId, courseLenght, deliverCertificatesTrigger, course
         const newStatus = {};
 
         data.forEach((s) => {
-          if (s.certificateDelivered) {
+          if (s.certificateDelivered === true) {
             newStatus[s.id] = 'Entregado';
           } else if (s.progress >= 80 && course.hasCertificate) {
             newStatus[s.id] = 'Con derecho';
@@ -24,14 +24,23 @@ const MyStudents = ({ courseId, courseLenght, deliverCertificatesTrigger, course
             newStatus[s.id] = 'Sin derecho';
           }
         });
+
         setCertificateStatus(newStatus);
+
+        const eligibleCount = data.filter((s) => s.progress >= 80 && course.hasCertificate && !s.certificateDelivered).length;
+
+        setCanDeliverCertificates(eligibleCount > 0);
+
+        if (typeof setCanDeliverCertificates === 'function') {
+          setCanDeliverCertificates(eligibleCount > 0);
+        }
       } catch (error) {
         console.error('Error al obtener estudiantes:', error);
       }
     };
 
     fetchStudents();
-  }, [courseId, course.hasCertificate]);
+  }, [courseId, course.hasCertificate, setCanDeliverCertificates]);
 
   useEffect(() => {
     if (deliverCertificatesTrigger) {
@@ -40,104 +49,103 @@ const MyStudents = ({ courseId, courseLenght, deliverCertificatesTrigger, course
   }, [deliverCertificatesTrigger]);
 
   const handleDeliverCertificates = async () => {
-    const eligibleStudents = students.filter(
-      (s) => certificateStatus[s.id] === "Con derecho"
-    );
-  
+    const eligibleStudents = students.filter((s) => certificateStatus[s.id] === 'Con derecho');
+
     if (eligibleStudents.length === 0) {
-      alert("No hay estudiantes con derecho al certificado o ya entregado.");
+      alert('No hay estudiantes con derecho al certificado o ya entregado.');
       return;
     }
-  
+
     const certificatesPayload = eligibleStudents.map((student) => ({
       studentId: student.id,
       base64: generateCertificatePDF(student),
     }));
-  
+
     const response = await deliverCertificates(courseId, certificatesPayload);
-  
+
     if (response.status === 200) {
       const updatedStatus = { ...certificateStatus };
       eligibleStudents.forEach((s) => {
-        updatedStatus[s.id] = "Entregado";
+        updatedStatus[s.id] = 'Entregado';
       });
       setCertificateStatus(updatedStatus);
-  
-      alert("¡Certificados generados y marcados como entregados en el backend!");
+
+      alert('¡Certificados generados y marcados como entregados en el backend!');
+
+      const updated = await getStudentsByCourse(courseId);
+      setStudents(updated);
     } else {
-      alert("Error al marcar certificados como entregados: " + response.message);
+      alert('Error al marcar certificados como entregados: ' + response.message);
     }
-  };  
+  };
 
   const generateCertificatePDF = (student) => {
     const doc = new jsPDF({
-      orientation: "portrait",
-      unit: "pt",
-      format: "letter",
+      orientation: 'portrait',
+      unit: 'pt',
+      format: 'letter',
     });
-  
-    const purple = "#5E60CE";
-    const gray = "#666666";
-    const black = "#000000";
+
+    const purple = '#5E60CE';
+    const gray = '#666666';
+    const black = '#000000';
     const fullName = `${student.name} ${student.surname}${student.lastname ? ' ' + student.lastname : ''}`;
     const instructorFullName = `${instructor.name} ${instructor.surname}${instructor.lastname ? ' ' + instructor.lastname : ''}`;
-  
+
     doc.setDrawColor(purple);
     doc.setLineWidth(4);
     doc.rect(30, 30, 550, 730);
-  
+
     doc.setFontSize(28);
     doc.setTextColor(purple);
-    doc.setFont("helvetica", "bold");
-    doc.text("EduHubPro", 300, 80, { align: "center" });
-  
+    doc.setFont('helvetica', 'bold');
+    doc.text('EduHubPro', 300, 80, { align: 'center' });
+
     doc.setFontSize(22);
     doc.setTextColor(black);
-    doc.setFont("times", "bold");
-    doc.text("CERTIFICADO DE FINALIZACIÓN", 300, 140, { align: "center" });
-  
-    doc.setFont("times", "normal");
+    doc.setFont('times', 'bold');
+    doc.text('CERTIFICADO DE FINALIZACIÓN', 300, 140, { align: 'center' });
+
+    doc.setFont('times', 'normal');
     doc.setFontSize(14);
     doc.setTextColor(gray);
-    doc.text("Otorgado a:", 300, 190, { align: "center" });
-  
+    doc.text('Otorgado a:', 300, 190, { align: 'center' });
+
     doc.setFontSize(18);
-    doc.setFont("times", "bolditalic");
+    doc.setFont('times', 'bolditalic');
     doc.setTextColor(black);
-    doc.text(fullName, 300, 220, { align: "center" });
-  
+    doc.text(fullName, 300, 220, { align: 'center' });
+
     doc.setFontSize(14);
-    doc.setFont("times", "normal");
+    doc.setFont('times', 'normal');
     doc.setTextColor(gray);
-    doc.text(`Por haber completado el curso:`, 300, 260, { align: "center" });
-  
-    doc.setFont("times", "bold");
-    doc.text(`"${course.title}"`, 300, 290, { align: "center" });
-  
-    doc.setFont("times", "normal");
-    doc.text(`con un progreso del ${student.progress}%`, 300, 320, { align: "center" });
-  
+    doc.text(`Por haber completado el curso:`, 300, 260, { align: 'center' });
+
+    doc.setFont('times', 'bold');
+    doc.text(`"${course.title}"`, 300, 290, { align: 'center' });
+
+    doc.setFont('times', 'normal');
+    doc.text(`con un progreso del ${student.progress}%`, 300, 320, { align: 'center' });
+
     const startDate = new Date(course.dateStart).toLocaleDateString();
     const endDate = new Date(course.dateEnd).toLocaleDateString();
-  
+
     doc.setTextColor(black);
     doc.setFontSize(12);
-    doc.text(`Fecha de inicio: ${startDate}`, 300, 370, { align: "center" });
-    doc.text(`Fecha de finalización: ${endDate}`, 300, 390, { align: "center" });
-  
+    doc.text(`Fecha de inicio: ${startDate}`, 300, 370, { align: 'center' });
+    doc.text(`Fecha de finalización: ${endDate}`, 300, 390, { align: 'center' });
+
     doc.setFontSize(12);
     doc.text(instructorFullName, 110, 515);
-    doc.text("Instructor del curso", 110, 530);
-  
-    doc.setFont("helvetica", "italic");
-    doc.setTextColor("#999999");
+    doc.text('Instructor del curso', 110, 530);
+
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor('#999999');
     doc.setFontSize(10);
-    doc.text("EduHubPro · Aprendizaje sin límites", 300, 700, { align: "center" });
-  
-    doc.save(`Certificado_${student.name}_${student.surname}.pdf`);
-    return doc.output("datauristring").split(",")[1];
+    doc.text('EduHubPro · Aprendizaje sin límites', 300, 700, { align: 'center' });
+
+    return doc.output('datauristring').split(',')[1];
   };
-  
 
   return (
     <div className="table-responsive rounded-3" style={{ maxHeight: '35rem' }}>

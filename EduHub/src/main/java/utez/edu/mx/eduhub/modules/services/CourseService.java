@@ -79,8 +79,11 @@ public class CourseService {
                 studentData.put("id", student.getId());
                 studentData.put("name", student.getName());
                 studentData.put("surname", student.getSurname());
+                studentData.put("lastname", student.getLastname());
                 studentData.put("status", enrollment.getStatus());
                 studentData.put("progress", enrollment.calculateProgress(course.getSessions().size()));
+                studentData.put("certificateDelivered", enrollment.isCertificateDelivered());
+                studentData.put("certificateFile", enrollment.getCertificateFile());
                 return studentData;
             }
             return null;
@@ -88,6 +91,7 @@ public class CourseService {
 
         return ResponseEntity.ok(students);
     }
+
 
     // SOLICITAR UNIRSE A UN CURSO
     public ResponseEntity<?> requestEnrollment(String courseId, String studentId) {

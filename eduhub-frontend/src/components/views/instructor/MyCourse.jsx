@@ -26,6 +26,7 @@ const MyCourse = () => {
   const [activeTab, setActiveTab] = useState('material');
   const [selectedSession, setSelectedSession] = useState(null);
   const [deliverCertificatesTrigger, setDeliverCertificatesTrigger] = useState(false);
+  const [canDeliverCertificates, setCanDeliverCertificates] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -197,16 +198,15 @@ const MyCourse = () => {
                       )}
                     </div>
                   )}
-                  {activeTab === 'students' && course?.status === 'Finalizado' && course?.hasCertificate && (
+                  {activeTab === 'students' && course?.status === 'Finalizado' && course?.hasCertificate && canDeliverCertificates !== null && (
                     <div className="col-12 col-sm-auto mt-2 px-0 mt-sm-0 text-center text-sm-end">
-                      <button
-                        className="btn btn-outline-primary me-2"
-                        onClick={() => {
-                          setDeliverCertificatesTrigger(true);
-                        }}
-                      >
-                        Entregar Certificados
-                      </button>
+                      {canDeliverCertificates ? (
+                        <button className="btn btn-outline-primary me-2" onClick={() => setDeliverCertificatesTrigger(true)}>
+                          Entregar Certificados
+                        </button>
+                      ) : (
+                        <span className="text-muted">Sin estudiantes para certificar</span>
+                      )}
                     </div>
                   )}
                 </div>
@@ -251,7 +251,7 @@ const MyCourse = () => {
                 </>
               )}
 
-              {activeTab === 'students' && <MyStudents courseId={course.id} courseLenght={course.studentsCount} deliverCertificatesTrigger={deliverCertificatesTrigger} course={course} instructor={instructor} />}
+              {activeTab === 'students' && <MyStudents courseId={course.id} courseLenght={course.studentsCount} deliverCertificatesTrigger={deliverCertificatesTrigger} course={course} instructor={instructor} setCanDeliverCertificates={setCanDeliverCertificates} />}
               {activeTab === 'config' && <CourseConfig course={course} setCourse={setCourse} canModify={canModify} />}
             </div>
           </main>
