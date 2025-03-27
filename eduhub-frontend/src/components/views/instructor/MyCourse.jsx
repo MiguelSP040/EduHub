@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Navbar from '../Navbar';
 import { getSessionsByCourse } from '../../../services/sessionService';
-import { publishCourse, requestModification, getCourseById } from '../../../services/courseService';
+import { publishCourse, requestModification, getCourseById, startCourse, finishCourse } from '../../../services/courseService';
 import SessionCard from './SessionCard';
 import SessionView from './SessionView';
 import MyStudents from './MyStudents';
@@ -122,6 +122,28 @@ const MyCourse = () => {
 
                   {activeTab === 'material' && (
                     <div className="col-12 col-sm-auto mt-2 px-0 mt-sm-0 text-center text-sm-end">
+                      {course?.status === 'Aprobado' && (
+                      <button className="btn btn-warning me-2" onClick={async () => {
+                        const response = await startCourse(course.id);
+                        alert(response.message);
+                        const updated = await getCourseById(course.id);
+                        setCourse(updated);
+                      }}>
+                        Empezar Curso (Prueba)
+                      </button>
+                    )}
+
+                    {course?.status === 'Empezado' && (
+                      <button className="btn btn-danger me-2" onClick={async () => {
+                        const response = await finishCourse(course.id);
+                        alert(response.message);
+                        const updated = await getCourseById(course.id);
+                        setCourse(updated);
+                      }}>
+                        Finalizar Curso (Prueba)
+                      </button>
+                    )}
+
                       {selectedSession ? (
                         <button className="btn btn-purple-400" onClick={() => setSelectedSession(null)}>
                           Volver al curso

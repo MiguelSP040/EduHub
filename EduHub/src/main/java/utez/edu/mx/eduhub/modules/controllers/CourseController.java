@@ -124,4 +124,15 @@ public class CourseController {
     public ResponseEntity<?> getCoursesByStudent(@PathVariable String studentId) {
         return courseService.requestCourseStudent(studentId);
     }
+
+    @PutMapping("/{courseId}/start")
+    public ResponseEntity<?> startCourse(@PathVariable String courseId) {
+        return courseService.startCourse(courseId);
+    }
+
+    @PutMapping("/{courseId}/finish")
+    public ResponseEntity<?> finishCourse(@PathVariable String courseId) {
+        return courseService.finishCourse(courseId);
+    }
+
 }

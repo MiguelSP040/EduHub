@@ -446,4 +446,74 @@ public class CourseService {
             }
         }
     }
+
+    public ResponseEntity<?> startCourse(String courseId) {
+        Optional<Course> optionalCourse = repository.findById(courseId);
+        if (optionalCourse.isEmpty()) {
+            return new ResponseEntity<>("Curso no encontrado", HttpStatus.NOT_FOUND);
+        }
+
+        Course course = optionalCourse.get();
+
+        if (!"Aprobado".equalsIgnoreCase(course.getStatus())) {
+            return new ResponseEntity<>("El curso no está aprobado", HttpStatus.BAD_REQUEST);
+        }
+
+        Date now = new Date();
+        Date startDate = course.getDateStart();
+
+        if (startDate.after(now)) {
+            long diffInMillis = startDate.getTime() - now.getTime();
+            long diffInDays = diffInMillis / (1000 * 60 * 60 * 24);
+
+            Calendar calendar = Calendar.getInstance();
+
+            calendar.setTime(startDate);
+            calendar.add(Calendar.DAY_OF_YEAR, (int) -diffInDays - 1);
+            course.setDateStart(calendar.getTime());
+
+            calendar.setTime(course.getDateEnd());
+            calendar.add(Calendar.DAY_OF_YEAR, (int) -diffInDays - 1);
+            course.setDateEnd(calendar.getTime());
+        }
+
+        course.setStatus("Empezado");
+        repository.save(course);
+        return new ResponseEntity<>("Curso marcado como empezado", HttpStatus.OK);
+    }
+
+    public ResponseEntity<?> finishCourse(String courseId) {
+        Optional<Course> optionalCourse = repository.findById(courseId);
+        if (optionalCourse.isEmpty()) {
+            return new ResponseEntity<>("Curso no encontrado", HttpStatus.NOT_FOUND);
+        }
+
+        Course course = optionalCourse.get();
+
+        if (!"Empezado".equalsIgnoreCase(course.getStatus())) {
+            return new ResponseEntity<>("El curso no está en estado 'Empezado'", HttpStatus.BAD_REQUEST);
+        }
+
+        Date now = new Date();
+        Date endDate = course.getDateEnd();
+
+        if (endDate.after(now)) {
+            long diffInMillis = endDate.getTime() - now.getTime();
+            long diffInDays = diffInMillis / (1000 * 60 * 60 * 24);
+
+            Calendar calendar = Calendar.getInstance();
+
+            calendar.setTime(course.getDateStart());
+            calendar.add(Calendar.DAY_OF_YEAR, (int) -diffInDays - 1);
+            course.setDateStart(calendar.getTime());
+
+            calendar.setTime(endDate);
+            calendar.add(Calendar.DAY_OF_YEAR, (int) -diffInDays - 1);
+            course.setDateEnd(calendar.getTime());
+        }
+
+        course.setStatus("Finalizado");
+        repository.save(course);
+        return new ResponseEntity<>("Curso marcado como finalizado", HttpStatus.OK);
+    }
 }

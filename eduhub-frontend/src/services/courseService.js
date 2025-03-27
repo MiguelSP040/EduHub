@@ -244,3 +244,39 @@ export const updateCourse = async (courseData) => {
     return { status: 500, message: "Error de conexión con el servidor" };
   }
 };
+
+export const startCourse = async (courseId) => {
+  const token = localStorage.getItem("token");
+  try {
+    const response = await fetch(`${API_URL}/${courseId}/start`, {
+      method: "PUT",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const text = await response.text();
+    if (!response.ok) {
+      return { status: response.status, message: text };
+    }
+    return { status: 200, message: text };
+  } catch (error) {
+    return { status: 500, message: "Error de conexión con el servidor." };
+  }
+};
+
+export const finishCourse = async (courseId) => {
+  const token = localStorage.getItem("token");
+  try {
+    const response = await fetch(`${API_URL}/${courseId}/finish`, {
+      method: "PUT",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const text = await response.text();
+    if (!response.ok) {
+      return { status: response.status, message: text };
+    }
+    return { status: 200, message: text };
+  } catch (error) {
+    return { status: 500, message: "Error de conexión con el servidor." };
+  }
+};
