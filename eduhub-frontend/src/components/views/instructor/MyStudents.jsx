@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getStudentsByCourse, deliverCertificates } from '../../../services/courseService';
-import { CheckCircle, AlertCircle } from 'react-feather';
+import { CheckCircle, AlertCircle, FileText } from 'react-feather';
 import jsPDF from 'jspdf';
 
 const MyStudents = ({ courseId, courseLenght, deliverCertificatesTrigger, course, instructor, setCanDeliverCertificates }) => {
@@ -186,7 +186,32 @@ const MyStudents = ({ courseId, courseLenght, deliverCertificatesTrigger, course
                     </span>
                   )}
                 </td>
-                <td>{certificateStatus[student.id]}</td>
+                <td>
+                  {certificateStatus[student.id] === 'Entregado' ? (
+                    <div className="d-flex align-items-center justify-content-center gap-2">
+                      <span className="text-success fw-semibold">Entregado</span>
+                      <button
+                        className="btn btn-sm btn-outline-secondary d-flex align-items-center"
+                        onClick={() => {
+                          const base64 = student.certificateFile;
+                          const byteCharacters = atob(base64);
+                          const byteNumbers = new Array(byteCharacters.length);
+                          for (let i = 0; i < byteCharacters.length; i++) {
+                            byteNumbers[i] = byteCharacters.charCodeAt(i);
+                          }
+                          const byteArray = new Uint8Array(byteNumbers);
+                          const blob = new Blob([byteArray], { type: 'application/pdf' });
+                          const tempUrl = URL.createObjectURL(blob);
+                          window.open(tempUrl, '_blank');
+                        }}
+                      >
+                        <FileText size={16} className="me-1" />
+                      </button>
+                    </div>
+                  ) : (
+                    certificateStatus[student.id]
+                  )}
+                </td>
               </tr>
             ))
           ) : (

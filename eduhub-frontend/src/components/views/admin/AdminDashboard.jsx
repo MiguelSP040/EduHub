@@ -45,10 +45,10 @@ const AdminDashboard = () => {
 
     const getStatusBadgeClass = (status) => {
         switch (status) {
-            case "Creado": return "secondary";
             case "Pendiente": return "warning";
             case "Aprobado": return "success";
             case "Empezado": return "primary";
+            case "Finalizado": return "danger";
             default: return "secondary";
         }
     };
