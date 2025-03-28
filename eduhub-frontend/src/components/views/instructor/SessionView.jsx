@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Edit, Paperclip } from 'react-feather';
 import { Editor } from 'primereact/editor';
-import { updateSession } from '../../../services/sessionService';
+import { updateSession, handleViewFile } from '../../../services/sessionService';
 import 'quill/dist/quill.snow.css';
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
 import 'primereact/resources/primereact.min.css';
@@ -166,13 +166,13 @@ const SessionView = ({ session, setSelectedSession, fetchSessions, courseStatus 
         <div className="d-flex flex-wrap gap-2">{renderTopButtons()}</div>
       </div>
 
-      <hr />
-
       {/* Contenido de la sesión (texto) */}
-      {!isEditing ? (
-        <div className="session-content bg-light rounded-4 p-4" dangerouslySetInnerHTML={{ __html: editedSession.content }} />
-      ) : (
-        <Editor value={editedSession.content} onTextChange={(e) => setEditedSession({ ...editedSession, content: e.htmlValue })} style={{ minHeight: '200px', width: '100%' }} />
+      {(isEditing || editedSession.content) && (
+        !isEditing ? (
+          <><hr /><div className="session-content bg-light rounded-4 p-4" dangerouslySetInnerHTML={{ __html: editedSession.content }} /></>
+        ) : (
+          <Editor value={editedSession.content} onTextChange={(e) => setEditedSession({ ...editedSession, content: e.htmlValue })} style={{ minHeight: '200px', width: '100%' }} />
+        )
       )}
 
       <hr />
@@ -197,25 +197,24 @@ const SessionView = ({ session, setSelectedSession, fetchSessions, courseStatus 
             {attachments.map((file, index) => {
               const fileName = file.fileName || file.name || 'Archivo';
 
-              const blob = base64ToBlob(file.data, file.fileType);
-
-              const tempUrl = URL.createObjectURL(blob);
-
               return (
                 <div key={index} className="card p-3 shadow-sm" style={{ width: '220px' }}>
                   <div className="text-center">
                     <FileText size={40} className="text-secondary" />
                   </div>
                   <p className="small text-truncate mt-2 mb-2">{fileName}</p>
-
                   {courseStatus === 'Creado' && isEditing ? (
                     <button className="btn btn-sm btn-danger w-100" onClick={() => removeAttachment(index)}>
                       Eliminar
                     </button>
                   ) : (
-                    <a href={tempUrl} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-purple-900 w-100">
+                    <button
+                      className="btn btn-sm btn-purple-900 w-100"
+                      onClick={() => handleViewFile(session.id, file)}
+                    >
                       Ver
-                    </a>
+                    </button>
+
                   )}
                 </div>
               );

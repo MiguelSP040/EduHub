@@ -9,22 +9,22 @@ public class MultimediaFile {
     private String id; 
     private String fileName;
     private String fileType;
-    private byte[] data;
+    private String gridFsId;
     
     public MultimediaFile() {
     }
 
-    public MultimediaFile(String fileName, String fileType, byte[] data) {
+    public MultimediaFile(String fileName, String fileType, String gridFsId) {
         this.fileName = fileName;
         this.fileType = fileType;
-        this.data = data;
+        this.gridFsId = gridFsId;
     }
 
-    public MultimediaFile(String id, String fileName, String fileType, byte[] data) {
+    public MultimediaFile(String id, String fileName, String fileType, String gridFsId) {
         this.id = id;
         this.fileName = fileName;
         this.fileType = fileType;
-        this.data = data;
+        this.gridFsId = gridFsId;
     }
 
     public String getId() {
@@ -51,13 +51,14 @@ public class MultimediaFile {
         this.fileType = fileType;
     }
 
-    public byte[] getData() {
-        return data;
+    public String getGridFsId() {
+        return gridFsId;
     }
 
-    public void setData(byte[] data) {
-        this.data = data;
+    public void setGridFsId(String gridFsId) {
+        this.gridFsId = gridFsId;
     }
 
+    
     
 }
