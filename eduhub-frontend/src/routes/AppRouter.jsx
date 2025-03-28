@@ -12,13 +12,14 @@ import AdminProfile from "../components/views/admin/AdminProfile";
 import AdminFinance from "../components/views/admin/AdminFinance";
 import InstructorDashboard from "../components/views/instructor/InstructorDashboard";
 import InstructorProfile from "../components/views/instructor/InstructorProfile";
-import NewCourse from "../components/views/instructor/newCourse";
+import NewCourse from "../components/views/instructor/NewCourse";
 import MyStudents from "../components/views/instructor/MyStudents";
 import MyCourse from "../components/views/instructor/MyCourse";
 import AdminEnrollments from "../components/views/admin/AdminEnrollments";
 import InstructorRatings from "../components/views/instructor/InstructorRatings";
 import AdminCourseSessions from "../components/views/admin/AdminCourseSession";
 import AdminInstructors from "../components/views/admin/AdminInstructors";
+import InstructorNotifications from "../components/views/instructor/InstructorNotifications";
 
 const AppRouter = () => {
     const [view, setView] = useState("login");
@@ -93,6 +94,11 @@ const AppRouter = () => {
                 <Route path="/profile" element={
                     <PrivateRoute>
                         <InstructorProfile/>
+                    </PrivateRoute>
+                } />
+                <Route path="/notifications" element={
+                    <PrivateRoute>
+                        <InstructorNotifications/>
                     </PrivateRoute>
                 } />
                 <Route path="/instructor/new-course" element={

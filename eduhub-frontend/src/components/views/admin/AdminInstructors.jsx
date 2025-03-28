@@ -2,20 +2,21 @@ import { useEffect, useState, useRef } from "react";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
 import { findAllUsers, activateInstructor } from "../../../services/userService";
-import { CheckCircle, AlertCircle } from "react-feather";
+import { Modal } from 'bootstrap'
+import { Eye } from "react-feather";
 
 const AdminInstructors = () => {
     const navbarRef = useRef(null);
+    const [instructorIndex, setInstructorIndex] = useState(0);
     const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
     const [instructors, setInstructors] = useState([]);
+    const viewInstructorModalRef = useRef(null);
 
     useEffect(() => {
         const fetchInstructors = async () => {
             try {
                 const data = await findAllUsers();
                 const filteredInstructors = data.filter(user => user.role === "ROLE_INSTRUCTOR");
-                console.log(filteredInstructors);
-                
                 setInstructors(filteredInstructors);
             } catch (error) {
                 console.error("Error al obtener instructores:", error);
@@ -39,7 +40,17 @@ const AdminInstructors = () => {
         } else {
             alert("Error al activar el instructor.");
         }
-    };    
+    };
+
+    const openModal = (modalRef, index) => {
+        setInstructorIndex(index);
+        console.log(instructors[instructorIndex]);
+        
+        if (modalRef.current) {
+            const modal = new Modal(modalRef.current);
+            modal.show();
+        }
+    }
 
     return (
         <div>
@@ -74,12 +85,12 @@ const AdminInstructors = () => {
                                     <tr>
                                         <th>Nombre Completo</th>
                                         <th>Correo Electrónico</th>
-                                        <th>Username</th>
+                                        <th>Apodo</th>
                                         <th>Estado</th>
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody className="align-middle">
                                     {instructors.length > 0 ? (
                                         instructors.map((instructor, index) => (
                                             <tr key={instructor._id || index}>
@@ -88,18 +99,21 @@ const AdminInstructors = () => {
                                                 <td>{instructor.username}</td>
                                                 <td>
                                                     {instructor.active ? (
-                                                        <span className="text-success">Activo <CheckCircle color="green" /></span>
+                                                        <span className="badge bg-success">Activo</span>
                                                     ) : (
-                                                        <span className="text-warning">Inactivo <AlertCircle color="orange" /></span>
+                                                        <span className="badge bg-warning">Inactivo</span>
                                                     )}
                                                 </td>
                                                 <td>
                                                     {!instructor.active && (
-                                                        <button className="btn btn-success btn-sm"
+                                                        <button className="btn btn-success btn-sm me-2"
                                                             onClick={() => handleActivateInstructor(instructor.id)}>
                                                             Activar
                                                         </button>
                                                     )}
+                                                    <button className="btn btn-primary btn-sm" onClick={() => openModal(viewInstructorModalRef, index)}>
+                                                            <Eye size={16} />
+                                                    </button>
                                                 </td>
                                             </tr>
                                         ))
@@ -112,6 +126,46 @@ const AdminInstructors = () => {
                             </table>
                         </div>
                     </main>
+                </div>
+            </div>
+
+            {/* MODAL VER DATOS DEL INSTRUCTOR */}
+            <div className="modal fade" ref={viewInstructorModalRef} tabIndex={-1}>
+                <div className="modal-dialog modal-dialog-centered">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h3 className="modal-title me-auto">Datos del Instructor</h3>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div className="modal-body text-center text-sm-start">
+                            <div className="row mb-3">
+                                <div className="col-12 col-sm-6">
+                                    <h5>Nombre (s)</h5>
+                                    <span>{instructors[instructorIndex]?.name} </span>
+                                </div>
+                                <div className="col-12 col-sm-6">
+                                    <h5>Apellido (s)</h5>
+                                    <span> {instructors[instructorIndex]?.surname} {instructors[instructorIndex]?.lastname} </span>
+                                </div>
+                            </div>
+                            <div className="row my-3">
+                                <div className="col-12 col-sm-6">
+                                    <h5>Apodo</h5>
+                                    <span> {instructors[instructorIndex]?.username} </span>
+                                </div>
+                                <div className="col-12 col-sm-6">
+                                    <h5>Correo electrónico</h5>
+                                    <span> {instructors[instructorIndex]?.email} </span>
+                                </div>
+                            </div>
+                            <div className="row mb-3">
+                                <div className="col-12">
+                                    <h5>Descripción</h5>
+                                    <span> {instructors[instructorIndex]?.description ? instructors[instructorIndex]?.description : 'Sin descripción' } </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

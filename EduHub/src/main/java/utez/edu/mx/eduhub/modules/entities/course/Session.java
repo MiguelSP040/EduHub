@@ -34,6 +34,12 @@ public class Session {
         this.content = content;
     }
 
+    public Session(Session other) {
+        this.nameSession = other.getNameSession();
+        this.content = other.getContent();
+        this.multimedia = new ArrayList<>(other.getMultimedia());
+    }
+
     public String getId() {
         return id;
     }

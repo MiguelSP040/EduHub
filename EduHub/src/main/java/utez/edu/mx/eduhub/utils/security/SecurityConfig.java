@@ -63,7 +63,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/eduhub/api/user").permitAll()
                         .requestMatchers(HttpMethod.POST, "/eduhub/api/courses").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/eduhub/api/courses/**").hasAnyAuthority("ROLE_INSTRUCTOR", "ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/eduhub/api/courses/**").hasAnyAuthority("ROLE_INSTRUCTOR", "ROLE_ADMIN", "ROLE_STUDENT")
                         .requestMatchers("/eduhub/auth/**").permitAll()
                         .requestMatchers("/eduhub/api/user/**").authenticated()
                         .requestMatchers("/eduhub/api/courses/**").authenticated()

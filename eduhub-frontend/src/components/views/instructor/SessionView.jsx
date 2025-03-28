@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Edit, Paperclip } from 'react-feather';
 import { Editor } from 'primereact/editor';
-import { updateSession } from '../../../services/sessionService';
+import { updateSession, handleViewFile } from '../../../services/sessionService';
 import 'quill/dist/quill.snow.css';
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
 import 'primereact/resources/primereact.min.css';
@@ -133,6 +133,17 @@ const SessionView = ({ session, setSelectedSession, fetchSessions, courseStatus 
     }
   };
 
+  function base64ToBlob(base64Data, contentType = 'application/pdf') {
+    const byteCharacters = atob(base64Data);
+    const byteNumbers = new Array(byteCharacters.length);
+
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    return new Blob([byteArray], { type: contentType });
+  }
+
   return (
     <div className="card shadow-sm p-4 m-4">
       {/* Encabezado con título + área de botones o mensajes */}
@@ -141,10 +152,7 @@ const SessionView = ({ session, setSelectedSession, fetchSessions, courseStatus 
           {!isEditing ? (
             <h2 className="fw-bold mb-0">{editedSession.nameSession}</h2>
           ) : (
-            <input
-              type="text"
-              className="form-control fw-bold fs-5"
-              value={editedSession.nameSession}
+            <input type="text" className="form-control fw-bold fs-5" value={editedSession.nameSession}
               onChange={(e) =>
                 setEditedSession({
                   ...editedSession,
@@ -158,19 +166,19 @@ const SessionView = ({ session, setSelectedSession, fetchSessions, courseStatus 
         <div className="d-flex flex-wrap gap-2">{renderTopButtons()}</div>
       </div>
 
-      <hr />
-
       {/* Contenido de la sesión (texto) */}
-      {!isEditing ? (
-        <div className="session-content" dangerouslySetInnerHTML={{ __html: editedSession.content }} />
-      ) : (
-        <Editor value={editedSession.content} onTextChange={(e) => setEditedSession({ ...editedSession, content: e.htmlValue })} style={{ minHeight: '200px', width: '100%' }} />
+      {(isEditing || editedSession.content) && (
+        !isEditing ? (
+          <><hr /><div className="session-content bg-light rounded-4 p-4" dangerouslySetInnerHTML={{ __html: editedSession.content }} /></>
+        ) : (
+          <Editor value={editedSession.content} onTextChange={(e) => setEditedSession({ ...editedSession, content: e.htmlValue })} style={{ minHeight: '200px', width: '100%' }} />
+        )
       )}
 
       <hr />
 
       {/* Material adjunto */}
-      <div className="mt-3 p-3 bg-light">
+      <div className="mt-3 p-3">
         <h5 className="fw-semibold mb-3">Material adjunto:</h5>
 
         {/* Sólo permitir añadir/eliminar archivos si el curso es "Creado" y estamos en edición */}
@@ -188,19 +196,25 @@ const SessionView = ({ session, setSelectedSession, fetchSessions, courseStatus 
           <div className="d-flex flex-wrap justify-content-center gap-3">
             {attachments.map((file, index) => {
               const fileName = file.fileName || file.name || 'Archivo';
+
               return (
                 <div key={index} className="card p-3 shadow-sm" style={{ width: '220px' }}>
                   <div className="text-center">
                     <FileText size={40} className="text-secondary" />
                   </div>
                   <p className="small text-truncate mt-2 mb-2">{fileName}</p>
-
                   {courseStatus === 'Creado' && isEditing ? (
                     <button className="btn btn-sm btn-danger w-100" onClick={() => removeAttachment(index)}>
                       Eliminar
                     </button>
                   ) : (
-                    <button className="btn btn-sm btn-primary w-100">Descargar</button>
+                    <button
+                      className="btn btn-sm btn-purple-900 w-100"
+                      onClick={() => handleViewFile(session.id, file)}
+                    >
+                      Ver
+                    </button>
+
                   )}
                 </div>
               );

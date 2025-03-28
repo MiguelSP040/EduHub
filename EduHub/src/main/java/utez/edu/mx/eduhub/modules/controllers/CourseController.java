@@ -8,12 +8,14 @@ import org.springframework.web.bind.annotation.*;
 import utez.edu.mx.eduhub.modules.entities.UserEntity;
 import utez.edu.mx.eduhub.modules.entities.course.Course;
 import utez.edu.mx.eduhub.modules.entities.course.Rating;
+import utez.edu.mx.eduhub.modules.entities.dto.CertificateData;
 import utez.edu.mx.eduhub.modules.repositories.UserRepository;
 import utez.edu.mx.eduhub.modules.services.CourseService;
 import utez.edu.mx.eduhub.utils.security.JWTUtil;
 import utez.edu.mx.eduhub.utils.security.UserDetailsImpl;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -107,12 +109,38 @@ public class CourseController {
         return courseService.update(course, coverImage, instructorId);
     }
 
+    @PutMapping("/{id}/archive")
+    public ResponseEntity<?> archiveCourse(@PathVariable String id, @RequestHeader("Authorization") String token) {
+        String username = jwtUtil.extractUsername(token.substring(7));
+        Optional<UserEntity> instructorOpt = userRepository.findByUsername(username);
+        if (instructorOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Usuario no encontrado.");
+        }
+        return courseService.archiveCourse(id, instructorOpt.get().getId());
+    }
+
+    @PutMapping("/{id}/duplicate")
+    public ResponseEntity<?> duplicateCourse(@PathVariable String id, @RequestHeader("Authorization") String token) {
+        String username = jwtUtil.extractUsername(token.substring(7));
+        Optional<UserEntity> instructorOpt = userRepository.findByUsername(username);
+        if (instructorOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Usuario no encontrado.");
+        }
+        return courseService.duplicateCourse(id, instructorOpt.get().getId());
+    }
+
 
     @PostMapping("/{courseId}/rate")
     public ResponseEntity<?> rateCourse(@PathVariable String courseId, @RequestBody Rating rating, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return courseService.addRating(courseId, rating, userDetails.getId());
     }
 
+    @PostMapping("/{courseId}/deliver-certificates")
+    public ResponseEntity<?> deliverCertificates(
+            @PathVariable String courseId,
+            @RequestBody List<CertificateData> certificates) {
+        return courseService.deliverCertificates(courseId, certificates);
+    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteCourse(@PathVariable String id) {
@@ -124,4 +152,20 @@ public class CourseController {
     public ResponseEntity<?> getCoursesByStudent(@PathVariable String studentId) {
         return courseService.requestCourseStudent(studentId);
     }
+
+    @PutMapping("/{courseId}/start")
+    public ResponseEntity<?> startCourse(@PathVariable String courseId) {
+        return courseService.startCourse(courseId);
+    }
+
+    @PutMapping("/{courseId}/finish")
+    public ResponseEntity<?> finishCourse(@PathVariable String courseId) {
+        return courseService.finishCourse(courseId);
+    }
+
+    @PutMapping("/{courseId}/reset")
+    public ResponseEntity<?> resetCourseToApproved(@PathVariable String courseId) {
+        return courseService.resetCourseToApproved(courseId);
+    }
+
 }

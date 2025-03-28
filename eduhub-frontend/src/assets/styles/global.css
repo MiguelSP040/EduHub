@@ -1,3 +1,7 @@
+html {
+    scroll-behavior: smooth;
+  }  
+
 .bg-main {
     background-color: #F9F9F9 !important; 
 }
@@ -10,6 +14,11 @@
 .border-purple {
     border-color: #6C63FF !important;
     border-radius: 3px !important;
+}
+
+.image-overlay {
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0));
+    pointer-events: 'none';
 }
 
 body {
@@ -29,6 +38,10 @@ text-align: right !important;
 }
 .session-content .ql-align-justify {
 text-align: justify !important;
+}
+
+.session-acordeon:hover {
+    border-left: 2px solid #6C63FF;
 }
   
 @media screen and (min-width: 576px) {

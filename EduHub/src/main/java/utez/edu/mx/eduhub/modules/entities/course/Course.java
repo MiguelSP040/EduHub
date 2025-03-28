@@ -44,6 +44,7 @@ public class Course {
     //Acciones del ROLE_ADMIN
     private Boolean isArchived;
     private Boolean isPublished;
+    private Boolean hasCertificate;
     private String status; //pendiente, aceptado o rechazado
 
     //Relaciones
@@ -54,7 +55,7 @@ public class Course {
 
     public Course() {}
 
-    public Course(String id, String title, String description, double price, Date dateStart, Date dateEnd, String category, Integer studentsCount, String coverImage, Boolean isArchived, Boolean isPublished, String status, String docenteId, List<StudentEnrollment> enrollments, List<Session> sessions, List<Rating> ratings) {
+    public Course(String id, String title, String description, double price, Date dateStart, Date dateEnd, String category, Integer studentsCount, String coverImage, Boolean isArchived, Boolean isPublished, Boolean hasCertificate, String status, String docenteId, List<StudentEnrollment> enrollments, List<Session> sessions, List<Rating> ratings) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -66,6 +67,7 @@ public class Course {
         this.coverImage = coverImage;
         this.isArchived = isArchived;
         this.isPublished = isPublished;
+        this.hasCertificate = hasCertificate;
         this.status = status;
         this.docenteId = docenteId;
         this.enrollments = enrollments;
@@ -159,6 +161,14 @@ public class Course {
 
     public void setPublished(Boolean published) {
         isPublished = published;
+    }
+
+    public Boolean getHasCertificate() {
+        return hasCertificate;
+    }
+
+    public void setHasCertificate(Boolean hasCertificate) {
+        this.hasCertificate = hasCertificate;
     }
 
     public String getStatus() {

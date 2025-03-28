@@ -4,10 +4,18 @@ import utez.edu.mx.eduhub.modules.services.MultimediaService;
 import utez.edu.mx.eduhub.modules.services.course.SessionService;
 import utez.edu.mx.eduhub.modules.entities.course.Session;
 import utez.edu.mx.eduhub.modules.entities.course.MultimediaFile;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.gridfs.GridFsResource;
+import org.springframework.data.mongodb.gridfs.GridFsTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import com.mongodb.client.gridfs.model.GridFSFile;
+import java.io.InputStream;
+import org.apache.commons.io.IOUtils;
 import java.util.List;
 
 @RestController
@@ -18,6 +26,9 @@ public class SessionController {
 
     @Autowired
     private MultimediaService multimediaService;
+
+    @Autowired
+    private GridFsTemplate gridFsTemplate;
 
     @GetMapping("")
     public ResponseEntity<?> findAll() {
@@ -93,10 +104,21 @@ public class SessionController {
         if (session != null) {
             for (MultimediaFile file : session.getMultimedia()) {
                 if (file.getId().equals(fileId)) {
-                    return ResponseEntity.ok()
-                            .header("Content-Disposition", "attachment; filename=\"" + file.getFileName() + "\"")
-                            .contentType(org.springframework.http.MediaType.parseMediaType(file.getFileType()))
-                            .body(file.getData());
+                    GridFSFile gridFsFile = gridFsTemplate.findOne(new Query(Criteria.where("_id").is(file.getGridFsId())));
+                    if (gridFsFile != null) {
+                        GridFsResource resource = gridFsTemplate.getResource(gridFsFile);
+                        try (InputStream is = resource.getInputStream()) {
+                            byte[] fileData = IOUtils.toByteArray(is);
+                            return ResponseEntity.ok()
+                                    .header("Content-Disposition", "attachment; filename=\"" + file.getFileName() + "\"")
+                                    .contentType(MediaType.parseMediaType(file.getFileType()))
+                                    .body(fileData);
+                        } catch (Exception e) {
+                            return ResponseEntity.status(500).body("Error al leer el archivo: " + e.getMessage());
+                        }
+                    } else {
+                        return ResponseEntity.status(404).body("Archivo no encontrado en GridFS");
+                    }
                 }
             }
         }

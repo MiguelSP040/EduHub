@@ -1,8 +1,33 @@
-import { List, Search } from "react-feather";
-import { useNavigate } from "react-router-dom";
+import {useState, useEffect, useContext} from 'react'
+import { AuthContext } from '../../context/AuthContext';
+import { findUserById } from '../../services/userService';
+import { List, Search } from 'react-feather';
+import { useNavigate } from 'react-router-dom';
+import profilePlaceholder from '../../assets/img/profileImage.png';
 
 const Navbar = ({ toggleSidebar }) => {
-    const navigate = useNavigate();
+    const token = localStorage.getItem('token');
+    
+        const navigate = useNavigate();
+        const { user } = useContext(AuthContext);
+        const [userLogged, setUserLogger] = useState(null);
+    
+      useEffect(() => {
+        const fetchUserData = async () => {
+          if (user?.id) {
+            const response = await findUserById(user.id);
+            if (response.ok) {
+              const data = await response.json();
+              setUserLogger(data);
+            } else {
+              console.error('Error al obtener usuario:', response);
+            }
+          }
+        };
+      
+        fetchUserData();
+      }, [user, token]);
+    
     return (
         <nav className="navbar navbar-expand-lg bg-body-tertiary shadow-sm fixed-top">
             <div className="container-fluid d-flex align-items-center justify-content-between">
@@ -31,7 +56,9 @@ const Navbar = ({ toggleSidebar }) => {
                         </div>
                     </form>
                     <a href="" onClick={ (e) => { e.stopPropagation(); navigate("/profile");} }>
-                    <img src="https://randomuser.me/api/portraits/men/22.jpg" alt="Usuario" className="rounded-circle d-none d-md-block user-select-none" width="40" height="40"  />
+                    <img src={userLogged?.profileImage ? `data:image/jpeg;base64,${userLogged.profileImage}` : profilePlaceholder} alt="avatar" className="rounded-circle d-none d-md-block user-select-none"
+                        style={{ width: '40px', height: '40px', objectFit: 'cover' }}
+                    />
                     </a>
                 </div>
             </div>

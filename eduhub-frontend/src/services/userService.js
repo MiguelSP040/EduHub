@@ -50,16 +50,20 @@ export const activateInstructor = async (instructorId) => {
 
 
 export const updateProfile = async (userData) => {
-    const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token");
+  try {
     const response = await fetch(`${API_URL}`, {
-        method: "PUT",
-        headers: { 
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify(userData),
+      method: "PUT",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify(userData),
     });
 
     return response;
+  } catch (error) {
+    return { status: 500, ok: false, message: "Error de conexión con el servidor." }
+  }
 };
 

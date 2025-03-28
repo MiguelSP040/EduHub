@@ -8,10 +8,15 @@ const CourseConfig = ({ course, setCourse }) => {
   const [price, setPrice] = useState(course.price === 0 ? 'Gratis' : course.price.toString());
   const [category, setCategory] = useState(course.category || '');
   const [coverImage, setCoverImage] = useState('');
+  const [hasCertificate, setHasCertificate] = useState(course.hasCertificate || false);
   const [dateStart, setDateStart] = useState(new Date(course.dateStart).toISOString().split('T')[0]);
   const [dateEnd, setDateEnd] = useState(new Date(course.dateEnd).toISOString().split('T')[0]);
   const [errorMsg, setErrorMsg] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const tomorrow = new Date(today.getTime() + 1000 * 60 * 60 * 24);
 
   const handleSave = async () => {
     if (!title.trim() || !description.trim() || !dateStart || !dateEnd || studentsCount === '' || isNaN(studentsCount) || !price.trim() || !category.trim()) {
@@ -22,8 +27,13 @@ const CourseConfig = ({ course, setCourse }) => {
     const start = new Date(dateStart);
     const end = new Date(dateEnd);
 
-    if (end.getTime() < start.getTime()) {
-      setErrorMsg('La fecha de fin no puede ser menor a la de inicio.');
+    if (start <= today) {
+      setErrorMsg('La fecha de inicio debe ser al menos un día después de la fecha actual.');
+      return;
+    }
+
+    if (end.getTime() <= start.getTime()) {
+      setErrorMsg('La fecha de fin debe ser al menos un día después que la fecha de inicio.');
       return;
     }
 
@@ -36,6 +46,7 @@ const CourseConfig = ({ course, setCourse }) => {
       price: price === '0' ? 0 : Number(price) || 0,
       dateStart: start,
       dateEnd: end,
+      hasCertificate,
       category,
       studentsCount: Number(studentsCount),
     };
@@ -62,9 +73,6 @@ const CourseConfig = ({ course, setCourse }) => {
       setIsSaving(false);
     }
   };
-
-  (()=>{console.log(course);
-  })()
 
   return (
     <div className="px-3 px-md-5 pt-3 text-start">
@@ -104,16 +112,16 @@ const CourseConfig = ({ course, setCourse }) => {
             <input
               type="text"
               className="form-control"
-              value={price === "0" ? "Gratis" : price}
+              value={price === '0' ? 'Gratis' : price}
               onChange={(e) => {
                 const value = e.target.value;
-                if (value.toLowerCase() === "gratis") {
-                  setPrice("0");
+                if (value.toLowerCase() === 'gratis') {
+                  setPrice('0');
                 } else if (/^\d*\.?\d*$/.test(value)) {
                   setPrice(value);
                 }
               }}
-              disabled={course && course.status !== "Creado"}
+              disabled={course && course.status !== 'Creado'}
             />
           </div>
         </div>
@@ -129,22 +137,49 @@ const CourseConfig = ({ course, setCourse }) => {
         <div className="col-12 col-md-6">
           <div className="mb-3 fw-bold">
             <label>Fecha de inicio</label>
-            <input type="date" className="form-control" value={dateStart} onChange={(e) => setDateStart(e.target.value)} disabled={course && course.status !== 'Creado'} />
+            <input
+              type="date"
+              className="form-control"
+              value={dateStart}
+              min={new Date().toISOString().split('T')[0]}
+              onChange={(e) => {
+                setDateStart(e.target.value);
+                if (dateEnd && new Date(e.target.value) >= new Date(dateEnd)) {
+                  setDateEnd('');
+                }
+              }}
+              disabled={course && course.status !== 'Creado'}
+            />
           </div>
         </div>
         <div className="col-12 col-md-6">
           <div className="mb-3 fw-bold">
             <label>Fecha de fin</label>
-            <input type="date" className="form-control" value={dateEnd} onChange={(e) => setDateEnd(e.target.value)} disabled={course && course.status !== 'Creado'} />
+            <input
+              type="date"
+              className={`form-control ${dateStart && dateEnd && new Date(dateEnd) <= new Date(dateStart) ? 'is-invalid' : ''}`}
+              value={dateEnd}
+              min={dateStart ? new Date(new Date(dateStart).getTime() + 1000 * 60 * 60 * 24).toISOString().split('T')[0] : ''}
+              onChange={(e) => setDateEnd(e.target.value)}
+              disabled={!dateStart || course.status !== 'Creado'}
+            />
+            {dateStart && dateEnd && new Date(dateEnd) <= new Date(dateStart) && <div className="invalid-feedback">La fecha de fin debe ser al menos un día después que la fecha de inicio.</div>}
           </div>
         </div>
       </div>
 
+      <div className="form-check mb-3 fw-bold">
+        <input type="checkbox" className="form-check-input" id="editHasCertificate" checked={hasCertificate} onChange={(e) => setHasCertificate(e.target.checked)} disabled={course && course.status !== 'Creado'} />
+        <label className="form-check-label" htmlFor="editHasCertificate">
+          ¿Este curso incluye certificado?
+        </label>
+      </div>
+
       {course.status === 'Creado' && (
-          <button className="btn btn-purple-900 mt-3" onClick={handleSave} disabled={isSaving || course.status !== 'Creado'}>
-            {isSaving ? <div className="spinner-border text-light"></div> : 'Guardar Cambios'}
-          </button>
-        )}
+        <button className="btn btn-purple-900 mt-3" onClick={handleSave} disabled={isSaving}>
+          {isSaving ? <div className="spinner-border text-light"></div> : 'Guardar Cambios'}
+        </button>
+      )}
     </div>
   );
 };
