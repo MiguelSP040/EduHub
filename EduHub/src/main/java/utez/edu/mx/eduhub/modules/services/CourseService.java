@@ -17,6 +17,7 @@ import utez.edu.mx.eduhub.modules.repositories.UserRepository;
 import utez.edu.mx.eduhub.modules.repositories.course.SessionRepository;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -91,7 +92,6 @@ public class CourseService {
 
         return ResponseEntity.ok(students);
     }
-
 
     // SOLICITAR UNIRSE A UN CURSO
     public ResponseEntity<?> requestEnrollment(String courseId, String studentId) {
@@ -196,8 +196,14 @@ public class CourseService {
     // CREAR UN CURSO
     public ResponseEntity<?> save(Course course, MultipartFile coverImage) {
         try {
-            Date today = new Date();
-            Date tomorrow = new Date(today.getTime() + (1000 * 60 * 60 * 24)); // Suma 1 día
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            sdf.setTimeZone(TimeZone.getTimeZone("America/Mexico_City"));
+
+            Date today = sdf.parse(sdf.format(new Date()));
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(today);
+            cal.add(Calendar.DATE, 1);
+            Date tomorrow = cal.getTime();
 
             if (course.getStudentsCount() < 1) {
                 return ResponseEntity.badRequest().body("El curso debe permitir al menos 1 estudiante.");
@@ -321,46 +327,134 @@ public class CourseService {
     public ResponseEntity<?> update(Course course, MultipartFile coverImage, String instructorId) {
         Optional<Course> existingCourseOptional = repository.findById(course.getId());
 
-        if (existingCourseOptional.isPresent()) {
-            Course existingCourse = existingCourseOptional.get();
-
-            if (!existingCourse.getDocenteId().equals(instructorId)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para modificar este curso.");
-            }
-
-            if (existingCourse.getStatus().equals("Empezado")) {
-                return ResponseEntity.badRequest().body("No se pueden hacer cambios en un curso que ya ha empezado.");
-            }
-
-            existingCourse.setTitle(course.getTitle() != null ? course.getTitle() : existingCourse.getTitle());
-            existingCourse.setDescription(course.getDescription() != null ? course.getDescription() : existingCourse.getDescription());
-            existingCourse.setDateStart(course.getDateStart() != null ? course.getDateStart() : existingCourse.getDateStart());
-            existingCourse.setDateEnd(course.getDateEnd() != null ? course.getDateEnd() : existingCourse.getDateEnd());
-            existingCourse.setPrice(course.getPrice());
-
-            if (existingCourse.getDateEnd().before(existingCourse.getDateStart())) {
-                return ResponseEntity.badRequest().body("La fecha de fin no puede ser menor a la de inicio");
-            }
-
-            existingCourse.setCategory(course.getCategory() != null ? course.getCategory() : existingCourse.getCategory());
-
-            if (course.getStudentsCount() >= 0) {
-                existingCourse.setStudentsCount(course.getStudentsCount());
-            }
-
-            try {
-                if (coverImage != null && !coverImage.isEmpty()) {
-                    existingCourse.setCoverImage(Base64.getEncoder().encodeToString(coverImage.getBytes()));
-                }
-
-                repository.save(existingCourse);
-                return ResponseEntity.ok(existingCourse);
-            } catch (IOException e) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al procesar la imagen.");
-            }
-        } else {
+        if (existingCourseOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Curso no encontrado");
         }
+
+        Course existingCourse = existingCourseOptional.get();
+
+        if (!existingCourse.getDocenteId().equals(instructorId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para modificar este curso.");
+        }
+
+        if ("Empezado".equals(existingCourse.getStatus())) {
+            return ResponseEntity.badRequest().body("No se pueden hacer cambios en un curso que ya ha empezado.");
+        }
+
+        existingCourse.setTitle(course.getTitle() != null ? course.getTitle() : existingCourse.getTitle());
+        existingCourse.setDescription(course.getDescription() != null ? course.getDescription() : existingCourse.getDescription());
+        existingCourse.setDateStart(course.getDateStart() != null ? course.getDateStart() : existingCourse.getDateStart());
+        existingCourse.setDateEnd(course.getDateEnd() != null ? course.getDateEnd() : existingCourse.getDateEnd());
+        existingCourse.setPrice(course.getPrice());
+        existingCourse.setCategory(course.getCategory() != null ? course.getCategory() : existingCourse.getCategory());
+        existingCourse.setStudentsCount(course.getStudentsCount() >= 0 ? course.getStudentsCount() : existingCourse.getStudentsCount());
+
+        existingCourse.setHasCertificate(course.getHasCertificate() != null ? course.getHasCertificate() : existingCourse.getHasCertificate());
+        existingCourse.setStatus(existingCourse.getStatus() != null ? existingCourse.getStatus() : "Creado");
+        existingCourse.setArchived(existingCourse.getArchived() != null ? existingCourse.getArchived() : false);
+        existingCourse.setPublished(existingCourse.getPublished() != null ? existingCourse.getPublished() : false);
+
+        if (existingCourse.getDateEnd().before(existingCourse.getDateStart())) {
+            return ResponseEntity.badRequest().body("La fecha de fin no puede ser menor a la de inicio.");
+        }
+
+        try {
+            if (coverImage != null && !coverImage.isEmpty()) {
+                existingCourse.setCoverImage(Base64.getEncoder().encodeToString(coverImage.getBytes()));
+            }
+
+            repository.save(existingCourse);
+            return ResponseEntity.ok(existingCourse);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al procesar la imagen.");
+        }
+    }
+
+    // DUPLICAR CURSO
+    public ResponseEntity<?> duplicateCourse(String courseId, String instructorId) {
+        Optional<Course> optionalCourse = repository.findById(courseId);
+        if (optionalCourse.isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Curso no encontrado.");
+
+        Course original = optionalCourse.get();
+
+        if (!original.getDocenteId().equals(instructorId))
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permisos.");
+
+        if (!"Finalizado".equalsIgnoreCase(original.getStatus()))
+            return ResponseEntity.badRequest().body("Solo se pueden duplicar cursos finalizados.");
+
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DATE, 2);
+        Date newStart = cal.getTime();
+        cal.add(Calendar.DATE, 7);
+        Date newEnd = cal.getTime();
+
+        Course duplicated = new Course();
+        duplicated.setTitle(original.getTitle());
+        duplicated.setDescription(original.getDescription());
+        duplicated.setPrice(original.getPrice());
+        duplicated.setCategory(original.getCategory());
+        duplicated.setStudentsCount(original.getStudentsCount());
+        duplicated.setCoverImage(original.getCoverImage());
+        duplicated.setHasCertificate(original.getHasCertificate());
+        duplicated.setDocenteId(original.getDocenteId());
+        duplicated.setEnrollments(new ArrayList<>());
+        duplicated.setRatings(new ArrayList<>());
+        duplicated.setDateStart(newStart);
+        duplicated.setDateEnd(newEnd);
+        duplicated.setStatus("Creado");
+        duplicated.setPublished(false);
+        duplicated.setArchived(false);
+        duplicated.setSessions(new ArrayList<>());
+
+        Course savedCourse = repository.save(duplicated);
+
+        List<Session> copiedSessions = new ArrayList<>();
+        for (Session s : original.getSessions()) {
+            Session newSession = new Session();
+            newSession.setCourseId(savedCourse.getId());
+            newSession.setNameSession(s.getNameSession());
+            newSession.setContent(s.getContent());
+            newSession.setMultimedia(new ArrayList<>(s.getMultimedia()));
+            copiedSessions.add(newSession);
+        }
+
+        copiedSessions.forEach(sessionRepository::save);
+        savedCourse.setSessions(copiedSessions);
+        repository.save(savedCourse);
+
+        return ResponseEntity.ok(savedCourse);
+    }
+
+
+    // ARCHIVAR CURSO
+    public ResponseEntity<?> archiveCourse(String courseId, String instructorId) {
+        Optional<Course> courseOpt = repository.findById(courseId);
+
+        if (courseOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Curso no encontrado.");
+        }
+
+        Course course = courseOpt.get();
+
+        if (!course.getDocenteId().equals(instructorId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para archivar este curso.");
+        }
+
+        if (!"Finalizado".equals(course.getStatus())) {
+            return ResponseEntity.badRequest().body("Solo se pueden archivar cursos finalizados.");
+        }
+
+        if (Boolean.TRUE.equals(course.getArchived())) {
+            return ResponseEntity.badRequest().body("El curso ya está archivado.");
+        }
+
+        course.setArchived(true);
+        course.setPublished(false);
+        repository.save(course);
+
+        return ResponseEntity.ok("Curso archivado correctamente.");
     }
 
     // ELIMINAR CURSO

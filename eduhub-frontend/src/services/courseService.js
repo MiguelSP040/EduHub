@@ -164,6 +164,38 @@ export const requestModification = async (courseId) => {
   }
 };
 
+export const archiveCourse = async (courseId) => {
+  const token = localStorage.getItem('token');
+  try {
+    const response = await fetch(`${API_URL}/${courseId}/archive`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const text = await response.text();
+    return { status: response.status, message: text };
+  } catch (error) {
+    return { status: 500, message: 'Error de conexión al archivar el curso.' };
+  }
+};
+
+export const duplicateCourse = async (courseId) => {
+  const token = localStorage.getItem('token');
+  try {
+    const response = await fetch(`${API_URL}/${courseId}/duplicate`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const text = await response.text();
+    return { status: response.status, message: text };
+  } catch (error) {
+    return { status: 500, message: 'Error de conexión al duplicar el curso.' };
+  }
+};
+
 export const requestEnrollment = async (courseId, studentId) => {
   const token = localStorage.getItem('token');
   try {

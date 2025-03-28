@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Navbar from '../Navbar';
 import { getSessionsByCourse } from '../../../services/sessionService';
-import { publishCourse, requestModification, getCourseById, startCourse, finishCourse, resetCourseToApproved } from '../../../services/courseService';
+import { publishCourse, requestModification, getCourseById, startCourse, finishCourse, resetCourseToApproved, duplicateCourse, archiveCourse } from '../../../services/courseService';
 import SessionCard from './SessionCard';
 import SessionView from './SessionView';
 import MyStudents from './MyStudents';
@@ -24,6 +24,7 @@ const MyCourse = () => {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const [instructor, setInstructor] = useState(null);
   const [course, setCourse] = useState(null);
+  const [activeFilter, setActiveFilter] = useState('all');
   const [sessions, setSessions] = useState([]);
   const [activeTab, setActiveTab] = useState('material');
   const [selectedSession, setSelectedSession] = useState(null);
@@ -48,6 +49,8 @@ const MyCourse = () => {
         console.error('Error al obtener el instructor:', error);
       }
     };
+    console.log(course);
+    
     fetchData();
   }, [location, navigate]);
 
@@ -207,11 +210,50 @@ const MyCourse = () => {
                             </div>
                           )}
 
+                          {course?.status === 'Finalizado' && !course?.archived && (
+                            <button
+                              className="btn btn-outline-secondary me-2"
+                              onClick={async () => {
+                                const confirmed = window.confirm('¿Estás seguro de archivar este curso?');
+                                if (!confirmed) return;
+
+                                const response = await archiveCourse(course.id);
+                                alert(response.message);
+                                if (response.status === 200) {
+                                  const updated = await getCourseById(course.id);
+                                  setCourse(updated);
+                                }
+                              }}
+                            >
+                              Archivar curso
+                            </button>
+                          )}
+
+                          {course?.status === 'Finalizado' && course?.archived && (
+                            <button
+                              className="btn btn-outline-dark me-2"
+                              onClick={async () => {
+                                const confirmed = window.confirm('¿Deseas crear una copia de este curso?');
+                                if (!confirmed) return;
+
+                                const response = await duplicateCourse(course.id);
+                                if (response.status === 200) {
+                                  alert('Curso duplicado correctamente.');
+                                  navigate('/instructor');
+                                } else {
+                                  alert(response.message || 'Error al duplicar el curso.');
+                                }
+                              }}
+                            >
+                              Crear copia de este curso
+                            </button>
+                          )}
+
                           {course?.status === 'Aprobado' && <span className="text-success fw-semibold">Curso Aprobado - No editable</span>}
 
                           {course?.status === 'Empezado' && <span className="text-primary fw-semibold">Curso Empezado - No editable</span>}
 
-                          {course?.status === 'Finalizado' && <span className="text-danger fw-semibold">Curso Finalizado - No editable</span>}
+                          {/*course?.status === 'Finalizado' && <span className="text-danger fw-semibold">Curso Finalizado - No editable</span>*/}
 
                           {course?.status === 'Creado' && today < courseStartDate && <AddSessionModal courseId={course.id} fetchSessions={fetchSessions} />}
                         </>

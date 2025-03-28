@@ -109,6 +109,26 @@ public class CourseController {
         return courseService.update(course, coverImage, instructorId);
     }
 
+    @PutMapping("/{id}/archive")
+    public ResponseEntity<?> archiveCourse(@PathVariable String id, @RequestHeader("Authorization") String token) {
+        String username = jwtUtil.extractUsername(token.substring(7));
+        Optional<UserEntity> instructorOpt = userRepository.findByUsername(username);
+        if (instructorOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Usuario no encontrado.");
+        }
+        return courseService.archiveCourse(id, instructorOpt.get().getId());
+    }
+
+    @PutMapping("/{id}/duplicate")
+    public ResponseEntity<?> duplicateCourse(@PathVariable String id, @RequestHeader("Authorization") String token) {
+        String username = jwtUtil.extractUsername(token.substring(7));
+        Optional<UserEntity> instructorOpt = userRepository.findByUsername(username);
+        if (instructorOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Usuario no encontrado.");
+        }
+        return courseService.duplicateCourse(id, instructorOpt.get().getId());
+    }
+
 
     @PostMapping("/{courseId}/rate")
     public ResponseEntity<?> rateCourse(@PathVariable String courseId, @RequestBody Rating rating, @AuthenticationPrincipal UserDetailsImpl userDetails) {

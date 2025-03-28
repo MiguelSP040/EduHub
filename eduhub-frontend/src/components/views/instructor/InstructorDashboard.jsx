@@ -4,7 +4,7 @@ import Sidebar from './Sidebar';
 import Navbar from '../Navbar';
 import { AuthContext } from '../../../context/AuthContext';
 import { getCourses, getCoursesByInstructor } from '../../../services/courseService';
-import { BookOpen, User } from 'react-feather';
+import { BookOpen, User, Archive } from 'react-feather';
 
 const InstructorDashboard = () => {
   const navigate = useNavigate();
@@ -13,6 +13,7 @@ const InstructorDashboard = () => {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState('myCourses');
   const [myCourses, setMyCourses] = useState([]);
+  const [archivedCourses, setArchivedCourses] = useState([]);
   const [courses, setCourses] = useState([]);
 
   useEffect(() => {
@@ -22,8 +23,13 @@ const InstructorDashboard = () => {
         const instructorCourses = await getCoursesByInstructor(user.id);
         let allCourses = await getCourses();
         allCourses = allCourses.filter((course) => course.published && course.status !== 'Pendiente');
+
+        const archived = instructorCourses.filter((c) => c.archived);
+        const notArchived = instructorCourses.filter((c) => !c.archived);
+
         setCourses([...allCourses]);
-        setMyCourses([...instructorCourses]);
+        setMyCourses([...notArchived]);
+        setArchivedCourses([...archived]);
       } catch (error) {
         console.error('Error al obtener cursos:', error);
         setCourses([]);
@@ -43,8 +49,10 @@ const InstructorDashboard = () => {
   };
 
   const coursesByTab = useMemo(() => {
-    return activeTab === 'myCourses' ? myCourses : courses;
-  }, [activeTab, courses, user]);
+    if (activeTab === 'myCourses') return myCourses;
+    if (activeTab === 'archived') return archivedCourses;
+    return courses;
+  }, [activeTab, courses, myCourses, archivedCourses]);
 
   const getStatusBadgeClass = (status) => {
     switch (status) {
@@ -55,7 +63,6 @@ const InstructorDashboard = () => {
       case 'Aprobado':
         return 'success';
       case 'Rechazado':
-        return 'danger';
       case 'Finalizado':
         return 'danger';
       default:
@@ -112,11 +119,14 @@ const InstructorDashboard = () => {
                 <div className="row gx-3 align-items-center">
                   <div className="col-12 col-sm d-flex justify-content-center justify-content-sm-start">
                     <div className="d-flex flex-row flex-sm-row w-100 justify-content-around justify-content-sm-start">
-                      {['myCourses', 'allCourses'].map((tab) => (
+                      {[
+                        { tab: 'myCourses', icon: <User size={20} className="d-sm-none" />, label: 'Mis Cursos' },
+                        { tab: 'allCourses', icon: <BookOpen size={20} className="d-sm-none" />, label: 'Todos' },
+                        { tab: 'archived', icon: <Archive size={20} className="d-sm-none" />, label: 'Archivo' },
+                      ].map(({ tab, icon, label }) => (
                         <button key={tab} type="button" className={`btn border-0 ${activeTab === tab ? 'border-bottom border-purple border-3 fw-semibold' : ''}`} onClick={() => setActiveTab(tab)}>
-                          {tab === 'myCourses' ? <User size={20} className="d-sm-none" /> : null}
-                          {tab === 'allCourses' ? <BookOpen size={20} className="d-sm-none" /> : null}
-                          <span className="d-none d-sm-inline">{tab === 'allCourses' ? 'Todos' : 'Mis Cursos'}</span>
+                          {icon}
+                          <span className="d-none d-sm-inline">{label}</span>
                         </button>
                       ))}
                     </div>
