@@ -49,10 +49,10 @@ const Navbar = ({ toggleSidebar }) => {
                 <div className="d-flex align-items-center">
                     <form className="me-3 d-none d-md-block">
                         <div className="input-group">
-                            <button className="btn border" type="button">
+                            <button className="btn border" type="button" disabled>
                                 <Search size={16} />
                             </button>
-                            <input className="form-control bg-body-tertiary" type="search" placeholder="Buscar..." />
+                            <input className="form-control bg-body-tertiary" type="search" placeholder="Buscar..." disabled/>
                         </div>
                     </form>
                     <a href="" onClick={ (e) => { e.stopPropagation(); navigate("/profile");} }>

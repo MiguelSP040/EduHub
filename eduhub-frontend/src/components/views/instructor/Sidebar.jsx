@@ -61,12 +61,12 @@ const Sidebar = ({ isExpanded, setIsExpanded, navbarRef }) => {
                     <div className="ms-2">{isExpanded && "Perfil"}</div>
                 </button>
 
-                <button className="btn btn-outline-secondary my-1 d-flex align-items-center col-12" onClick={ isExpanded ? (e) => { e.stopPropagation(); navigate("/ratings"); } : null } >
+                <button className="btn btn-outline-secondary my-1 d-flex align-items-center col-12" onClick={ isExpanded ? (e) => { e.stopPropagation(); navigate("/ratings"); } : null } disabled={true}>
                     <Star size={24} className="flex-shrink-0" />
                     <div className="ms-2 text-truncate">{isExpanded && "Mis calificaciones"}</div>
                 </button>
 
-                <button className="btn btn-outline-secondary my-1 d-flex align-items-center col-12" onClick={ isExpanded ? (e) => { e.stopPropagation(); navigate("/notifications"); } : null } >
+                <button className="btn btn-outline-secondary my-1 d-flex align-items-center col-12" onClick={ isExpanded ? (e) => { e.stopPropagation(); navigate("/notifications"); } : null } disabled={true}>
                     <Bell size={24} className="flex-shrink-0" />
                     <div className="ms-2 text-truncate">{isExpanded && "Notificaciones"}</div>
                 </button>

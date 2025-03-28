@@ -63,7 +63,7 @@ const Sidebar = ({ isExpanded, setIsExpanded, navbarRef }) => {
                     <div className="ms-2">{isExpanded && "Perfil"}</div>
                 </button>
 
-                <button className="btn btn-outline-secondary my-1 d-flex align-items-center col-12" onClick={ isExpanded ? (e) => { e.stopPropagation(); navigate("/students"); } : null }>
+                <button className="btn btn-outline-secondary my-1 d-flex align-items-center col-12" onClick={ isExpanded ? (e) => { e.stopPropagation(); navigate("/students"); } : null } disabled={true}>
                     <SlGraduation size={24} className="flex-shrink-0" />
                     <div className="ms-2">{isExpanded && "Estudiantes"}</div>
                 </button>
@@ -73,7 +73,7 @@ const Sidebar = ({ isExpanded, setIsExpanded, navbarRef }) => {
                     <div className="ms-2">{isExpanded && "Instructores"}</div>
                 </button>
 
-                <button className="btn btn-outline-secondary my-1 d-flex align-items-center col-12" onClick={ isExpanded ? (e) => { e.stopPropagation(); navigate("/finance"); } : null }>
+                <button className="btn btn-outline-secondary my-1 d-flex align-items-center col-12" onClick={ isExpanded ? (e) => { e.stopPropagation(); navigate("/finance"); } : null } disabled={true}>
                     <DollarSign size={24} className="flex-shrink-0" />
                     <div className="ms-2">{isExpanded && "Finanzas"}</div>
                 </button>
