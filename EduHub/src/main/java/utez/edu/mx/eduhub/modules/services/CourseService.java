@@ -675,6 +675,7 @@ public class CourseService {
         course.setDateStart(newStartDate);
         course.setDateEnd(newEndDate);
         course.setStatus("Aprobado");
+        course.setArchived(false);
 
         repository.save(course);
         return new ResponseEntity<>("Curso reiniciado como 'Aprobado'", HttpStatus.OK);
