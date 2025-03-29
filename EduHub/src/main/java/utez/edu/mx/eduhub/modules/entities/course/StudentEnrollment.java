@@ -1,11 +1,13 @@
 package utez.edu.mx.eduhub.modules.entities.course;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class StudentEnrollment {
     private String studentId;
     private String status; // "Pendiente", "Aceptado", "Rechazado"
+    private Date enrolledDate;
     private boolean certificateDelivered = false;
     private String certificateFile;
     private List<String> completedSessions;
@@ -16,6 +18,7 @@ public class StudentEnrollment {
         this.completedSessions = new ArrayList<>();
         this.certificateDelivered = false;
         this.certificateFile = null;
+        this.enrolledDate = new Date();
     }
 
     public int calculateProgress(int totalSessions) {
@@ -37,6 +40,14 @@ public class StudentEnrollment {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Date getEnrolledDate() {
+        return enrolledDate;
+    }
+
+    public void setEnrolledDate(Date enrolledDate) {
+        this.enrolledDate = enrolledDate;
     }
 
     public boolean isCertificateDelivered() {
