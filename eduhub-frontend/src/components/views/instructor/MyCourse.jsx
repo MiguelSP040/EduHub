@@ -49,8 +49,6 @@ const MyCourse = () => {
         console.error('Error al obtener el instructor:', error);
       }
     };
-    console.log(course);
-    
     fetchData();
   }, [location, navigate]);
 

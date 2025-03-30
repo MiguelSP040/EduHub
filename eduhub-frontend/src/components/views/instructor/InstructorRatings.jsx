@@ -1,12 +1,13 @@
 import { useEffect, useState, useRef } from 'react';
 import { getCoursesByInstructor } from '../../../services/courseService';
-import { Star } from 'react-feather';
 import Sidebar from './Sidebar';
 import Navbar from '../Navbar';
 import { Eye } from 'react-feather';
-import { data } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const InstructorRatings = () => {
+  const navigate = useNavigate();
+
   const [courses, setCourses] = useState([]);
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const navbarRef = useRef(null);
@@ -65,7 +66,7 @@ const InstructorRatings = () => {
                           </td>
                           <td>{course.ratings.length === 0 ? 'Sin reseñas' : `${course.ratings.length} reseñas`}</td>
                           <td>
-                            <button className="btn btn-primary" disabled={course.ratings.length === 0}>
+                            <button className="btn btn-primary" disabled={course.ratings.length === -1} onClick={() => navigate('/instructor/ratings/course-ratings', { state: { course } })}>
                               <Eye />
                             </button>
                           </td>

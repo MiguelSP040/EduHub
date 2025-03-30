@@ -121,22 +121,23 @@ export const downloadFile = async (sessionId, fileId, fileName) => {
   }
 };
 
-export const handleViewFile = async (sessionId, file) => {
+export const handleViewFile = async (sessionId, file, setLoadingId) => {
   try {
+    if (setLoadingId) setLoadingId(file.id);
     const token = localStorage.getItem("token");
     const response = await fetch(`${API_URL}/${sessionId}/multimedia/${file.id}`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` }
     });
-    if (!response.ok) {
-      throw new Error(`Error al descargar el archivo: ${response.statusText}`);
-    }
+    if (!response.ok) throw new Error(`Error al descargar el archivo: ${response.statusText}`);
     const blob = await response.blob();
     const tempUrl = URL.createObjectURL(blob);
     window.open(tempUrl, '_blank');
   } catch (error) {
     console.error(error);
     alert("Ocurrió un error al visualizar el archivo.");
+  } finally {
+    if (setLoadingId) setLoadingId(null);
   }
 };
 

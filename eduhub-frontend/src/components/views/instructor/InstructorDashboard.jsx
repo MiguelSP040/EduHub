@@ -82,7 +82,16 @@ const InstructorDashboard = () => {
                 <span className="badge text-bg-primary">{course.price === 0 ? 'GRATIS' : `$${course.price}`}</span>
               </div>
               <p className="card-text text-truncate">{course.description}</p>
-              <span className={`badge text-bg-${getStatusBadgeClass(course.status)} mb-3`}>{course.status}</span>
+              <div className="d-flex justify-content-between">
+                <span className={`badge text-bg-${getStatusBadgeClass(course.status)} mb-3`}>{course.status}</span>
+                <div>
+                  {course.hasCertificate? 
+                  ( <div className='text-success'><i className="bi bi-patch-check-fill"></i> Con certificado </div>) 
+                  :
+                  ( <div><i className="bi bi-patch-check"></i> Sin certificado </div>)
+                  }
+                </div>
+              </div>
               <div className="d-flex justify-content-between">
                 <span className="text-muted">Inicio: {formatDate(course.dateStart)}</span>
                 <span className="text-muted">Fin: {formatDate(course.dateEnd)}</span>

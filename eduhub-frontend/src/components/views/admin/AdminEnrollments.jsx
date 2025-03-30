@@ -86,8 +86,8 @@ const AdminEnrollments = () => {
                                         </div>
                                     </div>
                                     <div className="col-12 col-sm text-md-end mt-3 mt-sm-0">
-                                        <select className="form-select" value={selectedCourse || ""} onChange={handleCourseChange}>
-                                            <option value="" disabled>Seleccione un curso</option>
+                                        <select className="form-select" value={selectedCourse || ""} onChange={handleCourseChange} disabled={courses.length === 0}>
+                                            <option value="" disabled>{!courses.length === 0 ? 'Seleccionen curso' : 'No hay cursos disponibles'}</option>
                                             {courses.map(course => (
                                                 <option key={course.id} value={course.id}>
                                                     {course.title} - ${course.price}

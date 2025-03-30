@@ -135,7 +135,7 @@ const AdminInstructors = () => {
                     <div className="modal-content">
                         <div className="modal-header">
                             <h3 className="modal-title me-auto">Datos del Instructor</h3>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div className="modal-body text-center text-sm-start">
                             <div className="row mb-3">

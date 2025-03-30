@@ -52,9 +52,12 @@ public class CourseController {
         return courseService.getStudentsByCourse(courseId);
     }
 
-    @PostMapping("/{courseId}/enroll/{studentId}")
-    public ResponseEntity<?> requestEnrollment(@PathVariable String courseId, @PathVariable String studentId) {
-        return courseService.requestEnrollment(courseId, studentId);
+    @PostMapping(value = "/{courseId}/enroll/{studentId}", consumes = { "multipart/form-data" })
+    public ResponseEntity<?> requestEnrollment(
+            @PathVariable String courseId,
+            @PathVariable String studentId,
+            @RequestPart(value = "voucher", required = false) MultipartFile voucherFile) {
+        return courseService.requestEnrollment(courseId, studentId, voucherFile);
     }
 
     @PutMapping("/{courseId}/manage-enrollment/{studentId}/{accept}")
