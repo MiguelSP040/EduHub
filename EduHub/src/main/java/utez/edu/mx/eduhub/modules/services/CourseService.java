@@ -680,4 +680,18 @@ public class CourseService {
         return new ResponseEntity<>("Curso reiniciado como 'Aprobado'", HttpStatus.OK);
     }
 
+    //CURSO CON ESTADO DE PAGADO
+    public ResponseEntity<?> updateCoursePaymentStatus(String courseId, boolean isPayment) {
+        Optional<Course> optionalCourse = repository.findById(courseId);
+        if (optionalCourse.isEmpty()) {
+            return new ResponseEntity<>("Curso no encontrado", HttpStatus.NOT_FOUND);
+        }
+
+        Course course = optionalCourse.get();
+        course.setPayment(isPayment);
+        repository.save(course);
+
+        return new ResponseEntity<>("Estado de pago del curso actualizado correctamente", HttpStatus.OK);
+    }
+
 }

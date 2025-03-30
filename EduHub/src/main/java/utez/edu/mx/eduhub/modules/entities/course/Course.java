@@ -55,7 +55,7 @@ public class Course {
 
     public Course() {}
 
-    public Course(String id, String title, String description, double price, Date dateStart, Date dateEnd, String category, Integer studentsCount, String coverImage, Boolean isArchived, Boolean isPublished, Boolean hasCertificate, String status, String docenteId, List<StudentEnrollment> enrollments, List<Session> sessions, List<Rating> ratings) {
+    public Course(String id, String title, String description, double price, Date dateStart, Date dateEnd, String category, Integer studentsCount, String coverImage, Boolean isArchived, Boolean isPublished, Boolean hasCertificate, Boolean isPayment, String status, String docenteId, List<StudentEnrollment> enrollments, List<Session> sessions, List<Rating> ratings) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -68,6 +68,7 @@ public class Course {
         this.isArchived = isArchived;
         this.isPublished = isPublished;
         this.hasCertificate = hasCertificate;
+        this.isPayment = isPayment;
         this.status = status;
         this.docenteId = docenteId;
         this.enrollments = enrollments;
@@ -209,5 +210,13 @@ public class Course {
 
     public void setRatings(List<Rating> ratings) {
         this.ratings = ratings;
+    }
+
+    public Boolean getPayment() {
+        return isPayment;
+    }
+
+    public void setPayment(Boolean payment) {
+        isPayment = payment;
     }
 }
