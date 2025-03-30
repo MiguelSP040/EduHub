@@ -28,16 +28,15 @@ const InstructorProfile = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       if (user?.id) {
-        const response = await findUserById(user.id, token);
-        if (response.ok) {
-          const data = await response.json();
+        try {
+          const data = await findUserById(user.id);
           setUserLogger(data);
-        } else {
-          console.error('Error al obtener usuario:', response);
+        } catch (error) {
+          console.error("Error al obtener usuario:", error);
         }
       }
     };
-
+  
     fetchUserData();
   }, [user, token]);
 
@@ -53,7 +52,6 @@ const InstructorProfile = () => {
         description: userLogged.description || '',
       });
     }
-    console.log(userLogged);
   }, [userLogged]);
 
   const getRoleName = (role) => {

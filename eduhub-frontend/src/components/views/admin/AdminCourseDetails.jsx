@@ -5,8 +5,6 @@ const AdminCourseDetails = ({ course }) => {
         if (!course) {
             console.error("No se encontró la información del curso.");
         }
-        console.log(course);
-        
     }, [course]);
 
     if (!course) return <p className="text-muted">Cargando datos del curso...</p>;

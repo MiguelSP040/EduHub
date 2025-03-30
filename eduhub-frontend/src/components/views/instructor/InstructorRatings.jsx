@@ -23,7 +23,6 @@ const InstructorRatings = () => {
         console.error('Error al obtener cursos:', error);
       }
     };
-
     fetchCourses();
   }, []);
 
@@ -64,7 +63,7 @@ const InstructorRatings = () => {
                               <i key={i} className={i < Math.round(averageRating) ? 'bi bi-star-fill text-warning' : 'bi bi-star text-muted'}></i>
                             ))}
                           </td>
-                          <td>{course.ratings.length === 0 ? 'Sin reseñas' : `${course.ratings.length} reseñas`}</td>
+                          <td>{course.ratings.length === 0 ? 'Sin reseñas' : `${course.ratings.length} ${course.ratings.length === 1 ? 'reseña' : 'reseñas'}`}</td>
                           <td>
                             <button className="btn btn-primary" disabled={course.ratings.length === -1} onClick={() => navigate('/instructor/ratings/course-ratings', { state: { course } })}>
                               <Eye />

@@ -499,10 +499,9 @@ public class CourseService {
 
         Course course = optionalCourse.get();
 
-        /* Validar si el curso ya finalizó
-        if (new Date().before(course.getDateEnd())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El curso aún no ha finalizado.");
-        }*/
+        if (!"Finalizado".equalsIgnoreCase(course.getStatus())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Solo puedes calificar cursos finalizados.");
+        }
 
         boolean isEnrolled = course.getEnrollments().stream()
                 .anyMatch(enrollment -> enrollment.getStudentId().equals(studentId));

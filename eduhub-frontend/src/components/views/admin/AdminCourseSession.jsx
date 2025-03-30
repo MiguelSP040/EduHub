@@ -23,7 +23,6 @@ const AdminCourseSessions = () => {
   const [sessions, setSessions] = useState([]);
   const [activeTab, setActiveTab] = useState('material');
 
-  // Para ver detalle de una sesión
   const [selectedSession, setSelectedSession] = useState(null);
 
   useEffect(() => {
@@ -36,8 +35,7 @@ const AdminCourseSessions = () => {
         return;
       }
       try {
-        const response = await findUserById(data.docenteId);
-        const instructorData = await response.json();
+        const instructorData = await findUserById(data.docenteId);
         setInstructor(instructorData);
         setCourse(data);
       } catch (error) {
