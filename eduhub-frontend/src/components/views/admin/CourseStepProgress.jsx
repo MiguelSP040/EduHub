@@ -10,7 +10,7 @@ const CourseStepProgress = ({ status }) => {
     Rechazado: 1,
     Aprobado: 2,
     Empezado: 3,
-    Finalizado: 4,
+    Finalizado: 5,
   };
 
   const currentIndex = statusIndex[status] ?? 0;

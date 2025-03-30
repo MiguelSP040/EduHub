@@ -86,7 +86,7 @@ const AdminInstructorRatings = () => {
       totalRatings += ratings.length;
       totalSum += ratings.reduce((sum, r) => sum + r.rating, 0);
     }
-    
+
     return totalRatings > 0 ? (totalSum / totalRatings).toFixed(1) : '0.0';
   }, [ratingsByCourse]);
 
@@ -116,6 +116,9 @@ const AdminInstructorRatings = () => {
                       {instructor.name} {instructor.surname} - Calificaciones
                     </h5>
                     <select className="form-select form-select-sm w-auto" value={selectedCourse?.id || ''} onChange={(e) => setSelectedCourse(courses.find((c) => c.id === e.target.value))}>
+                      <option value="" disabled>
+                        {courses.length > 0 ? 'Selecciona un curso' : 'No hay cursos finalizados'}
+                      </option>
                       {courses.map((course) => (
                         <option key={course.id} value={course.id}>
                           {course.title}
@@ -134,7 +137,6 @@ const AdminInstructorRatings = () => {
 
             {/* PROMEDIO GENERAL */}
             <div className="row mb-4">
-
               {/* CARD IZQUIERDO: DATOS DEL INSTRUCTOR */}
               <div className="col-12 col-md-7 col-lg-7 mb-4 mb-md-0">
                 <div className="card rounded-4 border-0 shadow-sm h-100 p-0">
@@ -184,7 +186,6 @@ const AdminInstructorRatings = () => {
                   </div>
                 </div>
               </div>
-
             </div>
 
             {/* CALIFICACIONES POR CURSO */}
@@ -195,16 +196,20 @@ const AdminInstructorRatings = () => {
                     <div className="card-body">
                       <h5 className="fw-semibold mb-2">Promedio general del curso</h5>
                       <h4 className="text-primary">{courseStats.avg.toFixed(1)} / 5</h4>
-                      <small className="text-muted">{courseStats.total} calificaciones</small>
+                      <small className="text-muted">
+                        {courseStats.total} {courseStats.total === 1 ? 'calificación' : 'calificaciones'}
+                      </small>
                     </div>
                   </div>
                   <div className="card rounded-4 border-0 shadow-sm mb-4">
                     <div className="card-body">
                       <h6 className="fw-semibold mb-3">Porcentaje por estrellas</h6>
-                      {courseStats.stars.map((star) => (
+                      {courseStats.stars.map((star, index) => (
                         <div key={star} className="mb-2">
                           <div className="d-flex justify-content-between">
-                            <span>{star} estrellas</span>
+                            <span>
+                              {star} {index === 4 ? 'estrella' : 'estrellas'}
+                            </span>
                             <span>{courseStats.percentages[star]}%</span>
                           </div>
                           <div className="progress" style={{ height: '8px' }}>
@@ -250,7 +255,7 @@ const AdminInstructorRatings = () => {
                         </div>
                         <div className="mt-3 ps-1">
                           {r.comment ? (
-                            <div className='text-end'>
+                            <div className="text-end">
                               <p className="mb-1 text-start">{r.comment.length > 350 && !expandedComments[i] ? `${r.comment.slice(0, 350)}...` : r.comment}</p>
                               {r.comment.length > 150 && (
                                 <button className="btn btn-link p-0 ms-1" style={{ fontSize: '0.875rem' }} onClick={() => toggleComment(i)}>

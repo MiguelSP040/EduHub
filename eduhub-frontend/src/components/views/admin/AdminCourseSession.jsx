@@ -131,6 +131,12 @@ const AdminCourseSessions = () => {
                       <span className="fw-semibold text-success">Este curso ha empezado.</span>
                     </div>
                   )}
+
+                  <div className="col-12 col-md-auto text-md-end mt-2 mt-md-0">
+                    <button className="btn btn-outline-secondary" onClick={() => navigate('/admin')}>
+                      Volver
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

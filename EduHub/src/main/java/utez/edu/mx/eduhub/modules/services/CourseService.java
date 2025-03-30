@@ -85,6 +85,9 @@ public class CourseService {
                 studentData.put("progress", enrollment.calculateProgress(course.getSessions().size()));
                 studentData.put("certificateDelivered", enrollment.isCertificateDelivered());
                 studentData.put("certificateFile", enrollment.getCertificateFile());
+                studentData.put("enrolledDate", enrollment.getEnrolledDate());
+                studentData.put("voucherFile", enrollment.getVoucherFile());
+
                 return studentData;
             }
             return null;

@@ -1,12 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
-import { handleViewFile } from '../../../services/sessionService';
-import { getCourses, getStudentsByCourse, manageEnrollment } from '../../../services/courseService';
+import { getCourses, getStudentsByCourse, manageEnrollment, viewVoucherFile } from '../../../services/courseService';
 import { CheckCircle, AlertCircle, FileText } from 'react-feather';
-
-// PDF de prueba (puedes reemplazar esta URL con tu propio PDF)
-const TEST_PDF_URL = 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf';
 
 const AdminEnrollments = () => {
   const navbarRef = useRef(null);
@@ -26,28 +22,22 @@ const AdminEnrollments = () => {
         console.error('Error al obtener cursos:', error);
       }
     };
-
     fetchCourses();
   }, []);
 
   const fetchStudents = async (courseId) => {
     try {
       const data = await getStudentsByCourse(courseId);
-      // Añadimos el PDF de prueba a cada estudiante
-      const studentsWithTestFile = data.map((student) => ({
-        ...student,
-        fileUrl: TEST_PDF_URL, // Asignamos el PDF de prueba a todos los estudiantes
-      }));
-      setStudents(studentsWithTestFile);
+      setStudents(data);
     } catch (error) {
       console.error('Error al obtener estudiantes:', error);
     }
   };
 
-  const handleCourseChange = (event) => {
+  const handleCourseChange = async (event) => {
     const courseId = event.target.value;
-    setSelectedCourse(courseId);
-    fetchStudents(courseId);
+    await setSelectedCourse(courseId);
+    await fetchStudents(courseId);
   };
 
   const handleManageEnrollment = async (studentId, accept) => {
@@ -91,7 +81,7 @@ const AdminEnrollments = () => {
                   <div className="col-12 col-sm text-md-end mt-3 mt-sm-0">
                     <select className="form-select" value={selectedCourse || ''} onChange={handleCourseChange} disabled={courses.length === 0}>
                       <option value="" disabled>
-                        {!courses.length === 0 ? 'Seleccionen curso' : 'No hay cursos disponibles'}
+                        {courses.length === 0 ? 'No hay cursos aprobados' : 'Seleccione un curso'}
                       </option>
                       {courses.map((course) => (
                         <option key={course.id} value={course.id}>
@@ -117,49 +107,62 @@ const AdminEnrollments = () => {
                       <th>Acciones</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="align-middle">
                     {students.length > 0 ? (
                       students.map((student) => (
                         <tr key={student.id}>
                           <td>
                             {student.name} {student.surname}
                           </td>
-                          <td>{student.enrolledDate || 'No disponible'}</td>
+                          <td>{student.enrolledDate ? new Date(student.enrolledDate).toLocaleDateString() : 'No disponible'}</td>
                           <td>
-                            {student.status === 'Aceptado' || student.status === 'Completado' ? (
-                              <span className="text-success">
-                                {student.status} <CheckCircle color="green" />
-                              </span>
-                            ) : (
-                              <span className="text-warning">
-                                {student.status} <AlertCircle color="orange" />
-                              </span>
-                            )}
+                            <span className={`badge d-inline-flex align-items-center text-${student.status === 'Aceptado' || student.status === 'Completado' ? 'bg-success' : 'bg-warning'}`}>
+                              <span className="fs-6 fw-normal">{student.status}</span>
+                              {student.status === 'Aceptado' || student.status === 'Completado' ? (
+                                <span className="fs-6">
+                                  <i className="bi bi-check-circle ms-2"></i>
+                                </span>
+                              ) : (
+                                <span className="fs-6">
+                                  <i className="bi bi-hourglass-split ms-2"></i>
+                                </span>
+                              )}
+                            </span>
                           </td>
                           <td>
                             {student.voucherFile ? (
-                              <button className="btn btn-sm btn-outline-primary d-flex align-items-center" onClick={() => handleViewFile(selectedCourse, student.voucherFile, setLoadingFileId)} disabled={loadingFileId === student.voucherFile.id}>
-                                {loadingFileId === student.voucherFile.id ? (
-                                  <div className="spinner-border spinner-border-sm text-primary" role="status" />
-                                ) : (
-                                  <>
-                                    <FileText size={16} className="me-2" />
-                                    Ver
-                                  </>
-                                )}
-                              </button>
+                              (() => {
+                                const rawType = student.voucherFile.fileType || '';
+                                const ext = rawType.split('/')[1]?.toLowerCase() || '';
+                                const iconExt = ['pdf', 'png', 'jpg', 'jpeg', 'zip', 'svg', 'doc', 'docx'].includes(ext) ? (ext === 'jpeg' ? 'jpg' : ext) : null;
+                                const iconClass = iconExt ? `bi bi-filetype-${iconExt}` : 'bi bi-file-earmark-text';
+
+                                return (
+                                  <button className="btn btn-sm btn-outline-primary" onClick={() => viewVoucherFile(student.voucherFile.gridFsId, setLoadingFileId)} disabled={loadingFileId === student.voucherFile.gridFsId}>
+                                    {loadingFileId === student.voucherFile.gridFsId ? (
+                                      <div className="spinner-border spinner-border-sm text-primary" role="status" />
+                                    ) : (
+                                      <>
+                                        <span className='fs-5'><i className={`${iconClass} me-2`}></i></span>
+                                        Ver
+                                      </>
+                                    )}
+                                  </button>
+                                );
+                              })()
                             ) : (
-                              <span className="text-muted">No disponible</span>
+                              <span className="text-muted">
+                                <span className='fs-5'><i className="bi bi-file-earmark-x me-1"></i></span> No disponible
+                              </span>
                             )}
                           </td>
-
                           <td>
                             {student.status === 'Pendiente' && (
                               <>
-                                <button className="btn btn-success btn-sm me-2" onClick={() => handleManageEnrollment(student.id, true)}>
+                                <button className="btn btn-success me-2" onClick={() => handleManageEnrollment(student.id, true)}>
                                   Aceptar
                                 </button>
-                                <button className="btn btn-danger btn-sm" onClick={() => handleManageEnrollment(student.id, false)}>
+                                <button className="btn btn-danger" onClick={() => handleManageEnrollment(student.id, false)}>
                                   Rechazar
                                 </button>
                               </>
