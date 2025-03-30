@@ -7,10 +7,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import utez.edu.mx.eduhub.modules.entities.UserEntity;
-import utez.edu.mx.eduhub.modules.entities.course.Course;
-import utez.edu.mx.eduhub.modules.entities.course.Rating;
-import utez.edu.mx.eduhub.modules.entities.course.Session;
-import utez.edu.mx.eduhub.modules.entities.course.StudentEnrollment;
+import utez.edu.mx.eduhub.modules.entities.course.*;
 import utez.edu.mx.eduhub.modules.entities.dto.CertificateData;
 import utez.edu.mx.eduhub.modules.repositories.CourseRepository;
 import utez.edu.mx.eduhub.modules.repositories.UserRepository;
@@ -32,6 +29,9 @@ public class CourseService {
 
     @Autowired
     private SessionRepository sessionRepository;
+
+    @Autowired
+    private MultimediaService multimediaService;
 
     // OBTENER TODOS LOS CURSOS
     public ResponseEntity<?> findAll() {
@@ -94,7 +94,7 @@ public class CourseService {
     }
 
     // SOLICITAR UNIRSE A UN CURSO
-    public ResponseEntity<?> requestEnrollment(String courseId, String studentId) {
+    public ResponseEntity<?> requestEnrollment(String courseId, String studentId, MultipartFile voucherFile) {
         Optional<Course> courseOpt = repository.findById(courseId);
         if (courseOpt.isPresent()) {
             Course course = courseOpt.get();
@@ -115,11 +115,25 @@ public class CourseService {
             }
 
             String enrollmentStatus = course.getPrice() == 0 ? "Aceptado" : "Pendiente";
-            course.getEnrollments().add(new StudentEnrollment(studentId, enrollmentStatus));
+            StudentEnrollment enrollment = new StudentEnrollment(studentId, enrollmentStatus);
 
+            if (course.getPrice() > 0 && voucherFile != null && !voucherFile.isEmpty()) {
+                try {
+                    List<MultimediaFile> processed = multimediaService.processFiles(new MultipartFile[]{voucherFile});
+                    if (!processed.isEmpty()) {
+                        enrollment.setVoucherFile(processed.get(0)); // get(0) es correcto, no cambiar
+                    }
+                } catch (Exception e) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al procesar el voucher: " + e.getMessage());
+                }
+            }
+
+            course.getEnrollments().add(enrollment);
             repository.save(course);
+
             return ResponseEntity.ok(enrollmentStatus.equals("Aceptado") ? "Inscripción completada." : "Solicitud enviada.");
         }
+
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Curso no encontrado.");
     }
 

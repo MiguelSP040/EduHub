@@ -8,6 +8,7 @@ public class StudentEnrollment {
     private String studentId;
     private String status; // "Pendiente", "Aceptado", "Rechazado"
     private Date enrolledDate;
+    private MultimediaFile voucherFile;
     private boolean certificateDelivered = false;
     private String certificateFile;
     private List<String> completedSessions;
@@ -48,6 +49,14 @@ public class StudentEnrollment {
 
     public void setEnrolledDate(Date enrolledDate) {
         this.enrolledDate = enrolledDate;
+    }
+
+    public MultimediaFile getVoucherFile() {
+        return voucherFile;
+    }
+
+    public void setVoucherFile(MultimediaFile voucherFile) {
+        this.voucherFile = voucherFile;
     }
 
     public boolean isCertificateDelivered() {
