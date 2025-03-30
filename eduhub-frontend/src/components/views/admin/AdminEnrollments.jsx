@@ -4,6 +4,9 @@ import Navbar from "./Navbar";
 import { getCourses, getStudentsByCourse, manageEnrollment } from "../../../services/courseService";
 import { CheckCircle, AlertCircle, FileText } from "react-feather";
 
+// PDF de prueba (puedes reemplazar esta URL con tu propio PDF)
+const TEST_PDF_URL = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
+
 const AdminEnrollments = () => {
     const navbarRef = useRef(null);
     const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
@@ -28,7 +31,12 @@ const AdminEnrollments = () => {
     const fetchStudents = async (courseId) => {
         try {
             const data = await getStudentsByCourse(courseId);
-            setStudents(data);
+            // Añadimos el PDF de prueba a cada estudiante
+            const studentsWithTestFile = data.map(student => ({
+                ...student,
+                fileUrl: TEST_PDF_URL // Asignamos el PDF de prueba a todos los estudiantes
+            }));
+            setStudents(studentsWithTestFile);
         } catch (error) {
             console.error("Error al obtener estudiantes:", error);
         }
@@ -60,6 +68,15 @@ const AdminEnrollments = () => {
             alert(`Error: ${response.message}`);
         }
     };    
+
+    // Función para manejar el clic en el archivo
+    const handleFileClick = (fileUrl) => {
+        if (fileUrl) {
+            window.open(fileUrl, '_blank');
+        } else {
+            alert("No hay archivo disponible");
+        }
+    };
 
     return (
         <div>
@@ -108,7 +125,7 @@ const AdminEnrollments = () => {
                                             <th>Nombre</th>
                                             <th>Fecha de Inscripción</th>
                                             <th>Estado</th>
-                                            <th>Archivo</th>
+                                            <th>Comprobante</th>
                                             <th>Acciones</th>
                                         </tr>
                                     </thead>
@@ -126,7 +143,14 @@ const AdminEnrollments = () => {
                                                         )}
                                                     </td>
                                                     <td>
-                                                        <FileText/>
+                                                        <div 
+                                                            style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }} 
+                                                            onClick={() => handleFileClick(student.fileUrl)}
+                                                            title="Ver comprobante de pago"
+                                                        >
+                                                            <FileText className="me-2" />
+                                                            <span>Ver PDF</span>
+                                                        </div>
                                                     </td>
                                                     <td>
                                                         {student.status === "Pendiente" && (
