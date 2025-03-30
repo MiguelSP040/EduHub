@@ -9,4 +9,5 @@ import java.util.List;
 public interface FinanceRepository  extends MongoRepository<Finance, String> {
     List<Finance> findByCourseId(String courseId);
     List<Finance> findByCourseIdAndTransactionType(String courseId, TransactionType transactionType);
+
 }

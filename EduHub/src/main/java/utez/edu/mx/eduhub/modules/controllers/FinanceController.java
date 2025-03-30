@@ -39,4 +39,9 @@ public class FinanceController {
     public ResponseEntity<?> deleteFinance(@PathVariable String id) {
         return service.deleteFinance(id);
     }
+
+    @PostMapping("/pay-instructor/{courseId}")
+    public ResponseEntity<?> payInstructor(@PathVariable String courseId) {
+        return service.payInstructorForCourse(courseId);
+    }
 }
