@@ -75,8 +75,8 @@ public class FinanceService {
         }
 
 
-        UserEntity instructor = userRepository.findById(course.getInstructorId())
-                .orElseThrow(() -> new RuntimeException("No se encontró el instructor con id: " + course.getInstructorId()));
+        UserEntity instructor = userRepository.findById(course.getDocenteId())
+                .orElseThrow(() -> new RuntimeException("No se encontró el instructor con id: " + course.getDocenteId()));
 
         if (!"ROLE_INSTRUCTOR".equals(instructor.getRole())) {
             return new ResponseEntity<>("El usuario no tiene rol de INSTRUCTOR", HttpStatus.BAD_REQUEST);

@@ -38,7 +38,6 @@ public class Course {
     @Min(value = 1, message = "El curso debe permitir al menos 1 estudiante")
     @NotNull(message = "Ingrese una cantidad de estudiantes")
     private Integer studentsCount;
-    private String instructorId;
     private boolean paidToInstructor; //Pago realizado al instructor
     private String coverImage;
 
@@ -46,6 +45,7 @@ public class Course {
     private Boolean isArchived;
     private Boolean isPublished;
     private Boolean hasCertificate;
+    private Boolean isPayment;
     private String status; //pendiente, aceptado o rechazado
 
     //Relaciones
@@ -56,7 +56,7 @@ public class Course {
 
     public Course() {}
 
-    public Course(String id, String title, String description, double price, Date dateStart, Date dateEnd, String category, Integer studentsCount, String instructorId, boolean paidToInstructor, String coverImage, Boolean isArchived, Boolean isPublished, Boolean hasCertificate, String status, String docenteId, List<StudentEnrollment> enrollments, List<Session> sessions, List<Rating> ratings) {
+    public Course(String id, String title, String description, double price, Date dateStart, Date dateEnd, String category, Integer studentsCount, boolean paidToInstructor, String coverImage, Boolean isArchived, Boolean isPublished, Boolean hasCertificate, Boolean isPayment, String status, String docenteId, List<StudentEnrollment> enrollments, List<Session> sessions, List<Rating> ratings) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -65,12 +65,12 @@ public class Course {
         this.dateEnd = dateEnd;
         this.category = category;
         this.studentsCount = studentsCount;
-        this.instructorId = instructorId;
         this.paidToInstructor = paidToInstructor;
         this.coverImage = coverImage;
         this.isArchived = isArchived;
         this.isPublished = isPublished;
         this.hasCertificate = hasCertificate;
+        this.isPayment = isPayment;
         this.status = status;
         this.docenteId = docenteId;
         this.enrollments = enrollments;
@@ -214,12 +214,12 @@ public class Course {
         this.ratings = ratings;
     }
 
-    public String getInstructorId() {
-        return instructorId;
+    public Boolean getPayment() {
+        return isPayment;
     }
 
-    public void setInstructorId(String instructorId) {
-        this.instructorId = instructorId;
+    public void setPayment(Boolean payment) {
+        isPayment = payment;
     }
 
     public boolean isPaidToInstructor() {
