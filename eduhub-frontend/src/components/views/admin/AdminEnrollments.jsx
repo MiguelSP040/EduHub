@@ -16,7 +16,7 @@ const AdminEnrollments = () => {
     const fetchCourses = async () => {
       try {
         const data = await getCourses();
-        const paidCourses = data.filter((course) => course.price > 0 && course.status === 'Aprobado');
+        const paidCourses = data.filter((course) => course.price > 0 && (course.status === 'Aprobado' || course.status === 'Empezado' || course.status === 'Finalizado') && course.archived !== true);
         setCourses(paidCourses);
       } catch (error) {
         console.error('Error al obtener cursos:', error);
@@ -112,7 +112,7 @@ const AdminEnrollments = () => {
                       students.map((student) => (
                         <tr key={student.id}>
                           <td>
-                            {student.name} {student.surname}
+                            {student.name} {student.surname} {student.lastname && student.lastname}
                           </td>
                           <td>{student.enrolledDate ? new Date(student.enrolledDate).toLocaleDateString() : 'No disponible'}</td>
                           <td>
@@ -157,7 +157,7 @@ const AdminEnrollments = () => {
                             )}
                           </td>
                           <td>
-                            {student.status === 'Pendiente' && (
+                            {student.status === 'Pendiente' ? (
                               <>
                                 <button className="btn btn-success me-2" onClick={() => handleManageEnrollment(student.id, true)}>
                                   Aceptar
@@ -166,7 +166,9 @@ const AdminEnrollments = () => {
                                   Rechazar
                                 </button>
                               </>
-                            )}
+                            ) :
+                            ( <span className='text-muted'>Estudiante {student.status.toLowerCase()}</span> )
+                            }
                           </td>
                         </tr>
                       ))

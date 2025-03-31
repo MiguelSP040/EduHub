@@ -33,6 +33,9 @@ public class CourseService {
     @Autowired
     private MultimediaService multimediaService;
 
+    @Autowired
+    private NotificationService notificationService;
+
     // OBTENER TODOS LOS CURSOS
     public ResponseEntity<?> findAll() {
         return ResponseEntity.ok(repository.findAll());
@@ -279,6 +282,32 @@ public class CourseService {
         course.setStatus("Pendiente");
         course.setPublished(true);
         repository.save(course);
+
+        // ENVIAR NOTIFICACIÓN AL ADMIN
+        List<UserEntity> admins = userRepository.findAllByRole("ROLE_ADMIN");
+        for (UserEntity admin : admins) {
+            notificationService.sendNotification(
+                    admin.getId(),
+                    "Curso pendiente por aprobar",
+                    "El curso \"" + course.getTitle() + "\" ha sido enviado por un instructor para su aprobación.",
+                    "Alert",
+                    "course",
+                    courseId
+
+
+            );
+        }
+
+        // ENVIAR NOTIFICACIÓN AL INSTRUCTOR
+        notificationService.sendNotification(
+                instructorId,
+                "Curso enviado para aprobación",
+                "Tu curso \"" + course.getTitle() + "\" fue enviado para su aprobación. Pronto recibirás una respuesta.",
+                "Success",
+                "course",
+                courseId
+
+        );
 
         return ResponseEntity.ok(course);
     }
