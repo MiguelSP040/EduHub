@@ -74,6 +74,9 @@ public class FinanceService {
             return new ResponseEntity<>("Este curso ya fue pagado al instructor", HttpStatus.BAD_REQUEST);
         }
 
+        if (!"Finalizado".equals(course.getStatus()) && !"Empezado".equals(course.getStatus())) {
+            return new ResponseEntity<>("Solo se pueden pagar cursos en estado 'Finalizado' o 'Empezado'", HttpStatus.BAD_REQUEST);
+        }
 
         UserEntity instructor = userRepository.findById(course.getDocenteId())
                 .orElseThrow(() -> new RuntimeException("No se encontró el instructor con id: " + course.getDocenteId()));

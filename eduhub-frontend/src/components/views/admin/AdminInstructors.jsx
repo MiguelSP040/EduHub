@@ -4,6 +4,8 @@ import Navbar from './Navbar';
 import { findAllUsers, activateInstructor } from '../../../services/userService';
 import { Modal } from 'bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { getCoursesByInstructor } from '../../../services/courseService';
+import { payInstructorForCourse } from "../../../services/financeService";
 
 const AdminInstructors = () => {
   const navigate = useNavigate();
@@ -26,6 +28,48 @@ const AdminInstructors = () => {
 
     fetchInstructors();
   }, []);
+
+  const fetchCourses = async (id) => {
+    try {
+      const response = await getCoursesByInstructor(id);
+      return response;
+    } catch (error) {
+      console.error('Fallo al obtener cursos', error)
+    }
+  }
+
+  const handlePayToInstructor = async (instructorId) => {
+    const confirm = window.confirm("¿Estás seguro de que deseas pagar al instructor? Esta acción no se puede deshacer.");
+    if (!confirm) return;
+
+    try {
+      const courses = await fetchCourses(instructorId);
+      const unpaidCourses = courses.filter((course) => course.payment === false);
+
+      if (unpaidCourses.length === 0) {
+        alert("Este instructor no tiene cursos pendientes de pago.");
+        return;
+      }
+
+      let allSuccessful = true;
+      let messages = [];
+
+      for (const course of unpaidCourses) {
+        const res = await payInstructorForCourse(course.id);
+        messages.push(`Curso: ${course.title} → ${res.message}`);
+        if (res.status !== 200) allSuccessful = false;
+      }
+
+      alert(messages.join("\n"));
+      if (allSuccessful) {
+        console.log("Todos los pagos procesados exitosamente.");
+      }
+    } catch (error) {
+      console.error("Error al pagar al instructor:", error);
+      alert("Error inesperado al procesar el pago.");
+    }
+  };
+
 
   const handleActivateInstructor = async (instructorId) => {
     const response = await activateInstructor(instructorId);
@@ -108,6 +152,11 @@ const AdminInstructors = () => {
                           {instructor.active && (
                             <button className="btn btn-success btn-sm me-2" onClick={() => navigate('/instructors/ratings', { state: { instructor } })} title="Ver calificaciones">
                               <i className="bi bi-clipboard-data"></i>
+                            </button>
+                          )}
+                          {instructor.active && (
+                            <button className="btn btn-warning btn-sm me-2" onClick={() => handlePayToInstructor(instructor.id)} title="Pagar cursos">
+                              <i className="bi bi-currency-dollar"></i>
                             </button>
                           )}
                         </td>

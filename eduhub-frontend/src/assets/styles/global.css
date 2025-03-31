@@ -30,6 +30,11 @@ html {
   transform: translateY(-10px);
 }
 
+.recharts-wrapper :focus {
+  outline: none !important;
+}
+
+
 body {
   overflow-x: hidden;
 }

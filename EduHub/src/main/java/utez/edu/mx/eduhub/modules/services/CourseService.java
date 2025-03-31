@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import utez.edu.mx.eduhub.modules.entities.UserEntity;
 import utez.edu.mx.eduhub.modules.entities.course.*;
+import utez.edu.mx.eduhub.modules.entities.Finance;
 import utez.edu.mx.eduhub.modules.entities.dto.CertificateData;
 import utez.edu.mx.eduhub.modules.repositories.CourseRepository;
 import utez.edu.mx.eduhub.modules.repositories.UserRepository;
@@ -35,6 +36,9 @@ public class CourseService {
 
     @Autowired
     private NotificationService notificationService;
+
+    @Autowired
+    private FinanceService financeService;
 
     // OBTENER TODOS LOS CURSOS
     public ResponseEntity<?> findAll() {
@@ -172,6 +176,16 @@ public class CourseService {
         if (enrollmentOpt.isPresent()) {
             if (accept) {
                 enrollmentOpt.get().setStatus("Aceptado");
+                Finance finance = new Finance(
+                        null,
+                        course.getId(),
+                        studentId,
+                        TransactionType.INCOME,
+                        course.getPrice(),
+                        new Date(),
+                        "Inscripción aceptada por administrador"
+                );
+                financeService.createFinance(finance);
             } else {
                 course.getEnrollments().remove(enrollmentOpt.get());
             }
