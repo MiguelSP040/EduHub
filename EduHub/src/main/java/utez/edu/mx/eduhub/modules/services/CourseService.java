@@ -33,6 +33,9 @@ public class CourseService {
     @Autowired
     private MultimediaService multimediaService;
 
+    @Autowired
+    private NotificationService notificationService;
+
     // OBTENER TODOS LOS CURSOS
     public ResponseEntity<?> findAll() {
         return ResponseEntity.ok(repository.findAll());
@@ -85,6 +88,9 @@ public class CourseService {
                 studentData.put("progress", enrollment.calculateProgress(course.getSessions().size()));
                 studentData.put("certificateDelivered", enrollment.isCertificateDelivered());
                 studentData.put("certificateFile", enrollment.getCertificateFile());
+                studentData.put("enrolledDate", enrollment.getEnrolledDate());
+                studentData.put("voucherFile", enrollment.getVoucherFile());
+
                 return studentData;
             }
             return null;
@@ -276,6 +282,29 @@ public class CourseService {
         course.setStatus("Pendiente");
         course.setPublished(true);
         repository.save(course);
+
+        // ENVIAR NOTIFICACIÓN AL ADMIN
+        List<UserEntity> admins = userRepository.findAllByRole("ROLE_ADMIN");
+        for (UserEntity admin : admins) {
+            notificationService.sendNotification(
+                    admin.getId(),
+                    "Curso pendiente por aprobar",
+                    "El curso \"" + course.getTitle() + "\" ha sido enviado por un instructor para su aprobación.",
+                    "Alert",
+                    "course",
+                    courseId
+            );
+        }
+
+        // ENVIAR NOTIFICACIÓN AL INSTRUCTOR
+        notificationService.sendNotification(
+                instructorId,
+                "Curso enviado para aprobación",
+                "Tu curso \"" + course.getTitle() + "\" fue enviado para su aprobación. Pronto recibirás una respuesta.",
+                "Success",
+                "course",
+                courseId
+        );
 
         return ResponseEntity.ok(course);
     }
@@ -499,10 +528,9 @@ public class CourseService {
 
         Course course = optionalCourse.get();
 
-        /* Validar si el curso ya finalizó
-        if (new Date().before(course.getDateEnd())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El curso aún no ha finalizado.");
-        }*/
+        if (!"Finalizado".equalsIgnoreCase(course.getStatus())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Solo puedes calificar cursos finalizados.");
+        }
 
         boolean isEnrolled = course.getEnrollments().stream()
                 .anyMatch(enrollment -> enrollment.getStudentId().equals(studentId));

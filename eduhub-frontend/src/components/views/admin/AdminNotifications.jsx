@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '../Navbar';
+import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import { BookOpen } from 'react-feather';
 import { getNotifications, markAsRead } from '../../../services/notificationService';
 import { getCourseById } from '../../../services/courseService';
 
-export default function InstructorNotifications() {
+export default function AdminNotifications() {
   const navbarRef = useRef(null);
   const navigate = useNavigate();
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
@@ -25,7 +25,6 @@ export default function InstructorNotifications() {
 
   const handleMarkAsRead = async (id, newReadState) => {
     setFadingNotifications((prev) => [...prev, id]);
-
     setTimeout(async () => {
       await markAsRead(id, newReadState);
       await loadNotifications();
@@ -60,7 +59,7 @@ export default function InstructorNotifications() {
         try {
           const course = await getCourseById(relatedId);
           if (course) {
-            navigate('/instructor/course', { state: { course } });
+            navigate('/admin/course', { state: { course } });
           } else {
             alert('No se pudo cargar el curso.');
           }
@@ -113,7 +112,6 @@ export default function InstructorNotifications() {
                             {icon}
                             <span className="d-none d-sm-inline">{label}</span>
                           </button>
-
                           {tab === 'pending' && filtered.some((n) => !n.read) && (
                             <span className="position-absolute top-50 start-100 translate-middle badge rounded-pill bg-danger" style={{ fontSize: '0.65rem' }}>
                               {filtered.filter((n) => !n.read).length}

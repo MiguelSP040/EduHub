@@ -4,6 +4,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 import utez.edu.mx.eduhub.modules.entities.UserEntity;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -21,4 +22,6 @@ public interface UserRepository extends MongoRepository<UserEntity, String> {
     boolean existsByUsername(String username);
 
     boolean existsByEmail(String email);
+
+    List<UserEntity> findAllByRole(String role);
 }

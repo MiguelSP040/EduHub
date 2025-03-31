@@ -28,16 +28,15 @@ const AdminProfile = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       if (user?.id) {
-        const response = await findUserById(user.id);
-        if (response.ok) {
-          const data = await response.json();
+        try {
+          const data = await findUserById(user.id);
           setUserLogger(data);
-        } else {
-          console.error('Error al obtener usuario:', response);
+        } catch (error) {
+          console.error("Error al obtener usuario:", error);
         }
       }
     };
-
+  
     fetchUserData();
   }, [user, token]);
 

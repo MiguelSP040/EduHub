@@ -13,16 +13,19 @@ export const findAllUsers = async () => {
 };
 
 export const findUserById = async (id) => {
-    const token = localStorage.getItem("token");
-    const response = await fetch(`${API_URL}/${id}`, {
-        method: "GET",
-        headers: { 
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-        },
-    });
-    return response;
-}
+  const token = localStorage.getItem("token");
+  const response = await fetch(`${API_URL}/${id}`, {
+      method: "GET",
+      headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+      },
+  });
+  if (!response.ok) {
+      throw new Error("Error al obtener el usuario");
+  }
+  return response.json();
+};
 
 export const activateInstructor = async (instructorId) => {
   const token = localStorage.getItem("token");

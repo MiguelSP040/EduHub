@@ -1,56 +1,65 @@
 html {
-    scroll-behavior: smooth;
-  }  
+  scroll-behavior: smooth;
+}
 
 .bg-main {
-    background-color: #F9F9F9 !important; 
+  background-color: #f9f9f9 !important;
 }
 
 .course-body-height {
-    height: 12rem !important;
-    overflow-y: hidden;
+  height: 12rem !important;
+  overflow-y: hidden;
 }
 
 .border-purple {
-    border-color: #6C63FF !important;
-    border-radius: 3px !important;
+  border-color: #6c63ff !important;
+  border-radius: 3px !important;
 }
 
 .image-overlay {
-    background: linear-gradient(to right, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0));
-    pointer-events: 'none';
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0));
+  pointer-events: 'none';
+}
+
+.notification-card {
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.notification-card.fade-out {
+  opacity: 0;
+  transform: translateY(-10px);
 }
 
 body {
-    overflow-x: hidden;
+  overflow-x: hidden;
 }
 
 .session-content {
-/* Restablece la alineación por defecto del navegador */
-text-align: initial !important;
+  /* Restablece la alineación por defecto del navegador */
+  text-align: initial !important;
 }
 /* Y aplica la alineación que Quill genera en sus clases */
 .session-content .ql-align-center {
-text-align: center !important;
+  text-align: center !important;
 }
 .session-content .ql-align-right {
-text-align: right !important;
+  text-align: right !important;
 }
 .session-content .ql-align-justify {
-text-align: justify !important;
+  text-align: justify !important;
 }
 
 .session-acordeon:hover {
-    border-left: 2px solid #6C63FF;
+  border-left: 2px solid #6c63ff;
 }
-  
-@media screen and (min-width: 576px) {
-    .img-container {
-        width: 10rem;
-        justify-items: center;
-    }
 
-    .course-width {
-        width: 18rem !important;
-    }
+@media screen and (min-width: 576px) {
+  .img-container {
+    width: 10rem;
+    justify-items: center;
+  }
+
+  .course-width {
+    width: 18rem !important;
+  }
 }

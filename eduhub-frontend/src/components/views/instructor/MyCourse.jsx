@@ -41,8 +41,7 @@ const MyCourse = () => {
         return;
       }
       try {
-        const response = await findUserById(data.docenteId);
-        const instructorData = await response.json();
+        const instructorData = await findUserById(data.docenteId);
         setInstructor(instructorData);
         setCourse(data);
       } catch (error) {

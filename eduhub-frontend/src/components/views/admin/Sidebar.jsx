@@ -1,7 +1,7 @@
 import { useContext, useRef, useEffect } from "react";
 import { AuthContext } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { Home, User, DollarSign, FileText, Users, LogOut } from "react-feather";
+import { Home, User, DollarSign, Bell, Users, LogOut } from "react-feather";
 import { SlGraduation } from "react-icons/sl";
 
 const Sidebar = ({ isExpanded, setIsExpanded, navbarRef }) => {
@@ -76,6 +76,11 @@ const Sidebar = ({ isExpanded, setIsExpanded, navbarRef }) => {
                 <button className="btn btn-outline-secondary my-1 d-flex align-items-center col-12" onClick={ isExpanded ? (e) => { e.stopPropagation(); navigate("/finance"); } : null }>
                     <DollarSign size={24} className="flex-shrink-0" />
                     <div className="ms-2">{isExpanded && "Finanzas"}</div>
+                </button>
+
+                <button className="btn btn-outline-secondary my-1 d-flex align-items-center col-12" onClick={ isExpanded ? (e) => { e.stopPropagation(); navigate("/admin/notifications"); } : null }>
+                    <Bell size={24} className="flex-shrink-0" />
+                    <div className="ms-2">{isExpanded && "Notificaciones"}</div>
                 </button>
 
                 <div className="mt-auto">

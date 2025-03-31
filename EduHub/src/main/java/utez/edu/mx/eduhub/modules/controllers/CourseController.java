@@ -3,14 +3,18 @@ package utez.edu.mx.eduhub.modules.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import utez.edu.mx.eduhub.modules.entities.UserEntity;
 import utez.edu.mx.eduhub.modules.entities.course.Course;
+import utez.edu.mx.eduhub.modules.entities.course.MultimediaFile;
 import utez.edu.mx.eduhub.modules.entities.course.Rating;
 import utez.edu.mx.eduhub.modules.entities.dto.CertificateData;
+import utez.edu.mx.eduhub.modules.repositories.CourseRepository;
 import utez.edu.mx.eduhub.modules.repositories.UserRepository;
 import utez.edu.mx.eduhub.modules.services.CourseService;
+import utez.edu.mx.eduhub.modules.services.MultimediaService;
 import utez.edu.mx.eduhub.utils.security.JWTUtil;
 import utez.edu.mx.eduhub.utils.security.UserDetailsImpl;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,6 +32,9 @@ public class CourseController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private MultimediaService multimediaService;
 
     @Autowired
     private JWTUtil jwtUtil;
@@ -143,6 +150,11 @@ public class CourseController {
             @PathVariable String courseId,
             @RequestBody List<CertificateData> certificates) {
         return courseService.deliverCertificates(courseId, certificates);
+    }
+
+    @GetMapping("/view-file/{gridFsId}")
+    public ResponseEntity<?> viewFile(@PathVariable String gridFsId) {
+        return multimediaService.viewFile(gridFsId);
     }
 
     @DeleteMapping("/{id}")
