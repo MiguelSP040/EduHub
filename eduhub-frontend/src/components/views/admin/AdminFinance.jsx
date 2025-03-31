@@ -4,6 +4,9 @@ import Navbar from "./Navbar";
 import FinancePieChart from "./FinancePieChart";
 import { getAllFinances } from "../../../services/financeService";
 import FinanceListTransactions from "./FinanceListTransactions";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import logo from "../../../assets/img/eduhub-icon.png";
 
 const AdminFinance = () => {
     const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
@@ -42,6 +45,38 @@ const AdminFinance = () => {
         setIsSidebarExpanded(!isSidebarExpanded);
     };
 
+    const downloadPDF = async () => {
+        const input = document.getElementById("pdf-content");
+        if (!input) return;
+
+        const canvas = await html2canvas(input, { scale: 2 });
+        const imgData = canvas.toDataURL("image/png");
+        const pdf = new jsPDF("p", "mm", "a4");
+
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+
+        const logoImg = new Image();
+        logoImg.src = logo;
+
+        const logoSize = 20;
+        const margin = 10;
+        const title = "Reporte de métricas de EduHub";
+
+        logoImg.onload = () => {
+            pdf.addImage(logoImg, "PNG", margin, 10, logoSize, logoSize);
+            pdf.setFontSize(16);
+            pdf.text(title, margin + logoSize + 5, 20);
+
+            const imgProps = pdf.getImageProperties(imgData);
+            const imgWidth = pageWidth - 2 * margin;
+            const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+
+            pdf.addImage(imgData, "PNG", margin, 30, imgWidth, imgHeight);
+            pdf.save("reporte_finanzas.pdf");
+        };
+    };
+
     return (
         <div>
             {/* SIDEBAR */}
@@ -62,20 +97,21 @@ const AdminFinance = () => {
                         <div className="row">
                             <div className="col d-flex justify-content-between align-items-center">
                                 <h3 className="mb-0">Finanzas</h3>
-                                <button className="btn btn-purple-400">Descargar reporte</button>
+                                <button className="btn btn-purple-400" onClick={downloadPDF}>Descargar reporte</button>
                             </div>
                         </div>
-                        <div className="row">
-                            <div className="col-12 col-md-5 bg-white shadow-sm p-4 rounded mt-3">
-                                <h3>Métricas</h3>
-                                <FinancePieChart chartData={chartData} />
+                        <div id="pdf-content">
+                            <div className="row">
+                                <div className="col-12 col-md-5 bg-white shadow-sm p-4 rounded mt-3">
+                                    <h3>Métricas</h3>
+                                    <FinancePieChart chartData={chartData} />
+                                </div>
+                            </div>
+
+                            <div className="bg-white shadow-sm p-4 rounded mt-2">
+                                <FinanceListTransactions />
                             </div>
                         </div>
-
-                        <div className="bg-white shadow-sm p-4 rounded mt-2">
-                            <FinanceListTransactions />
-                        </div>
-
                     </main>
                 </div>
             </div>
