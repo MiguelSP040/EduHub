@@ -293,8 +293,6 @@ public class CourseService {
                     "Alert",
                     "course",
                     courseId
-
-
             );
         }
 
@@ -306,7 +304,6 @@ public class CourseService {
                 "Success",
                 "course",
                 courseId
-
         );
 
         return ResponseEntity.ok(course);

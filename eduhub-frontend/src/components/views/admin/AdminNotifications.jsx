@@ -20,8 +20,6 @@ export default function AdminNotifications() {
 
   const loadNotifications = async () => {
     const data = await getNotifications();
-    console.log(data);
-
     setNotifications(data);
   };
 
