@@ -75,9 +75,12 @@ const InstructorRatings = () => {
                           </td>
                           <td>{course.ratings.length === 0 ? 'Sin reseñas' : `${course.ratings.length} ${course.ratings.length === 1 ? 'reseña' : 'reseñas'}`}</td>
                           <td>
-                            <button className="btn btn-primary" onClick={() => navigate('/instructor/ratings/course-ratings', { state: { course } })}>
+                            {course.status === 'Finalizado' ? 
+                            <button className="btn btn-primary" onClick={() => navigate('/instructor/ratings/course-ratings', { state: { course } })} title='Ver calificaciones'>
                               <Eye />
-                            </button>
+                            </button> :
+                              <span className='text-muted'>Sin acciones disponibles</span>
+                            }
                           </td>
                         </tr>
                       );
