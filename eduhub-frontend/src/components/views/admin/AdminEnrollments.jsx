@@ -82,7 +82,7 @@ const AdminEnrollments = () => {
                 <div className="row gx-3 align-items-center">
                   <div className="col-12 col-sm d-flex justify-content-center justify-content-sm-start">
                     <div className="d-flex flex-row flex-sm-row w-100 justify-content-around justify-content-sm-start">
-                      <span className="fw-semibold fs-5">Gestión de Inscripciones</span>
+                      <span className="fw-semibold fs-4">Gestión de Inscripciones</span>
                     </div>
                   </div>
                   <div className="col-12 col-sm text-md-end mt-3 mt-sm-0">

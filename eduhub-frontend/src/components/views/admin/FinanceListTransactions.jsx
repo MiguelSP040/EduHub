@@ -58,43 +58,46 @@ const FinanceListTransactions = () => {
 
     return (
         <div className="mt-4">
-            <h5 className="mb-3">Listado de transacciones</h5>
-            <div className="table-responsive">
+            <h4 className="mb-3">Listado de transacciones</h4>
+            <div className="table-responsive" style={{ maxHeight: '400px', overflowY: 'auto' }}>
                 <table className="table table-bordered align-middle">
                     <thead className="table-light">
                         <tr>
-                            <th>Tipo</th>
-                            <th>Descripción</th>
-                            <th>Curso</th>
-                            <th>Usuario</th>
-                            <th>Monto</th>
                             <th>Fecha</th>
+                            <th>Usuario</th>
+                            <th>Curso</th>
+                            <th>Descripción</th>
+                            <th>Tipo</th>
+                            <th>Monto</th>
                         </tr>
                     </thead>
                     <tbody>
                         {transactions.length > 0 ? (
                             transactions.map((item) => (
                                 <tr key={item.id}>
+                                    <td>{formatDate(item.transactionDate)}</td>
+                                    <td>{userMap[item.userId] || item.userId || "—"}</td>
+                                    <td>{courseMap[item.courseId] || item.courseId || "—"}</td>
+                                    <td>{item.description || "—"}</td>
                                     <td>
-                                        <span className={`badge ${item.transactionType === "INCOME" ? "bg-success" : "bg-danger"}`}>
+                                        <span className={`badge ${item.transactionType === "INCOME" ? "badge-purple-color" : "badge-pink-color"}`}>
                                             {item.transactionType === "INCOME" ? "Ingreso" : "Egreso"}
                                         </span>
                                     </td>
-                                    <td>{item.description || "—"}</td>
-                                    <td>{courseMap[item.courseId] || item.courseId || "—"}</td>
-                                    <td>{userMap[item.userId] || item.userId || "—"}</td>
                                     <td>${Number(item.amount).toFixed(2)}</td>
-                                    <td>{formatDate(item.transactionDate)}</td>
                                 </tr>
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="6" className="text-center text-muted">No hay transacciones registradas.</td>
+                                <td colSpan="6" className="text-center text-muted">
+                                    No hay transacciones registradas.
+                                </td>
                             </tr>
                         )}
                     </tbody>
                 </table>
             </div>
+
         </div>
     );
 };
