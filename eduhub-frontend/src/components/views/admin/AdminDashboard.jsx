@@ -46,18 +46,17 @@ const AdminDashboard = () => {
   const getStatusBadgeClass = (status) => {
     switch (status) {
       case 'Pendiente':
-        return 'warning';
+        return 'badge-blue-color';
       case 'Aprobado':
-        return 'success';
+        return 'badge-green-color';
       case 'Empezado':
-        return 'primary';
+        return 'badge-pink-color';
       case 'Finalizado':
-        return 'danger';
+        return 'badge-red-color';
       default:
-        return 'secondary';
+        return 'badge-gray-color';
     }
   };
-
   const renderCourses = () =>
     coursesByStatus.length > 0 ? (
       coursesByStatus.map((course) => (
@@ -67,27 +66,28 @@ const AdminDashboard = () => {
             <div className="card-body course-body-height">
               <div className="d-flex justify-content-between align-items-center mb-2">
                 <h5 className="card-title text-truncate">{course.title}</h5>
-                <span className="badge text-bg-primary">{course.price === 0 ? 'GRATIS' : `$${course.price}`}</span>
+                <span className="badge badge-purple-color px-3 m-2">{course.price === 0 ? 'GRATIS' : `$${course.price}`}</span>
               </div>
-              <p className="card-text text-truncate">{course.description}</p>
+              
               <div className="d-flex justify-content-between">
-                <span className={`badge text-bg-${getStatusBadgeClass(course.status)} mb-3`}>{course.status}</span>
+                <span className={`badge ${getStatusBadgeClass(course.status)} mb-3`}>{course.status}</span>
                 <div>
-                  {course.hasCertificate? 
-                  ( <div className='text-success'><i className="bi bi-patch-check-fill"></i> Con certificado </div>) 
-                  :
-                  ( <div><i className="bi bi-patch-check"></i> Sin certificado </div>)
+                  {course.hasCertificate ?
+                    (<div className='text-success'><i className="bi bi-patch-check-fill"></i> Con certificado </div>)
+                    :
+                    (<div><i className="bi bi-patch-check"></i> Sin certificado </div>)
                   }
                 </div>
               </div>
-              <div className="d-flex justify-content-between">
-                <span className="text-muted">Inicio: {formatDate(course.dateStart)}</span>
-                <span className="text-muted">Fin: {formatDate(course.dateEnd)}</span>
+              <p className="card-text text-truncate">{course.description}</p>
+              <div className="text-muted small mb-2">
+                <i className="bi bi-calendar-event me-1" />
+                {formatDate(course.dateStart)} → {formatDate(course.dateEnd)}
               </div>
             </div>
-            <div className="card-footer bg-white border-0">
-              <button className="btn rounded-5 btn-purple-900" onClick={() => navigate('/admin/course', { state: { course } })}>
-                Gestionar
+            <div className="card-footer bg-white border-0 text-start">
+              <button className="btn rounded-5 btn-light" onClick={() => navigate('/admin/course', { state: { course } })}>
+                <i className="bi bi-gear-fill"></i> Configuración 
               </button>
             </div>
           </div>

@@ -122,19 +122,19 @@ const AdminCourseSessions = () => {
 
                   {course?.status === 'Aprobado' && (
                     <div className="col-12 col-sm-auto mt-2 mt-sm-0 text-center text-sm-end">
-                      <span className="fw-semibold text-success">Este curso ha sido aprobado.</span>
+                      <span className="fw-semibold text-success">Curso Aprobado</span>
                     </div>
                   )}
 
                   {course?.status === 'Empezado' && (
                     <div className="col-12 col-sm-auto mt-2 mt-sm-0 text-center text-sm-end">
-                      <span className="fw-semibold text-success">Este curso ha empezado.</span>
+                      <span className="fw-semibold text-blue">Curso Empezado</span>
                     </div>
                   )}
 
                   <div className="col-12 col-md-auto text-md-end mt-2 mt-md-0">
                     <button className="btn btn-outline-secondary" onClick={() => navigate('/admin')}>
-                      Volver
+                    <i className="bi bi-arrow-90deg-left"></i>
                     </button>
                   </div>
                 </div>
