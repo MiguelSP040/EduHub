@@ -89,7 +89,7 @@ export default function AdminNotifications() {
   const filtered = activeTab === 'pending' ? notifications.filter((n) => !n.read) : notifications;
 
   return (
-    <div>
+    <div className='bg-main'>
       <Sidebar isExpanded={isSidebarExpanded} setIsExpanded={setIsSidebarExpanded} navbarRef={navbarRef} />
       <div className="flex-grow-1">
         <div ref={navbarRef}>

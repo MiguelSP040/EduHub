@@ -1,49 +1,30 @@
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: smooth; /*Scroll suave*/
 }
 
+/*Fondo general*/
 .bg-main {
   background-color: #f9f9f9 !important;
 }
 
+/*==== CURSOS ====*/
 .course-body-height {
   height: 12rem !important;
   overflow-y: hidden;
 }
-
 .border-purple {
   border-color: #6c63ff !important;
   border-radius: 3px !important;
 }
-
 .image-overlay {
   background: linear-gradient(to right, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0));
   pointer-events: 'none';
 }
 
-.notification-card {
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-
-.notification-card.fade-out {
-  opacity: 0;
-  transform: translateY(-10px);
-}
-
-.recharts-wrapper :focus {
-  outline: none !important;
-}
-
-
-body {
-  overflow-x: hidden;
-}
-
+/*==== SESIONES ====*/
 .session-content {
-  /* Restablece la alineación por defecto del navegador */
   text-align: initial !important;
 }
-/* Y aplica la alineación que Quill genera en sus clases */
 .session-content .ql-align-center {
   text-align: center !important;
 }
@@ -53,11 +34,25 @@ body {
 .session-content .ql-align-justify {
   text-align: justify !important;
 }
-
 .session-acordeon:hover {
   border-left: 2px solid #6c63ff;
 }
 
+/*==== NOTIFICACIONES ====*/
+.notification-card {
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.notification-card.fade-out {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/*==== FINANZAS ====*/
+.recharts-wrapper :focus {
+  outline: none !important;
+}
+
+/*====RESPONSIVIDAD PANTALLAS MEDIANAS O SUPERIOR====*/
 @media screen and (min-width: 576px) {
   .img-container {
     width: 10rem;
