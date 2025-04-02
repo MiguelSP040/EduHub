@@ -128,7 +128,7 @@ const Login = ({ setView }) => {
           )}
         </button>
       </form>
-      <p className="text-danger mt-4"><small>O inicia sesión</small></p>
+      <p className="text-danger mt-4"><small>O registrate</small></p>
       <button
         className="btn btn-purple-400 mt-2 w-100  fw-bold"
         onClick={() => setView("registerStep1")}
