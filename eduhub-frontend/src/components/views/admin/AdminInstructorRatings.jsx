@@ -164,7 +164,7 @@ const AdminInstructorRatings = () => {
                   </div>
                   <div className="col-12 col-md-auto text-md-end mt-2 mt-md-0">
                     <button className="btn btn-outline-secondary" onClick={() => navigate('/instructors')}>
-                      Volver
+                    <i className="bi bi-arrow-90deg-left"></i>
                     </button>
                   </div>
                 </div>

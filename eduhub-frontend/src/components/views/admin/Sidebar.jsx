@@ -20,7 +20,7 @@ const Sidebar = ({ isExpanded, setIsExpanded, navbarRef }) => {
             if (
                 sidebarRef.current &&
                 !sidebarRef.current.contains(event.target) &&
-                navbarRef.current && 
+                navbarRef.current &&
                 !navbarRef.current.contains(event.target)
             ) {
                 setIsExpanded(false);
@@ -36,7 +36,7 @@ const Sidebar = ({ isExpanded, setIsExpanded, navbarRef }) => {
     }, [isExpanded, setIsExpanded, navbarRef]);
 
     return (
-        <div 
+        <div
             ref={sidebarRef}
             className={` sidebar bg-light shadow p-2 flex-column ${isExpanded ? "sidebar-expanded" : "sidebar-collapsed d-none d-md-flex"} `} onClick={!isExpanded ? () => setIsExpanded(true) : null}
             style={{
@@ -52,39 +52,40 @@ const Sidebar = ({ isExpanded, setIsExpanded, navbarRef }) => {
         >
             <div className="d-flex flex-column h-100 w-100 pt-1">
                 {/* Botones del Sidebar */}
-                <button className="btn btn-outline-secondary my-1 d-flex align-items-center col-12" onClick={ isExpanded ? (e) => { e.stopPropagation(); navigate("/admin"); } : null } >
+                <button className="btn my-1 d-flex align-items-center col-12 mt-3" onClick={isExpanded ? (e) => { e.stopPropagation(); navigate("/admin"); } : null} >
                     <Home size={24} className="flex-shrink-0" />
                     <div className="ms-2">{isExpanded && "Inicio"}</div>
                 </button>
 
                 <button
-                    className="btn btn-outline-secondary my-1 d-flex align-items-center col-12" onClick={ isExpanded ? (e) => { e.stopPropagation(); navigate("/profileAdmin"); } : null }>
+                    className="btn my-3 d-flex align-items-center col-12" onClick={isExpanded ? (e) => { e.stopPropagation(); navigate("/profileAdmin"); } : null}>
                     <User size={24} className="flex-shrink-0" />
                     <div className="ms-2">{isExpanded && "Perfil"}</div>
                 </button>
 
-                <button className="btn btn-outline-secondary my-1 d-flex align-items-center col-12" onClick={ isExpanded ? (e) => { e.stopPropagation(); navigate("/students"); } : null }>
+                <button className="btn my-3 d-flex align-items-center col-12" onClick={isExpanded ? (e) => { e.stopPropagation(); navigate("/students"); } : null}>
                     <SlGraduation size={24} className="flex-shrink-0" />
                     <div className="ms-2">{isExpanded && "Estudiantes"}</div>
                 </button>
 
-                <button className="btn btn-outline-secondary my-1 d-flex align-items-center col-12" onClick={ isExpanded ? (e) => { e.stopPropagation(); navigate("/instructors"); } : null }>
+                <button className="btn  my-3 d-flex align-items-center col-12" onClick={isExpanded ? (e) => { e.stopPropagation(); navigate("/instructors"); } : null}>
                     <Users size={24} className="flex-shrink-0" />
                     <div className="ms-2">{isExpanded && "Instructores"}</div>
                 </button>
 
-                <button className="btn btn-outline-secondary my-1 d-flex align-items-center col-12" onClick={ isExpanded ? (e) => { e.stopPropagation(); navigate("/finance"); } : null }>
+                <button className="btn my-3 d-flex align-items-center col-12" onClick={isExpanded ? (e) => { e.stopPropagation(); navigate("/finance"); } : null}>
                     <DollarSign size={24} className="flex-shrink-0" />
                     <div className="ms-2">{isExpanded && "Finanzas"}</div>
                 </button>
 
-                <button className="btn btn-outline-secondary my-1 d-flex align-items-center col-12" onClick={ isExpanded ? (e) => { e.stopPropagation(); navigate("/admin/notifications"); } : null }>
+                <button className="btn my-3 d-flex align-items-center col-12" onClick={isExpanded ? (e) => { e.stopPropagation(); navigate("/admin/notifications"); } : null}>
                     <Bell size={24} className="flex-shrink-0" />
                     <div className="ms-2">{isExpanded && "Notificaciones"}</div>
                 </button>
 
                 <div className="mt-auto">
-                    <button className="btn btn-danger d-flex align-items-center col-12" onClick={ isExpanded ? (e) => { e.stopPropagation(); handleLogout(); } : null }>
+                    <hr></hr>
+                    <button className="btn my-3 d-flex align-items-center col-12" onClick={isExpanded ? (e) => { e.stopPropagation(); handleLogout(); } : null}>
                         <LogOut size={24} className="flex-shrink-0" />
                         <div className="ms-2 text-truncate">
                             {isExpanded && "Cerrar sesión"}

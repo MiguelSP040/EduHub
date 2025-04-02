@@ -111,14 +111,16 @@ html {
   color: #aa39ad;
 }
 
-.card-header-purple {
-  background-color: #f3e8ff;
-  color: #5b2b82;
-}
+
 body {
   overflow-x: hidden;
 }
 
+/*SIDEBAR*/
+
+.bg-lila{
+  background-color: #faf5fe;
+}
 /*==== SESIONES ====*/
 
 .session-content {

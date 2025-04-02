@@ -138,7 +138,7 @@ const AdminFinance = () => {
                         <div className="row">
                             <div className="col d-flex justify-content-between align-items-center">
                                 <h3 className="mb-0">Finanzas</h3>
-                                <button className="btn btn-purple-400" onClick={downloadPDF}>Descargar reporte</button>
+                                <button className="btn btn-purple-400" onClick={downloadPDF}><i className="bi bi-download"></i> Descargar reporte</button>
                             </div>
                         </div>
 
