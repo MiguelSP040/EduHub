@@ -98,7 +98,7 @@ const AdminDashboard = () => {
     );
 
   return (
-    <div>
+    <div className='bg-main'>
       {/* SIDEBAR */}
       <Sidebar isExpanded={isSidebarExpanded} setIsExpanded={setIsSidebarExpanded} navbarRef={navbarRef} />
 

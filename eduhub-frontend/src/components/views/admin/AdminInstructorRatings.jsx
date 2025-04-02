@@ -98,7 +98,7 @@ const AdminInstructorRatings = () => {
   };
 
   return (
-    <div>
+    <div className='bg-main'>
       <Sidebar isExpanded={isSidebarExpanded} setIsExpanded={setIsSidebarExpanded} navbarRef={navbarRef} />
       <div className="flex-grow-1">
         <div ref={navbarRef}>

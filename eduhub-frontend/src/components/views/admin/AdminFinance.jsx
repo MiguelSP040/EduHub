@@ -118,7 +118,7 @@ const AdminFinance = () => {
     };
 
     return (
-        <div>
+        <div className='bg-main'>
             {/* SIDEBAR */}
             <Sidebar
                 isExpanded={isSidebarExpanded}

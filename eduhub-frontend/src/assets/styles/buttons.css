@@ -1,0 +1,64 @@
+/* Variables de color para botones */
+:root {
+    --btn-purple-900: #AA39AD;
+    --btn-purple-900-hover: #8A2E8A;
+    --btn-purple-900-active: #6A1E6A;
+  
+    --btn-purple-400: #604274;
+    --btn-purple-400-hover: #4D3A5A;
+    --btn-purple-400-active: #3A2C42;
+  
+    --btn-gray-800: #B9B9B9;
+    --btn-gray-800-hover: #A0A0A0;
+    --btn-gray-800-active: #A0A0A0;
+  }
+  
+  /*==== BOTONES ====*/
+  /* Estilos base para botones */
+  .btn-purple-900,
+  .btn-purple-400,
+  .btn-gray-800 {
+    color: white !important;
+  }
+  
+  /* Botón Primario */
+  .btn-purple-900 {
+    background-color: var(--btn-purple-900);
+  }
+  .btn-purple-900:hover {
+    background-color: var(--btn-purple-900-hover);
+  }
+  .btn-purple-900:active {
+    background-color: var(--btn-purple-900-active) !important;
+  }
+  .btn-purple-900:disabled {
+    background-color: var(--btn-purple-900) !important;
+  }
+  
+  /* Botón Secundario */
+  .btn-purple-400 {
+    background-color: var(--btn-purple-400);
+  }
+  .btn-purple-400:hover {
+    background-color: var(--btn-purple-400-hover);
+  }
+  .btn-purple-400:active {
+    background-color: var(--btn-purple-400-active) !important;
+  }
+  .btn-purple-400:disabled {
+    background-color: var(--btn-purple-400);
+  }
+  
+  /* Botón Gris */
+  .btn-gray-800 {
+    background-color: var(--btn-gray-800);
+  }
+  .btn-gray-800:hover {
+    background-color: var(--btn-gray-800-hover);
+  }
+  .btn-gray-800:active {
+    background-color: var(--btn-gray-800-active) !important;
+  }
+  .btn-gray-800:disabled {
+    background-color: var(--btn-gray-800);
+  }
