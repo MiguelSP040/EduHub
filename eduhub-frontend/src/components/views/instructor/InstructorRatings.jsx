@@ -4,13 +4,15 @@ import Sidebar from './Sidebar';
 import Navbar from '../Navbar';
 import { Eye } from 'react-feather';
 import { useNavigate } from 'react-router-dom';
+import Loading from '../../utilities/Loading';
 
 const InstructorRatings = () => {
   const navigate = useNavigate();
+  const navbarRef = useRef(null);
 
   const [courses, setCourses] = useState([]);
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
-  const navbarRef = useRef(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -21,13 +23,15 @@ const InstructorRatings = () => {
         setCourses(data);
       } catch (error) {
         console.error('Error al obtener cursos:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchCourses();
   }, []);
 
   return (
-    <div className='bg-main'>
+    <div className="bg-main">
       {/* SIDEBAR */}
       <Sidebar isExpanded={isSidebarExpanded} setIsExpanded={setIsSidebarExpanded} navbarRef={navbarRef} />
 
@@ -52,7 +56,13 @@ const InstructorRatings = () => {
                   </tr>
                 </thead>
                 <tbody className="align-middle">
-                  {courses.length > 0 ? (
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan="4" className="text-center py-3">
+                        <Loading/>
+                      </td>
+                    </tr>
+                  ) : courses.length > 0 ? (
                     courses.map((course) => {
                       const averageRating = course.ratings.length > 0 ? course.ratings.reduce((sum, r) => sum + r.rating, 0) / course.ratings.length : 0;
                       return (
@@ -65,7 +75,7 @@ const InstructorRatings = () => {
                           </td>
                           <td>{course.ratings.length === 0 ? 'Sin reseñas' : `${course.ratings.length} ${course.ratings.length === 1 ? 'reseña' : 'reseñas'}`}</td>
                           <td>
-                            <button className="btn btn-primary" disabled={course.ratings.length === -1} onClick={() => navigate('/instructor/ratings/course-ratings', { state: { course } })}>
+                            <button className="btn btn-primary" onClick={() => navigate('/instructor/ratings/course-ratings', { state: { course } })}>
                               <Eye />
                             </button>
                           </td>

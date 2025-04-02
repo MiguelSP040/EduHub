@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -49,7 +50,9 @@ public class Course {
     private String status; //pendiente, aceptado o rechazado
 
     //Relaciones
+    @Indexed
     private String docenteId; //Referencia al Docente creador del curso
+
     private List<StudentEnrollment> enrollments = new ArrayList<>();
     private List<Session> sessions; //Embebido: OneToMany
     private List<Rating> ratings; //Embebido: OneToMany

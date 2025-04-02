@@ -173,7 +173,7 @@ const MyStudents = ({ courseId, courseLenght, deliverCertificatesTrigger, course
                 <td>
                   {student.name} {student.surname}{' '}
                 </td>
-                <td>{student.enrolledDate || 'Fecha no disponible'}</td>
+                <td>{student.enrolledDate ? new Date(student.enrolledDate).toLocaleDateString() : 'No disponible'}</td>
                 <td>{student.status === 'Aceptado' || student.status === 'En progreso' || student.status === 'Completado' ? `${student.progress || 0}%` : 'N/A'}</td>
                 <td>
                   {student.status === 'Aceptado' || student.status === 'Completado' ? (

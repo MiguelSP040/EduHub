@@ -5,27 +5,33 @@ import { findAllUsers, activateInstructor } from '../../../services/userService'
 import { Modal } from 'bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { getCoursesByInstructor } from '../../../services/courseService';
-import { payInstructorForCourse } from "../../../services/financeService";
+import { payInstructorForCourse } from '../../../services/financeService';
+import Loading from '../../utilities/Loading';
 
 const AdminInstructors = () => {
   const navigate = useNavigate();
   const navbarRef = useRef(null);
+  const viewInstructorModalRef = useRef(null);
+
   const [instructorIndex, setInstructorIndex] = useState(0);
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const [instructors, setInstructors] = useState([]);
-  const viewInstructorModalRef = useRef(null);
+  const [isLoading, setLoading] = useState(true);
+
+  const fetchInstructors = async () => {
+    setLoading(true);
+    try {
+      const data = await findAllUsers();
+      const filteredInstructors = data.filter((user) => user.role === 'ROLE_INSTRUCTOR');
+      setInstructors(filteredInstructors);
+    } catch (error) {
+      console.error('Error al obtener instructores:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchInstructors = async () => {
-      try {
-        const data = await findAllUsers();
-        const filteredInstructors = data.filter((user) => user.role === 'ROLE_INSTRUCTOR');
-        setInstructors(filteredInstructors);
-      } catch (error) {
-        console.error('Error al obtener instructores:', error);
-      }
-    };
-
     fetchInstructors();
   }, []);
 
@@ -34,20 +40,20 @@ const AdminInstructors = () => {
       const response = await getCoursesByInstructor(id);
       return response;
     } catch (error) {
-      console.error('Fallo al obtener cursos', error)
+      console.error('Fallo al obtener cursos', error);
     }
-  }
+  };
 
   const handlePayToInstructor = async (instructorId) => {
-    const confirm = window.confirm("¿Estás seguro de que deseas pagar al instructor? Esta acción no se puede deshacer.");
-    if (!confirm) return;
+    const confirmAction = window.confirm('¿Estás seguro de que deseas pagar al instructor? Esta acción no se puede deshacer.');
+    if (!confirmAction) return;
 
     try {
       const courses = await fetchCourses(instructorId);
       const unpaidCourses = courses.filter((course) => course.payment === false);
 
       if (unpaidCourses.length === 0) {
-        alert("Este instructor no tiene cursos pendientes de pago.");
+        alert('Este instructor no tiene cursos pendientes de pago.');
         return;
       }
 
@@ -60,23 +66,21 @@ const AdminInstructors = () => {
         if (res.status !== 200) allSuccessful = false;
       }
 
-      alert(messages.join("\n"));
+      alert(messages.join('\n'));
       if (allSuccessful) {
-        console.log("Todos los pagos procesados exitosamente.");
+        console.log('Todos los pagos procesados exitosamente.');
       }
     } catch (error) {
-      console.error("Error al pagar al instructor:", error);
-      alert("Error inesperado al procesar el pago.");
+      console.error('Error al pagar al instructor:', error);
+      alert('Error inesperado al procesar el pago.');
     }
   };
-
 
   const handleActivateInstructor = async (instructorId) => {
     const response = await activateInstructor(instructorId);
 
     if (response.status === 200) {
       alert(response.message);
-
       setInstructors((prevInstructors) => prevInstructors.map((instructor) => (instructor.id === instructorId ? { ...instructor, active: true } : instructor)));
     } else {
       alert('Error al activar el instructor.');
@@ -85,8 +89,6 @@ const AdminInstructors = () => {
 
   const openModal = (modalRef, index) => {
     setInstructorIndex(index);
-    console.log(instructors[instructorIndex]);
-
     if (modalRef.current) {
       const modal = new Modal(modalRef.current);
       modal.show();
@@ -94,7 +96,7 @@ const AdminInstructors = () => {
   };
 
   return (
-    <div className='bg-main'>
+    <div className="bg-main">
       {/* SIDEBAR */}
       <Sidebar isExpanded={isSidebarExpanded} setIsExpanded={setIsSidebarExpanded} navbarRef={navbarRef} />
 
@@ -131,7 +133,13 @@ const AdminInstructors = () => {
                   </tr>
                 </thead>
                 <tbody className="align-middle">
-                  {instructors.length > 0 ? (
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan="5" className="text-center py-5">
+                        <Loading />
+                      </td>
+                    </tr>
+                  ) : instructors.length > 0 ? (
                     instructors.map((instructor, index) => (
                       <tr key={instructor._id || index}>
                         <td>
@@ -188,30 +196,29 @@ const AdminInstructors = () => {
               <div className="row mb-3">
                 <div className="col-12 col-sm-6">
                   <h5>Nombre (s)</h5>
-                  <span>{instructors[instructorIndex]?.name} </span>
+                  <span>{instructors[instructorIndex]?.name}</span>
                 </div>
                 <div className="col-12 col-sm-6">
                   <h5>Apellido (s)</h5>
                   <span>
-                    {' '}
-                    {instructors[instructorIndex]?.surname} {instructors[instructorIndex]?.lastname}{' '}
+                    {instructors[instructorIndex]?.surname} {instructors[instructorIndex]?.lastname}
                   </span>
                 </div>
               </div>
               <div className="row my-3">
                 <div className="col-12 col-sm-6">
                   <h5>Apodo</h5>
-                  <span> {instructors[instructorIndex]?.username} </span>
+                  <span>{instructors[instructorIndex]?.username}</span>
                 </div>
                 <div className="col-12 col-sm-6">
                   <h5>Correo electrónico</h5>
-                  <span> {instructors[instructorIndex]?.email} </span>
+                  <span>{instructors[instructorIndex]?.email}</span>
                 </div>
               </div>
               <div className="row mb-3">
                 <div className="col-12">
                   <h5>Descripción</h5>
-                  <span> {instructors[instructorIndex]?.description ? instructors[instructorIndex]?.description : 'Sin descripción'} </span>
+                  <span>{instructors[instructorIndex]?.description ? instructors[instructorIndex]?.description : 'Sin descripción'}</span>
                 </div>
               </div>
             </div>
