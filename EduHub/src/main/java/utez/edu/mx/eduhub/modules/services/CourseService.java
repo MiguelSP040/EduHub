@@ -305,7 +305,7 @@ public class CourseService {
                     "Curso pendiente por aprobar",
                     "El curso \"" + course.getTitle() + "\" ha sido enviado por un instructor para su aprobación.",
                     "Alert",
-                    "course",
+                    "Course",
                     courseId
             );
         }
@@ -316,7 +316,7 @@ public class CourseService {
                 "Curso enviado para aprobación",
                 "Tu curso \"" + course.getTitle() + "\" fue enviado para su aprobación. Pronto recibirás una respuesta.",
                 "Success",
-                "course",
+                "Course",
                 courseId
         );
 

@@ -13,7 +13,7 @@ public class NotificationService {
     private NotificationRepository repository;
 
     public void sendNotification(String userId, String title, String message, String type, String relatedModule, String relatedId) {
-        Notification notification = new Notification(userId, title, message, type, relatedId, relatedModule);
+        Notification notification = new Notification(userId, title, message, type, relatedModule, relatedId);
         repository.save(notification);
     }
 

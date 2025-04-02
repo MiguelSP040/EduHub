@@ -5,27 +5,35 @@ import Sidebar from './Sidebar';
 import { BookOpen } from 'react-feather';
 import { getNotifications, markAsRead } from '../../../services/notificationService';
 import { getCourseById } from '../../../services/courseService';
+import Loading from '../../utilities/Loading';
 
 export default function InstructorNotifications() {
-  const navbarRef = useRef(null);
   const navigate = useNavigate();
+  const navbarRef = useRef(null);
+
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState('allNotifications');
   const [notifications, setNotifications] = useState([]);
   const [fadingNotifications, setFadingNotifications] = useState([]);
+  const [isLoading, setLoading] = useState(true);
 
   useEffect(() => {
     loadNotifications();
   }, []);
 
   const loadNotifications = async () => {
-    const data = await getNotifications();
-    setNotifications(data);
+    try {
+      const data = await getNotifications();
+      setNotifications(data);
+    } catch (error) {
+      console.error('Error al obtener las notificaciones', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleMarkAsRead = async (id, newReadState) => {
     setFadingNotifications((prev) => [...prev, id]);
-
     setTimeout(async () => {
       await markAsRead(id, newReadState);
       await loadNotifications();
@@ -90,7 +98,7 @@ export default function InstructorNotifications() {
   const filtered = activeTab === 'pending' ? notifications.filter((n) => !n.read) : notifications;
 
   return (
-    <div className='bg-main'>
+    <div className="bg-main">
       <Sidebar isExpanded={isSidebarExpanded} setIsExpanded={setIsSidebarExpanded} navbarRef={navbarRef} />
       <div className="flex-grow-1">
         <div ref={navbarRef}>
@@ -127,7 +135,9 @@ export default function InstructorNotifications() {
               </div>
             </div>
 
-            {filtered.length > 0 ? (
+            {isLoading ? (
+              <Loading />
+            ) : filtered.length > 0 ? (
               <div className="d-flex flex-column gap-3">
                 {filtered.map((n) => {
                   const date = new Date(n.createdAt);

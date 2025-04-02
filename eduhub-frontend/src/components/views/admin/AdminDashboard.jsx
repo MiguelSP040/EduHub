@@ -1,31 +1,40 @@
 import { useState, useRef, useEffect, useContext, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { BookOpen, Clock, CheckCircle, XCircle } from 'react-feather';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
-import { BookOpen, Clock, CheckCircle, XCircle } from 'react-feather';
 import { AuthContext } from '../../../context/AuthContext';
 import { getCourses } from '../../../services/courseService';
-import { useNavigate } from 'react-router-dom';
+import Loading from '../../utilities/Loading';
 
 const AdminDashboard = () => {
-  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
-  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const { user } = useContext(AuthContext); // Por si llega ser necesario
   const navbarRef = useRef(null);
+
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const [availableCourses, setAvailableCourses] = useState([]);
   const [activeTab, setActiveTab] = useState('allCourses');
-  const navigate = useNavigate();
+  const [isLoading, setLoading] = useState(true);
+
+  const fetchData = async () => {
+    try {
+      let allCourses = await getCourses();
+      allCourses = allCourses.filter((course) => course.published);
+      setAvailableCourses(allCourses || []);
+    } catch (error) {
+      console.error('Error al obtener los cursos:', error);
+      setAvailableCourses([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        let allCourses = await getCourses();
-        allCourses = allCourses.filter((course) => course.published);
-        setAvailableCourses(allCourses || []);
-      } catch (error) {
-        console.error('Error al obtener los cursos:', error);
-        setAvailableCourses([]);
-      }
-    };
     fetchData();
+    // Polling: actualizar cada 30 segundos para reflejar cambios en tiempo real
+    const intervalId = setInterval(fetchData, 30000);
+    return () => clearInterval(intervalId);
   }, []);
 
   const coursesByStatus = useMemo(() => {
@@ -72,11 +81,15 @@ const AdminDashboard = () => {
               <div className="d-flex justify-content-between">
                 <span className={`badge ${getStatusBadgeClass(course.status)} mb-3`}>{course.status}</span>
                 <div>
-                  {course.hasCertificate ?
-                    (<div className='text-success'><i className="bi bi-patch-check-fill"></i> Con certificado </div>)
-                    :
-                    (<div><i className="bi bi-patch-check"></i> Sin certificado </div>)
-                  }
+                  {course.hasCertificate ? (
+                    <div className="text-success">
+                      <i className="bi bi-patch-check-fill"></i> Con certificado{' '}
+                    </div>
+                  ) : (
+                    <div>
+                      <i className="bi bi-patch-check"></i> Sin certificado{' '}
+                    </div>
+                  )}
                 </div>
               </div>
               <p className="card-text text-truncate">{course.description}</p>
@@ -98,7 +111,7 @@ const AdminDashboard = () => {
     );
 
   return (
-    <div className='bg-main'>
+    <div className="bg-main">
       {/* SIDEBAR */}
       <Sidebar isExpanded={isSidebarExpanded} setIsExpanded={setIsSidebarExpanded} navbarRef={navbarRef} />
 
@@ -133,7 +146,7 @@ const AdminDashboard = () => {
 
             {/* LISTADO DE CURSOS FILTRADOS */}
             <section>
-              <div className="row">{renderCourses()}</div>
+              {isLoading ? <Loading /> : <div className="row">{renderCourses()}</div>}
             </section>
           </main>
         </div>

@@ -2,28 +2,36 @@ import { useEffect, useState, useRef } from 'react';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
 import { getCourses, getStudentsByCourse, manageEnrollment, viewVoucherFile } from '../../../services/courseService';
-import { CheckCircle, AlertCircle, FileText } from 'react-feather';
+import Loading from '../../utilities/Loading';
 
 const AdminEnrollments = () => {
   const navbarRef = useRef(null);
+
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
-  const [courses, setCourses] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState(null);
-  const [students, setStudents] = useState([]);
   const [loadingFileId, setLoadingFileId] = useState(null);
+  const [students, setStudents] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [isLoading, setLoading] = useState(true);
+
+  const fetchData = async () => {
+    try {
+      const data = await getCourses();
+      const paidCourses = data.filter((course) => course.price > 0 && (course.status === 'Aprobado' || course.status === 'Empezado' || course.status === 'Finalizado') && course.archived !== true);
+      setCourses(paidCourses);
+    } catch (error) {
+      console.error('Error al obtener cursos:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        const data = await getCourses();
-        const paidCourses = data.filter((course) => course.price > 0 && (course.status === 'Aprobado' || course.status === 'Empezado' || course.status === 'Finalizado') && course.archived !== true);
-        setCourses(paidCourses);
-      } catch (error) {
-        console.error('Error al obtener cursos:', error);
-      }
-    };
-    fetchCourses();
-  }, []);
+    fetchData();
+    // Actualiza cada 30 segundos para reflejar cambios en tiempo real
+    const intervalId = setInterval(fetchData, 30000);
+    return () => clearInterval(intervalId);
+  }, []); // Usamos [] para evitar reejecuciones innecesarias
 
   const fetchStudents = async (courseId) => {
     try {
@@ -36,8 +44,8 @@ const AdminEnrollments = () => {
 
   const handleCourseChange = async (event) => {
     const courseId = event.target.value;
-    await setSelectedCourse(courseId);
-    await fetchStudents(courseId);
+    setSelectedCourse(courseId);
+    fetchStudents(courseId);
   };
 
   const handleManageEnrollment = async (studentId, accept) => {
@@ -46,7 +54,6 @@ const AdminEnrollments = () => {
     const response = await manageEnrollment(selectedCourse, studentId, accept);
     if (response.status === 200) {
       alert(response.message);
-
       setStudents((prevStudents) =>
         accept ? prevStudents.map((student) => (student.id === studentId ? { ...student, status: 'Aceptado' } : student)) : prevStudents.map((student) => (student.id === studentId ? { ...student, status: 'Rechazado', tempRejected: true } : student))
       );
@@ -56,7 +63,7 @@ const AdminEnrollments = () => {
   };
 
   return (
-    <div className='bg-main'>
+    <div className="bg-main">
       {/* SIDEBAR */}
       <Sidebar isExpanded={isSidebarExpanded} setIsExpanded={setIsSidebarExpanded} navbarRef={navbarRef} />
 
@@ -79,15 +86,21 @@ const AdminEnrollments = () => {
                     </div>
                   </div>
                   <div className="col-12 col-sm text-md-end mt-3 mt-sm-0">
-                    <select className="form-select" value={selectedCourse || ''} onChange={handleCourseChange} disabled={courses.length === 0}>
-                      <option value="" disabled>
-                        {courses.length === 0 ? 'No hay cursos aprobados' : 'Seleccione un curso'}
-                      </option>
-                      {courses.map((course) => (
-                        <option key={course.id} value={course.id}>
-                          {course.title} - ${course.price}
-                        </option>
-                      ))}
+                    <select className="form-select" value={selectedCourse || ''} onChange={handleCourseChange} disabled={isLoading || courses.length === 0}>
+                      {isLoading ? (
+                        <option value="">Cargando cursos...</option>
+                      ) : (
+                        <>
+                          <option value="" disabled>
+                            {courses.length === 0 ? 'No hay cursos aprobados' : 'Seleccione un curso'}
+                          </option>
+                          {courses.map((course) => (
+                            <option key={course.id} value={course.id}>
+                              {course.title} - ${course.price}
+                            </option>
+                          ))}
+                        </>
+                      )}
                     </select>
                   </div>
                 </div>
@@ -143,7 +156,9 @@ const AdminEnrollments = () => {
                                       <div className="spinner-border spinner-border-sm text-primary" role="status" />
                                     ) : (
                                       <>
-                                        <span className='fs-5'><i className={`${iconClass} me-2`}></i></span>
+                                        <span className="fs-5">
+                                          <i className={`${iconClass} me-2`}></i>
+                                        </span>
                                         Ver
                                       </>
                                     )}
@@ -152,7 +167,10 @@ const AdminEnrollments = () => {
                               })()
                             ) : (
                               <span className="text-muted">
-                                <span className='fs-5'><i className="bi bi-file-earmark-x me-1"></i></span> No disponible
+                                <span className="fs-5">
+                                  <i className="bi bi-file-earmark-x me-1"></i>
+                                </span>{' '}
+                                No disponible
                               </span>
                             )}
                           </td>
@@ -166,9 +184,9 @@ const AdminEnrollments = () => {
                                   Rechazar
                                 </button>
                               </>
-                            ) :
-                            ( <span className='text-muted'>Estudiante {student.status.toLowerCase()}</span> )
-                            }
+                            ) : (
+                              <span className="text-muted">Estudiante {student.status.toLowerCase()}</span>
+                            )}
                           </td>
                         </tr>
                       ))
