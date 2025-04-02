@@ -34,6 +34,21 @@ html {
   outline: none !important;
 }
 
+.badge-income-color {
+  background-color: #E6F6EB;
+  color:#426053;
+
+}
+
+.badge-expense-color {
+  background-color: #f8e0f9;
+  color: #aa39ad;
+}
+
+/*background-color: #aa39ad; FIUCSA
+  background-color: #F7EDFE; lila
+  color: #654980; morado*/
+
 
 body {
   overflow-x: hidden;
@@ -43,13 +58,16 @@ body {
   /* Restablece la alineación por defecto del navegador */
   text-align: initial !important;
 }
+
 /* Y aplica la alineación que Quill genera en sus clases */
 .session-content .ql-align-center {
   text-align: center !important;
 }
+
 .session-content .ql-align-right {
   text-align: right !important;
 }
+
 .session-content .ql-align-justify {
   text-align: justify !important;
 }

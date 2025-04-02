@@ -9,7 +9,7 @@ import {
 } from "recharts";
 import { getAllFinances } from "../../../services/financeService";
 
-const COLORS = ["#8884d8", "#dc3545"];
+const COLORS = ["#8e44ad", "#c295cd"];
 
 const CustomActiveShape = (props) => {
     const RADIAN = Math.PI / 180;

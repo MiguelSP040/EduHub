@@ -58,15 +58,15 @@ const FinanceListTransactions = () => {
 
     return (
         <div className="mt-4">
-            <h5 className="mb-3">Listado de transacciones</h5>
+            <h4 className="mb-3">Listado de transacciones</h4>
             <div className="table-responsive">
                 <table className="table table-bordered align-middle">
                     <thead className="table-light">
                         <tr>
-                            <th>Tipo</th>
-                            <th>Descripción</th>
                             <th>Curso</th>
+                            <th>Descripción</th>
                             <th>Usuario</th>
+                            <th>Tipo</th>
                             <th>Monto</th>
                             <th>Fecha</th>
                         </tr>
@@ -75,14 +75,14 @@ const FinanceListTransactions = () => {
                         {transactions.length > 0 ? (
                             transactions.map((item) => (
                                 <tr key={item.id}>
+                                    <td>{courseMap[item.courseId] || item.courseId || "—"}</td>
+                                    <td>{item.description || "—"}</td>
+                                    <td>{userMap[item.userId] || item.userId || "—"}</td>
                                     <td>
-                                        <span className={`badge ${item.transactionType === "INCOME" ? "bg-success" : "bg-danger"}`}>
+                                        <span className={`badge ${item.transactionType === "INCOME" ? "badge-income-color" : "badge-expense-color"}`}>
                                             {item.transactionType === "INCOME" ? "Ingreso" : "Egreso"}
                                         </span>
                                     </td>
-                                    <td>{item.description || "—"}</td>
-                                    <td>{courseMap[item.courseId] || item.courseId || "—"}</td>
-                                    <td>{userMap[item.userId] || item.userId || "—"}</td>
                                     <td>${Number(item.amount).toFixed(2)}</td>
                                     <td>{formatDate(item.transactionDate)}</td>
                                 </tr>
