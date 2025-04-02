@@ -139,23 +139,23 @@ const AdminInstructors = () => {
                         </td>
                         <td>{instructor.email}</td>
                         <td>{instructor.username}</td>
-                        <td>{instructor.active ? <span className="badge bg-success">Activo</span> : <span className="badge bg-warning">Inactivo</span>}</td>
+                        <td>{instructor.active ? <span className="badge bg-success px-3">Activo</span> : <span className="badge bg-warning">Inactivo</span>}</td>
                         <td>
                           {!instructor.active && (
                             <button className="btn btn-success btn-sm me-2" onClick={() => handleActivateInstructor(instructor.id)} title="Activar al instructor">
                               <i className="bi bi-check-circle"></i>
                             </button>
                           )}
-                          <button className="btn btn-primary btn-sm me-2" onClick={() => openModal(viewInstructorModalRef, index)} title="Ver datos del instructor">
+                          <button className="btn badge-blue-color  btn-sm me-2" onClick={() => openModal(viewInstructorModalRef, index)} title="Ver datos del instructor">
                             <i className="bi bi-eye"></i>
                           </button>
                           {instructor.active && (
-                            <button className="btn btn-success btn-sm me-2" onClick={() => navigate('/instructors/ratings', { state: { instructor } })} title="Ver calificaciones">
+                            <button className="btn badge-green-color btn-sm me-2" onClick={() => navigate('/instructors/ratings', { state: { instructor } })} title="Ver calificaciones">
                               <i className="bi bi-clipboard-data"></i>
                             </button>
                           )}
                           {instructor.active && (
-                            <button className="btn btn-warning btn-sm me-2" onClick={() => handlePayToInstructor(instructor.id)} title="Pagar cursos">
+                            <button className="btn badge-pink-color btn-sm me-2" onClick={() => handlePayToInstructor(instructor.id)} title="Pagar cursos">
                               <i className="bi bi-currency-dollar"></i>
                             </button>
                           )}
