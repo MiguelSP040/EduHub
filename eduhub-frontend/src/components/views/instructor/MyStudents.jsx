@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react';
 import { getStudentsByCourse, deliverCertificates } from '../../../services/courseService';
 import { CheckCircle, AlertCircle, FileText } from 'react-feather';
 import jsPDF from 'jspdf';
+import Loading from '../../utilities/Loading';
 
 const MyStudents = ({ courseId, courseLenght, deliverCertificatesTrigger, course, instructor, setCanDeliverCertificates }) => {
   const [students, setStudents] = useState([]);
   const [certificateStatus, setCertificateStatus] = useState({});
+  const [isStudentsLoading, setIsStudentsLoading] = useState(true);
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -36,6 +38,8 @@ const MyStudents = ({ courseId, courseLenght, deliverCertificatesTrigger, course
         }
       } catch (error) {
         console.error('Error al obtener estudiantes:', error);
+      } finally {
+        setIsStudentsLoading(false);
       }
     };
 
@@ -154,7 +158,7 @@ const MyStudents = ({ courseId, courseLenght, deliverCertificatesTrigger, course
           <tr>
             <th colSpan="5" className="text-center">
               <h4 className="mb-0">
-                Estudiantes Inscritos - {students.length}/{courseLenght}
+                Estudiantes Inscritos - {isStudentsLoading ? '--' :students.length}/{courseLenght}
               </h4>
             </th>
           </tr>
@@ -167,11 +171,17 @@ const MyStudents = ({ courseId, courseLenght, deliverCertificatesTrigger, course
           </tr>
         </thead>
         <tbody>
-          {students.length > 0 ? (
+          {isStudentsLoading ? (
+            <tr>
+              <td colSpan="5" className="text-center py-5">
+                <Loading />
+              </td>
+            </tr>
+          ) : students.length > 0 ? (
             students.map((student) => (
               <tr key={student.id}>
                 <td>
-                  {student.name} {student.surname}{' '}
+                  {student.name} {student.surname}
                 </td>
                 <td>{student.enrolledDate ? new Date(student.enrolledDate).toLocaleDateString() : 'No disponible'}</td>
                 <td>{student.status === 'Aceptado' || student.status === 'En progreso' || student.status === 'Completado' ? `${student.progress || 0}%` : 'N/A'}</td>

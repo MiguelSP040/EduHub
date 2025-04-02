@@ -65,17 +65,16 @@ const InstructorDashboard = () => {
 
   const getStatusBadgeClass = (status) => {
     switch (status) {
-      case 'Creado':
-        return 'secondary';
       case 'Pendiente':
-        return 'warning';
+        return 'badge-blue-color';
       case 'Aprobado':
-        return 'success';
-      case 'Rechazado':
+        return 'badge-green-color';
+      case 'Empezado':
+        return 'badge-pink-color';
       case 'Finalizado':
-        return 'danger';
+        return 'badge-red-color';
       default:
-        return 'primary';
+        return 'badge-gray-color';
     }
   };
 
@@ -88,11 +87,11 @@ const InstructorDashboard = () => {
             <div className="card-body course-body-height">
               <div className="d-flex justify-content-between align-items-center mb-2">
                 <h5 className="card-title text-truncate">{course.title}</h5>
-                <span className="badge text-bg-primary">{course.price === 0 ? 'GRATIS' : `$${course.price}`}</span>
+                <span className="badge badge-purple-color">{course.price === 0 ? 'GRATIS' : `$${course.price}`}</span>
               </div>
-              <p className="card-text text-truncate">{course.description}</p>
+              
               <div className="d-flex justify-content-between">
-                <span className={`badge text-bg-${getStatusBadgeClass(course.status)} mb-3`}>{course.status}</span>
+                <span className={`badge ${getStatusBadgeClass(course.status)} mb-3`}>{course.status}</span>
                 <div>
                   {course.hasCertificate ? (
                     <div className="text-success">
@@ -105,14 +104,15 @@ const InstructorDashboard = () => {
                   )}
                 </div>
               </div>
-              <div className="d-flex justify-content-between">
-                <span className="text-muted">Inicio: {formatDate(course.dateStart)}</span>
-                <span className="text-muted">Fin: {formatDate(course.dateEnd)}</span>
+              <p className="card-text text-truncate">{course.description}</p>
+              <div className="text-muted small mb-2">
+                <i className="bi bi-calendar-event me-1" />
+                {formatDate(course.dateStart)} → {formatDate(course.dateEnd)}
               </div>
             </div>
             <div className="card-footer bg-white border-0">
-              <button className="btn rounded-5 btn-purple-900" onClick={() => navigate('/instructor/course', { state: { course } })}>
-                Ver curso
+              <button className="btn rounded-5 btn-blue-600" onClick={() => navigate('/instructor/course', { state: { course } })}>
+              <i className="bi bi-arrow-return-right"></i> Ver curso
               </button>
             </div>
           </div>
@@ -162,9 +162,7 @@ const InstructorDashboard = () => {
             </div>
 
             {/* LISTADO DE CURSOS */}
-            <section>
-              {isLoading ? <Loading /> : <div className="row">{renderCourses()}</div>}
-            </section>
+            <section>{isLoading ? <Loading /> : <div className="row">{renderCourses()}</div>}</section>
           </main>
         </div>
       </div>

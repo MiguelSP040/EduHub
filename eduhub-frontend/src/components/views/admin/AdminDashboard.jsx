@@ -66,6 +66,7 @@ const AdminDashboard = () => {
         return 'badge-gray-color';
     }
   };
+  
   const renderCourses = () =>
     coursesByStatus.length > 0 ? (
       coursesByStatus.map((course) => (
@@ -99,8 +100,8 @@ const AdminDashboard = () => {
               </div>
             </div>
             <div className="card-footer bg-white border-0 text-start">
-              <button className="btn rounded-5 btn-light" onClick={() => navigate('/admin/course', { state: { course } })}>
-                <i className="bi bi-gear-fill"></i> Configuración 
+              <button className="btn rounded-5 btn-blue-600" onClick={() => navigate('/admin/course', { state: { course } })}>
+                <i className="bi bi-gear-fill"></i> Gestionar 
               </button>
             </div>
           </div>

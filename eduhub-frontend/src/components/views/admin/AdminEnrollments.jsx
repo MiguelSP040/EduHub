@@ -13,6 +13,7 @@ const AdminEnrollments = () => {
   const [students, setStudents] = useState([]);
   const [courses, setCourses] = useState([]);
   const [isLoading, setLoading] = useState(true);
+  const [isStudentsLoading, setStudentsLoading] = useState(true);
 
   const fetchData = async () => {
     try {
@@ -28,10 +29,9 @@ const AdminEnrollments = () => {
 
   useEffect(() => {
     fetchData();
-    // Actualiza cada 30 segundos para reflejar cambios en tiempo real
     const intervalId = setInterval(fetchData, 30000);
     return () => clearInterval(intervalId);
-  }, []); // Usamos [] para evitar reejecuciones innecesarias
+  }, []);
 
   const fetchStudents = async (courseId) => {
     try {
@@ -39,6 +39,8 @@ const AdminEnrollments = () => {
       setStudents(data);
     } catch (error) {
       console.error('Error al obtener estudiantes:', error);
+    } finally {
+      setStudentsLoading(false);
     }
   };
 
@@ -121,7 +123,14 @@ const AdminEnrollments = () => {
                     </tr>
                   </thead>
                   <tbody className="align-middle">
-                    {students.length > 0 ? (
+                  {isStudentsLoading ? (
+                    <tr>
+                      <td colSpan="5" className="text-center py-3">
+                        <Loading/>
+                      </td>
+                    </tr>
+                  ) : 
+                    students.length > 0 ? (
                       students.map((student) => (
                         <tr key={student.id}>
                           <td>

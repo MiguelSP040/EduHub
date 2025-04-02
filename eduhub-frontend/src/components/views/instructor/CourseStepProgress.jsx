@@ -1,9 +1,10 @@
 import React from 'react';
-import { Stepper, Step, StepLabel } from '@mui/material';
+import { Stepper, Step, StepLabel, useMediaQuery, useTheme } from '@mui/material';
 
 const CourseStepProgress = ({ status }) => {
   const steps = ['Creado', 'En Revisión', 'Aprobado', 'En Curso', 'Finalizado'];
 
+  // Mapeo de estados a índices
   const statusIndex = {
     Creado: 0,
     Pendiente: 1,
@@ -15,9 +16,17 @@ const CourseStepProgress = ({ status }) => {
 
   const currentIndex = statusIndex[status] ?? 0;
 
+  // Hook de MUI para detectar pantallas pequeñas
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   return (
-    <div className="mb-5 px-4">
-      <Stepper activeStep={currentIndex} alternativeLabel>
+    <div className="mb-5 px-4 d-flex justify-content-center d-md-block">
+      <Stepper
+        activeStep={currentIndex}
+        alternativeLabel={!isMobile}
+        orientation={isMobile ? 'vertical' : 'horizontal'}
+      >
         {steps.map((label, index) => (
           <Step key={index} completed={index < currentIndex}>
             <StepLabel>{label}</StepLabel>

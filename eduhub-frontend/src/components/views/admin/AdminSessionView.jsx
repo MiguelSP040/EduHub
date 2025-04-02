@@ -7,10 +7,6 @@ const AdminSessionView = ({ session, setSelectedSession }) => {
 
   return (
     <div className="container mt-4">
-      <button className="btn btn-purple-400 mb-3 d-flex align-items-center" onClick={() => setSelectedSession(null)}>
-        <ArrowLeft size={20} className="me-2" />
-        Volver
-      </button>
 
       <div className="card shadow-sm p-4">
         <h2 className="fw-bold">{session.nameSession}</h2>

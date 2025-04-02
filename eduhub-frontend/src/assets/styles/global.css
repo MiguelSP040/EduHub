@@ -7,6 +7,33 @@ html {
   background-color: #f9f9f9 !important;
 }
 
+/*====VARIABLES GLOBALES DE COLOR====*/
+:root {
+  --bg-success: #A5DC86;
+  --bg-warning: #F8BB86;
+  --bg-danger: #F27474;  
+}
+
+.bg-green-success {
+  background-color: var(--bg-success);
+}
+.bg-orange-warning {
+  background-color: var(--bg-warning);
+}
+.bg-red-danger {
+  background-color: var(--bg-danger);
+}
+
+.txt-green-success {
+  color: var(--bg-success);
+}
+.txt-orange-warning {
+  color: var(--bg-warning);
+}
+.txt-red-danger {
+  color: var(--bg-danger);
+}
+
 /*==== CURSOS ====*/
 .course-body-height {
   height: 12rem !important;
@@ -15,6 +42,9 @@ html {
 .border-purple {
   border-color: #6c63ff !important;
   border-radius: 3px !important;
+}
+.border-blue {
+  border-color: #65739F !important;
 }
 .image-overlay {
   background: linear-gradient(to right, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0));
@@ -35,13 +65,12 @@ html {
 }
 
 /*  PERSONALIZACION DE BADGES (ESTADOS)*/
-.badge-green-color { 
-  background-color: #E6F6EB;
-  color:#426053;
-
+.badge-green-color {
+  background-color: #e6f6eb;
+  color: #426053;
 }
 
-.badge-purple-color{
+.badge-purple-color {
   background-color: #8e44ad;
   color: #ffff;
 }
@@ -50,21 +79,20 @@ html {
   color: #8e44ad;
 }
 
-.badge-blue-color{
-  background-color: #E6F4FE ;
-  color:#3C5983;
+.badge-blue-color {
+  background-color: #e6f4fe;
+  color: #3c5983;
 }
 
-.badge-red-color{
+.badge-red-color {
   background-color: #f7cece;
   color: #dd6464;
 }
 
-.badge-gray-color{
+.badge-gray-color {
   background-color: #e9e7e7;
   color: #3b3a3b;
 }
-
 
 /*background-color: #aa39ad; FIUCSA
   background-color: #F7EDFE; lila
@@ -72,15 +100,15 @@ html {
 
 /*TIPOGRAFIA*/
 
-.text-blue{
-  color:#65739f;
+.text-blue {
+  color: #65739f;
 }
 
-.text-purple{
-  color:#6c63ff;
+.text-purple {
+  color: #6c63ff;
 }
-.text-pink{
-  color:#AA39AD;
+.text-pink {
+  color: #aa39ad;
 }
 
 .card-header-purple {
