@@ -267,6 +267,27 @@ export const deliverCertificates = async (courseId, certificates) => {
   }
 };
 
+export const viewVoucherFile = async (gridFsId, setLoadingId) => {
+  try {
+    if (setLoadingId) setLoadingId(gridFsId);
+    const token = localStorage.getItem("token");
+    const response = await fetch(`http://localhost:8080/eduhub/api/courses/view-file/${gridFsId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!response.ok) throw new Error(`Error al obtener el archivo: ${response.statusText}`);
+
+    const blob = await response.blob();
+    const tempUrl = URL.createObjectURL(blob);
+    window.open(tempUrl, "_blank");
+  } catch (error) {
+    console.error(error);
+    alert("No se pudo mostrar el archivo.");
+  } finally {
+    if (setLoadingId) setLoadingId(null);
+  }
+};
+
 export const updateCourse = async (courseData) => {
   const token = localStorage.getItem('token');
 

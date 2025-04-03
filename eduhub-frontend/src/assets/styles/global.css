@@ -1,56 +1,171 @@
 html {
-    scroll-behavior: smooth;
-  }  
+  scroll-behavior: smooth; /*Scroll suave*/
+}
 
+/*Fondo general*/
 .bg-main {
-    background-color: #F9F9F9 !important; 
+  background-color: #f9f9f9 !important;
 }
 
+/*====VARIABLES GLOBALES DE COLOR====*/
+:root {
+  --bg-success: #A5DC86;
+  --bg-warning: #F8BB86;
+  --bg-danger: #F27474;  
+}
+
+.bg-green-success {
+  background-color: var(--bg-success);
+}
+.bg-orange-warning {
+  background-color: var(--bg-warning);
+}
+.bg-red-danger {
+  background-color: var(--bg-danger);
+}
+
+.txt-green-success {
+  color: var(--bg-success);
+}
+.txt-orange-warning {
+  color: var(--bg-warning);
+}
+.txt-red-danger {
+  color: var(--bg-danger);
+}
+
+/*==== CURSOS ====*/
 .course-body-height {
-    height: 12rem !important;
-    overflow-y: hidden;
+  height: 12rem !important;
+  overflow-y: hidden;
 }
-
 .border-purple {
-    border-color: #6C63FF !important;
-    border-radius: 3px !important;
+  border-color: #6c63ff !important;
+  border-radius: 3px !important;
+}
+.border-blue {
+  border-color: #65739F !important;
+}
+.image-overlay {
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0));
+  pointer-events: 'none';
 }
 
-.image-overlay {
-    background: linear-gradient(to right, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0));
-    pointer-events: 'none';
+.notification-card {
+  transition: opacity 0.5s ease, transform 0.5s ease;
 }
+
+.notification-card.fade-out {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.recharts-wrapper :focus {
+  outline: none !important;
+}
+
+/*  PERSONALIZACION DE BADGES (ESTADOS)*/
+.badge-green-color {
+  background-color: #e6f6eb;
+  color: #426053;
+}
+
+.badge-purple-color {
+  background-color: #8e44ad;
+  color: #ffff;
+}
+.badge-pink-color {
+  background-color: #f8e0f9;
+  color: #8e44ad;
+}
+
+.badge-blue-color {
+  background-color: #e6f4fe;
+  color: #3c5983;
+}
+
+.badge-red-color {
+  background-color: #f7cece;
+  color: #dd6464;
+}
+
+.badge-gray-color {
+  background-color: #e9e7e7;
+  color: #3b3a3b;
+}
+
+/*background-color: #aa39ad; FIUCSA
+  background-color: #F7EDFE; lila
+  color: #654980; morado*/
+
+/*TIPOGRAFIA*/
+
+.text-blue {
+  color: #65739f;
+}
+
+.text-purple {
+  color: #6c63ff;
+}
+.text-pink {
+  color: #aa39ad;
+}
+
 
 body {
-    overflow-x: hidden;
+  overflow-x: hidden;
 }
+
+/*SIDEBAR*/
+
+.bg-lila{
+  background-color: #faf5fe;
+}
+/*==== SESIONES ====*/
 
 .session-content {
-/* Restablece la alineación por defecto del navegador */
-text-align: initial !important;
+  text-align: initial !important;
 }
+
 /* Y aplica la alineación que Quill genera en sus clases */
+
 .session-content .ql-align-center {
-text-align: center !important;
+  text-align: center !important;
 }
+
 .session-content .ql-align-right {
-text-align: right !important;
+  text-align: right !important;
 }
+
 .session-content .ql-align-justify {
-text-align: justify !important;
+  text-align: justify !important;
 }
-
 .session-acordeon:hover {
-    border-left: 2px solid #6C63FF;
+  border-left: 2px solid #6c63ff;
 }
-  
-@media screen and (min-width: 576px) {
-    .img-container {
-        width: 10rem;
-        justify-items: center;
-    }
 
-    .course-width {
-        width: 18rem !important;
-    }
+/*==== NOTIFICACIONES ====*/
+.notification-card {
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.notification-card.fade-out {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/*==== FINANZAS ====*/
+.recharts-wrapper :focus {
+  outline: none !important;
+}
+
+/*====RESPONSIVIDAD PANTALLAS MEDIANAS O SUPERIOR====*/
+@media screen and (min-width: 576px) {
+  .img-container {
+    width: 10rem;
+    justify-items: center;
+  }
+
+  .course-width {
+    width: 18rem !important;
+  }
 }

@@ -5,40 +5,91 @@ const AdminCourseDetails = ({ course }) => {
         if (!course) {
             console.error("No se encontró la información del curso.");
         }
-        console.log(course);
-        
     }, [course]);
 
     if (!course) return <p className="text-muted">Cargando datos del curso...</p>;
 
     return (
-        <div className="card shadow-sm p-4">
-            <div className="text-start">
-                <div className="text-center bg-light py-1">
-                    <h4 className="mb-3">Detalles del Curso</h4>
-                </div>
-                <hr />
-                <div className="row">
-                    <div className="col-6"><p><strong>Título:</strong> {course.title}</p></div>
-                    <div className="col-6"><p><strong>Descripción:</strong> {course.description}</p></div>
-                </div>
-                <hr />
-                <div className="row">
-                    <div className="col-6"><p><strong>Categoría:</strong> {course.category}</p></div>
-                    <div className="col-6"><p><strong>Precio:</strong> {course.price === 0 ? "GRATIS" : `$${course.price}`}</p></div>
-                </div>
-                <hr />
-                <div className="row">
-                    <div className="col-6"><p><strong>Fecha de Inicio:</strong> {new Date(course.dateStart).toLocaleDateString()}</p></div>
-                    <div className="col-6"><p><strong>Fecha de Fin:</strong> {new Date(course.dateEnd).toLocaleDateString()}</p></div>
-                </div>
-                <hr />
-                <div className="row">
-                    <div className="col-6"><p><strong>Estado:</strong> <span className={`badge text-bg-${course.status === "Pendiente" ? "warning" : course.status === "Aprobado" ? "success" : "danger"}`}>{course.status}</span></p></div>
-                    <div className="col-6"><p><strong>Estudiantes inscritos:</strong> {course.enrollments.length || 0}/{course.studentsCount} </p></div>
+        <div className="row">
+
+            <div className="card shadow-sm p-4">
+                <div className="text-start">
+                    
+                    <div className="text-start py-2 border-bottom ">
+                        <h3 className="mb-0"> Detalles del Curso</h3>
+                    </div>
+
+                    
+                    <div className="row py-3 border-bottom">
+                        <div className="col-12 col-md-6 mb-2 mb-md-0">
+                            <strong>Título:</strong>
+                            <p className="mb-0">{course.title}</p>
+                        </div>
+                        <div className="col-12 col-md-6">
+                            <strong>Descripción:</strong>
+                            <p className="mb-0">{course.description}</p>
+                        </div>
+                    </div>
+
+                    
+                    <div className="row py-3 border-bottom">
+                        <div className="col-12 col-md-6 mb-2 mb-md-0">
+                            <strong>Categoría:</strong>
+                            <p className="mb-0">{course.category}</p>
+                        </div>
+                        <div className="col-12 col-md-6">
+                            <strong>Precio:</strong>
+                            <p className="mb-0">
+                                {course.price === 0 ? (
+                                    <span className="badge badge-green-color">GRATIS</span>
+                                ) : (
+                                    <span className="badge badge-pink-color">${course.price}</span>
+                                )}
+                            </p>
+                        </div>
+                    </div>
+
+                    
+                    <div className="row py-3 border-bottom">
+                        <div className="col-12 col-md-6 mb-2 mb-md-0">
+                            <strong>Fecha de Inicio:</strong>
+                            <p className="mb-0">{new Date(course.dateStart).toLocaleDateString()}</p>
+                        </div>
+                        <div className="col-12 col-md-6">
+                            <strong>Fecha de Fin:</strong>
+                            <p className="mb-0">{new Date(course.dateEnd).toLocaleDateString()}</p>
+                        </div>
+                    </div>
+
+                    
+                    <div className="row py-3">
+                        <div className="col-12 col-md-6 mb-2 mb-md-0">
+                            <strong>Estado:</strong>
+                            <p className="mb-0">
+                                <span className={`badge ${course.status === "Pendiente"
+                                        ? "badge-blue-color"
+                                        : course.status === "Aprobado"
+                                            ? "badge-green-color"
+                                            : course.status === "Finalizado"
+                                                ? "badge-red-color"
+                                                :course.status === "Empezado"
+                                                    ? "badge-blue-color"
+                                                        : "badge-gray-color"
+                                    }`}>
+                                    {course.status}
+                                </span>
+                            </p>
+                        </div>
+                        <div className="col-12 col-md-6">
+                            <strong>Estudiantes inscritos:</strong>
+                            <p className="mb-0">{course.enrollments?.length || 0}/{course.studentsCount}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
+
         </div>
+
     );
 };
 

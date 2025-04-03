@@ -105,9 +105,9 @@ const Login = ({ setView }) => {
         </div>
         <div className="row">
           <div className="col-12">
-            <div className="w-100 text-end mt-3">
-              <a onClick={() => setView("recover")} className="text-decoration-none">
-                <small>Olvidé mi contraseña</small>
+            <div className="w-100 text-end text-blue mt-1">
+              <a onClick={() => setView("recover")} className="text-decoration-underline">
+                <small>¿Olvidaste tu contraseña?</small>
               </a>
             </div>
           </div>
@@ -115,7 +115,7 @@ const Login = ({ setView }) => {
 
         <button
           type="button"
-          className="btn btn-purple-900 w-100 text-white mt-4 fw-bold"
+          className="btn btn-purple-900 w-100 text-white mt-5 fw-bold"
           onClick={handleLogin}
           disabled={isDisabled || loading}
         >
@@ -130,11 +130,12 @@ const Login = ({ setView }) => {
       </form>
       <p className="text-danger mt-4"><small>O registrate</small></p>
       <button
-        className="btn btn-purple-400 w-100 mt-2 fw-bold"
+        className="btn btn-purple-400 mt-2 w-100  fw-bold"
         onClick={() => setView("registerStep1")}
       >
-        ¿No tienes cuenta?
+        ¿No tienes cuenta?  
       </button>
+      
     </div>
   );
 };

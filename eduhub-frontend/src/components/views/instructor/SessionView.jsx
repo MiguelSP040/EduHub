@@ -10,6 +10,7 @@ import 'primeicons/primeicons.css';
 const SessionView = ({ session, setSelectedSession, fetchSessions, courseStatus }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadingFileId, setLoadingFileId] = useState(null);
 
   const [editedSession, setEditedSession] = useState({
     id: session.id,
@@ -133,26 +134,18 @@ const SessionView = ({ session, setSelectedSession, fetchSessions, courseStatus 
     }
   };
 
-  function base64ToBlob(base64Data, contentType = 'application/pdf') {
-    const byteCharacters = atob(base64Data);
-    const byteNumbers = new Array(byteCharacters.length);
-
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i);
-    }
-    const byteArray = new Uint8Array(byteNumbers);
-    return new Blob([byteArray], { type: contentType });
-  }
-
   return (
     <div className="card shadow-sm p-4 m-4">
       {/* Encabezado con título + área de botones o mensajes */}
-      <div className="bg-light p-2 mb-2 d-flex flex-wrap justify-content-between align-items-center">
+      <div className="bg-light p-2 mb-2 d-flex flex-wrap justify-content-between text-start align-items-center">
         <div className="flex-grow-1 me-3">
           {!isEditing ? (
             <h2 className="fw-bold mb-0">{editedSession.nameSession}</h2>
           ) : (
-            <input type="text" className="form-control fw-bold fs-5" value={editedSession.nameSession}
+            <input
+              type="text"
+              className="form-control fw-bold fs-5"
+              value={editedSession.nameSession}
               onChange={(e) =>
                 setEditedSession({
                   ...editedSession,
@@ -167,13 +160,15 @@ const SessionView = ({ session, setSelectedSession, fetchSessions, courseStatus 
       </div>
 
       {/* Contenido de la sesión (texto) */}
-      {(isEditing || editedSession.content) && (
-        !isEditing ? (
-          <><hr /><div className="session-content bg-light rounded-4 p-4" dangerouslySetInnerHTML={{ __html: editedSession.content }} /></>
+      {(isEditing || editedSession.content) &&
+        (!isEditing ? (
+          <>
+            <hr />
+            <div className="session-content bg-light rounded-4 p-4" dangerouslySetInnerHTML={{ __html: editedSession.content }} />
+          </>
         ) : (
           <Editor value={editedSession.content} onTextChange={(e) => setEditedSession({ ...editedSession, content: e.htmlValue })} style={{ minHeight: '200px', width: '100%' }} />
-        )
-      )}
+        ))}
 
       <hr />
 
@@ -208,13 +203,9 @@ const SessionView = ({ session, setSelectedSession, fetchSessions, courseStatus 
                       Eliminar
                     </button>
                   ) : (
-                    <button
-                      className="btn btn-sm btn-purple-900 w-100"
-                      onClick={() => handleViewFile(session.id, file)}
-                    >
-                      Ver
+                    <button className="btn btn-sm btn-purple-900 w-100" onClick={() => handleViewFile(session.id, file, setLoadingFileId)} disabled={loadingFileId === file.id}>
+                      {loadingFileId === file.id ? <div className="spinner-border spinner-border-sm text-light" /> : 'Ver'}
                     </button>
-
                   )}
                 </div>
               );

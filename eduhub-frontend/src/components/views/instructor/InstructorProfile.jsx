@@ -28,16 +28,15 @@ const InstructorProfile = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       if (user?.id) {
-        const response = await findUserById(user.id, token);
-        if (response.ok) {
-          const data = await response.json();
+        try {
+          const data = await findUserById(user.id);
           setUserLogger(data);
-        } else {
-          console.error('Error al obtener usuario:', response);
+        } catch (error) {
+          console.error("Error al obtener usuario:", error);
         }
       }
     };
-
+  
     fetchUserData();
   }, [user, token]);
 
@@ -53,7 +52,6 @@ const InstructorProfile = () => {
         description: userLogged.description || '',
       });
     }
-    console.log(userLogged);
   }, [userLogged]);
 
   const getRoleName = (role) => {
@@ -214,7 +212,7 @@ const InstructorProfile = () => {
   };
 
   return (
-    <div>
+    <div className='bg-main'>
       {/* SIDEBAR */}
       <Sidebar isExpanded={isSidebarExpanded} setIsExpanded={setIsSidebarExpanded} navbarRef={navbarRef} />
 
@@ -234,11 +232,11 @@ const InstructorProfile = () => {
                 <div className="card shadow-sm mb-4">
                   <div className="card-body light-gray-bg text-center">
                     <div className="position-relative">
-                      <img src={userLogged?.profileImage ? `data:image/jpeg;base64,${userLogged.profileImage}` : profilePlaceholder} alt="avatar" className="rounded-circle img-fluid border border-4 border-info p-1"
+                      <img src={userLogged?.profileImage ? `data:image/jpeg;base64,${userLogged.profileImage}` : profilePlaceholder} alt="avatar" className="rounded-circle img-fluid border border-4 border-blue p-1"
                         style={{ width: '150px', height: '150px', objectFit: 'cover' }}
                       />
                       {/* Botón de cámara en posición absoluta */}
-                      <button type="button" className="btn btn-info text-white rounded-circle position-absolute" style={{ bottom: '0px', right: 'calc(50% - 70px)' }} onClick={() => openModal(cameraModalRef)}>
+                      <button type="button" className="btn btn-blue-600 text-white rounded-circle position-absolute" style={{ bottom: '0px', right: 'calc(50% - 70px)' }} onClick={() => openModal(cameraModalRef)}>
                         <i className="bi bi-pencil-square" />
                       </button>
                     </div>

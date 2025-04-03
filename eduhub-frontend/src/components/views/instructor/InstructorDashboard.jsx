@@ -1,41 +1,50 @@
 import { useState, useRef, useEffect, useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Loading from '../../utilities/Loading';
 import Sidebar from './Sidebar';
 import Navbar from '../Navbar';
 import { AuthContext } from '../../../context/AuthContext';
 import { getCourses, getCoursesByInstructor } from '../../../services/courseService';
-import { BookOpen, User, Archive } from 'react-feather';
+import { BookOpen, Archive } from 'react-feather';
 
 const InstructorDashboard = () => {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
   const navbarRef = useRef(null);
+
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState('myCourses');
   const [myCourses, setMyCourses] = useState([]);
   const [archivedCourses, setArchivedCourses] = useState([]);
   const [courses, setCourses] = useState([]);
+  const [isLoading, setLoading] = useState(true);
+
+  const fetchData = async () => {
+    try {
+      if (!user?.id) return;
+      const instructorCourses = await getCoursesByInstructor(user.id);
+      let allCourses = await getCourses();
+      allCourses = allCourses.filter((course) => course.published && course.status !== 'Pendiente');
+
+      const archived = instructorCourses.filter((c) => c.archived);
+      const notArchived = instructorCourses.filter((c) => !c.archived);
+
+      setCourses([...allCourses]);
+      setMyCourses([...notArchived]);
+      setArchivedCourses([...archived]);
+    } catch (error) {
+      console.error('Error al obtener cursos:', error);
+      setCourses([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        if (!user?.id) return;
-        const instructorCourses = await getCoursesByInstructor(user.id);
-        let allCourses = await getCourses();
-        allCourses = allCourses.filter((course) => course.published && course.status !== 'Pendiente');
-
-        const archived = instructorCourses.filter((c) => c.archived);
-        const notArchived = instructorCourses.filter((c) => !c.archived);
-
-        setCourses([...allCourses]);
-        setMyCourses([...notArchived]);
-        setArchivedCourses([...archived]);
-      } catch (error) {
-        console.error('Error al obtener cursos:', error);
-        setCourses([]);
-      }
-    };
     fetchData();
+    // Polling: actualizar cada 30 segundos para reflejar cambios en tiempo real
+    const intervalId = setInterval(fetchData, 30000);
+    return () => clearInterval(intervalId);
   }, [user]);
 
   const formatDate = (dateString) => {
@@ -56,17 +65,16 @@ const InstructorDashboard = () => {
 
   const getStatusBadgeClass = (status) => {
     switch (status) {
-      case 'Creado':
-        return 'secondary';
       case 'Pendiente':
-        return 'warning';
+        return 'badge-blue-color';
       case 'Aprobado':
-        return 'success';
-      case 'Rechazado':
+        return 'badge-green-color';
+      case 'Empezado':
+        return 'badge-pink-color';
       case 'Finalizado':
-        return 'danger';
+        return 'badge-red-color';
       default:
-        return 'primary';
+        return 'badge-gray-color';
     }
   };
 
@@ -79,18 +87,32 @@ const InstructorDashboard = () => {
             <div className="card-body course-body-height">
               <div className="d-flex justify-content-between align-items-center mb-2">
                 <h5 className="card-title text-truncate">{course.title}</h5>
-                <span className="badge text-bg-primary">{course.price === 0 ? 'GRATIS' : `$${course.price}`}</span>
+                <span className="badge badge-purple-color">{course.price === 0 ? 'GRATIS' : `$${course.price}`}</span>
+              </div>
+              
+              <div className="d-flex justify-content-between">
+                <span className={`badge ${getStatusBadgeClass(course.status)} mb-3`}>{course.status}</span>
+                <div>
+                  {course.hasCertificate ? (
+                    <div className="text-success">
+                      <i className="bi bi-patch-check-fill"></i> Con certificado{' '}
+                    </div>
+                  ) : (
+                    <div>
+                      <i className="bi bi-patch-check"></i> Sin certificado{' '}
+                    </div>
+                  )}
+                </div>
               </div>
               <p className="card-text text-truncate">{course.description}</p>
-              <span className={`badge text-bg-${getStatusBadgeClass(course.status)} mb-3`}>{course.status}</span>
-              <div className="d-flex justify-content-between">
-                <span className="text-muted">Inicio: {formatDate(course.dateStart)}</span>
-                <span className="text-muted">Fin: {formatDate(course.dateEnd)}</span>
+              <div className="text-muted small mb-2">
+                <i className="bi bi-calendar-event me-1" />
+                {formatDate(course.dateStart)} → {formatDate(course.dateEnd)}
               </div>
             </div>
             <div className="card-footer bg-white border-0">
-              <button className="btn rounded-5 btn-purple-900" onClick={() => navigate('/instructor/course', { state: { course } })}>
-                Ver curso
+              <button className="btn rounded-5 btn-blue-600" onClick={() => navigate('/instructor/course', { state: { course } })}>
+              <i className="bi bi-arrow-return-right"></i> Ver curso
               </button>
             </div>
           </div>
@@ -101,7 +123,7 @@ const InstructorDashboard = () => {
     );
 
   return (
-    <div>
+    <div className="bg-main">
       {/* SIDEBAR */}
       <Sidebar isExpanded={isSidebarExpanded} setIsExpanded={setIsSidebarExpanded} navbarRef={navbarRef} />
 
@@ -120,8 +142,7 @@ const InstructorDashboard = () => {
                   <div className="col-12 col-sm d-flex justify-content-center justify-content-sm-start">
                     <div className="d-flex flex-row flex-sm-row w-100 justify-content-around justify-content-sm-start">
                       {[
-                        { tab: 'myCourses', icon: <User size={20} className="d-sm-none" />, label: 'Mis Cursos' },
-                        { tab: 'allCourses', icon: <BookOpen size={20} className="d-sm-none" />, label: 'Todos' },
+                        { tab: 'myCourses', icon: <BookOpen size={20} className="d-sm-none" />, label: 'Mis Cursos' },
                         { tab: 'archived', icon: <Archive size={20} className="d-sm-none" />, label: 'Archivo' },
                       ].map(({ tab, icon, label }) => (
                         <button key={tab} type="button" className={`btn border-0 ${activeTab === tab ? 'border-bottom border-purple border-3 fw-semibold' : ''}`} onClick={() => setActiveTab(tab)}>
@@ -141,9 +162,7 @@ const InstructorDashboard = () => {
             </div>
 
             {/* LISTADO DE CURSOS */}
-            <section>
-              <div className="row">{renderCourses()}</div>
-            </section>
+            <section>{isLoading ? <Loading /> : <div className="row">{renderCourses()}</div>}</section>
           </main>
         </div>
       </div>

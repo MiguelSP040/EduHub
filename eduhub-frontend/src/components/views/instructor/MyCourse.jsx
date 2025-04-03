@@ -10,10 +10,11 @@ import MyStudents from './MyStudents';
 import CourseConfig from './CourseConfig';
 import AddSessionModal from './AddSessionModal';
 import { AuthContext } from '../../../context/AuthContext';
-import { BookOpen, Users, Settings } from 'react-feather';
+import { BookOpen, Users, Settings, ArrowLeft } from 'react-feather';
 import { findUserById } from '../../../services/userService';
 import CourseStepProgress from './CourseStepProgress';
 import SessionIndexAccordion from './SessionIndexAccordion';
+import Loading from '../../utilities/Loading';
 
 const MyCourse = () => {
   const navigate = useNavigate();
@@ -30,27 +31,28 @@ const MyCourse = () => {
   const [selectedSession, setSelectedSession] = useState(null);
   const [deliverCertificatesTrigger, setDeliverCertificatesTrigger] = useState(false);
   const [canDeliverCertificates, setCanDeliverCertificates] = useState(false);
+  // Estado para controlar la carga del curso
+  const [isCourseLoading, setCourseLoading] = useState(true);
+  const [isSessionLoading, setSessionLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       const data = location.state?.course;
-
       if (!data) {
         console.error('No se encontró la información del curso.');
         navigate('/admin');
         return;
       }
       try {
-        const response = await findUserById(data.docenteId);
-        const instructorData = await response.json();
+        const instructorData = await findUserById(data.docenteId);
         setInstructor(instructorData);
         setCourse(data);
       } catch (error) {
         console.error('Error al obtener el instructor:', error);
+      } finally {
+        setCourseLoading(false);
       }
     };
-    console.log(course);
-    
     fetchData();
   }, [location, navigate]);
 
@@ -66,31 +68,14 @@ const MyCourse = () => {
       setSessions(sessionData.reverse());
     } catch (error) {
       console.error('Error al obtener sesiones:', error);
-    }
-  };
-
-  const getProgressStep = (status) => {
-    switch (status) {
-      case 'Creado':
-        return 0;
-      case 'Pendiente':
-      case 'Rechazado':
-        return 1;
-      case 'Aprobado':
-        return 2;
-      case 'Empezado':
-        return 3;
-      case 'Finalizado':
-        return 4;
-      default:
-        return 0;
+    } finally {
+      setSessionLoading(false);
     }
   };
 
   const handlePublishCourse = async () => {
     const response = await publishCourse(course.id);
     alert(response.message);
-
     if (response.status === 200) {
       const updatedCourse = await getCourseById(course.id);
       setCourse(updatedCourse);
@@ -100,7 +85,6 @@ const MyCourse = () => {
   const handleRequestModification = async () => {
     const response = await requestModification(course.id);
     alert(response.message);
-
     if (response.status === 200) {
       const updatedCourse = await getCourseById(course.id);
       setCourse(updatedCourse);
@@ -112,7 +96,7 @@ const MyCourse = () => {
   const canModify = course?.status === 'Creado' || (course?.status === 'Aprobado' && today < courseStartDate);
 
   return (
-    <div>
+    <div className="bg-main">
       {/* SIDEBAR */}
       <Sidebar isExpanded={isSidebarExpanded} setIsExpanded={setIsSidebarExpanded} navbarRef={navbarRef} />
 
@@ -123,7 +107,7 @@ const MyCourse = () => {
         </div>
 
         <div className="overflow-auto vh-100">
-          <main className={'px-3 px-md-5 pt-5 mt-5 ms-md-5'}>
+          <main className="px-3 px-md-5 pt-5 mt-5 ms-md-5">
             {/* BARRA DE NAVEGACIÓN SECUNDARIA */}
             <div className="bg-white shadow-sm mb-4">
               <div className="container-fluid px-4 py-2">
@@ -191,7 +175,8 @@ const MyCourse = () => {
 
                       {selectedSession ? (
                         <button className="btn btn-purple-400" onClick={() => setSelectedSession(null)}>
-                          Volver al curso
+                          <ArrowLeft size={20} className="me-2" />
+                          Volver
                         </button>
                       ) : (
                         <>
@@ -216,7 +201,6 @@ const MyCourse = () => {
                               onClick={async () => {
                                 const confirmed = window.confirm('¿Estás seguro de archivar este curso?');
                                 if (!confirmed) return;
-
                                 const response = await archiveCourse(course.id);
                                 alert(response.message);
                                 if (response.status === 200) {
@@ -235,7 +219,6 @@ const MyCourse = () => {
                               onClick={async () => {
                                 const confirmed = window.confirm('¿Deseas crear una copia de este curso?');
                                 if (!confirmed) return;
-
                                 const response = await duplicateCourse(course.id);
                                 if (response.status === 200) {
                                   alert('Curso duplicado correctamente.');
@@ -248,12 +231,6 @@ const MyCourse = () => {
                               Crear copia de este curso
                             </button>
                           )}
-
-                          {course?.status === 'Aprobado' && <span className="text-success fw-semibold">Curso Aprobado - No editable</span>}
-
-                          {course?.status === 'Empezado' && <span className="text-primary fw-semibold">Curso Empezado - No editable</span>}
-
-                          {/*course?.status === 'Finalizado' && <span className="text-danger fw-semibold">Curso Finalizado - No editable</span>*/}
 
                           {course?.status === 'Creado' && today < courseStartDate && <AddSessionModal courseId={course.id} fetchSessions={fetchSessions} />}
                         </>
@@ -271,58 +248,85 @@ const MyCourse = () => {
                       )}
                     </div>
                   )}
+                  {!selectedSession && (
+                    <div className="col-12 col-md-auto text-md-end mt-2 mt-md-0">
+                      <button className="btn btn-outline-secondary" onClick={() => navigate('/instructor')}>
+                        <i className="bi bi-arrow-left"></i>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
 
             <div className="mx-md-5">
-              {/* RENDERIZADO DINÁMICO SEGÚN EL TAB SELECCIONADO */}
-              {activeTab === 'material' && (
-                <>
-                  {selectedSession ? (
-                    <SessionView session={selectedSession} setSelectedSession={setSelectedSession} fetchSessions={fetchSessions} courseStatus={course?.status} />
+              {activeTab === 'material' && !selectedSession && (
+                <div className="position-relative w-100 mb-3">
+                  {isCourseLoading ? (
+                    <div className="placeholder-glow" style={{ height: '250px', width: '100%' }}>
+                      <span className="placeholder col-12 rounded-4" style={{ height: '250px' }}></span>
+                    </div>
                   ) : (
+                    <img
+                      src={course?.coverImage ? `data:image/jpeg;base64,${course.coverImage}` : 'https://t3.ftcdn.net/jpg/04/67/96/14/360_F_467961418_UnS1ZAwAqbvVVMKExxqUNi0MUFTEJI83.jpg'}
+                      className="w-100 rounded-4 object-fit-cover image-gradient"
+                      style={{ height: '250px' }}
+                      alt={course?.title}
+                    />
+                  )}
+
+                  <div className="position-absolute image-overlay top-0 start-0 w-100 h-100 rounded-4" />
+
+                  <div className="position-absolute top-50 start-0 text-start text-white p-4 w-100">
+                    <h3 className="fw-bold">{course?.title}</h3>
+                    <h6>
+                      {instructor?.name} {instructor?.surname} {instructor?.lastname}
+                    </h6>
+                    <p className="text-truncate">{course?.description}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Loading debajo de la portada mientras se carga el curso */}
+              {isCourseLoading ||
+                (isSessionLoading && (
+                  <div className="text-center py-5">
+                    <Loading />
+                  </div>
+                ))}
+
+              {/* RENDERIZADO DINÁMICO SEGÚN EL TAB SELECCIONADO */}
+              {!isCourseLoading && !isSessionLoading && (
+                <>
+                  {activeTab === 'material' && (
                     <>
-                      <div className="position-relative w-100 mb-3">
-                        {/* Imagen de portada */}
-                        <img
-                          src={course?.coverImage ? `data:image/jpeg;base64,${course.coverImage}` : 'https://t3.ftcdn.net/jpg/04/67/96/14/360_F_467961418_UnS1ZAwAqbvVVMKExxqUNi0MUFTEJI83.jpg'}
-                          className="w-100 rounded-4 object-fit-cover image-gradient"
-                          style={{ height: '250px' }}
-                          alt={course?.title}
-                        />
-
-                        <div className="position-absolute image-overlay top-0 start-0 w-100 h-100 rounded-4" />
-
-                        <div className="position-absolute top-50 start-0 text-start text-white p-4 w-100">
-                          <h3 className="fw-bold">{course?.title}</h3>
-                          <h6>
-                            {instructor?.name} {instructor?.surname} {instructor?.lastname}
-                          </h6>
-                          <p className="text-truncate">{course?.description}</p>
-                        </div>
-                      </div>
-
-                      {course && <CourseStepProgress status={course?.status} />}
-
-                      {sessions.length > 0 && <SessionIndexAccordion sessions={sessions} />}
-
-                      {sessions.length > 0 ? (
-                        sessions.map((session) => (
-                          <div id={`session-${session.id}`} key={session.id}>
-                            <SessionCard session={session} instructor={instructor} onSelect={() => setSelectedSession(session)} />
-                          </div>
-                        ))
+                      {selectedSession ? (
+                        <SessionView session={selectedSession} setSelectedSession={setSelectedSession} fetchSessions={fetchSessions} courseStatus={course?.status} />
                       ) : (
-                        <p className="text-muted text-center mt-5">No hay sesiones registradas aún.</p>
+                        <>
+                          {course && <CourseStepProgress status={course?.status} />}
+
+                          {sessions.length > 0 && <SessionIndexAccordion sessions={sessions} />}
+
+                          {sessions.length > 0 ? (
+                            sessions.map((session) => (
+                              <div id={`session-${session.id}`} key={session.id}>
+                                <SessionCard session={session} instructor={instructor} onSelect={() => setSelectedSession(session)} />
+                              </div>
+                            ))
+                          ) : (
+                            <p className="text-muted text-center mt-5">No hay sesiones registradas aún.</p>
+                          )}
+                        </>
                       )}
                     </>
                   )}
+
+                  {activeTab === 'students' && <MyStudents courseId={course.id} courseLenght={course.studentsCount} deliverCertificatesTrigger={deliverCertificatesTrigger} course={course} instructor={instructor} setCanDeliverCertificates={setCanDeliverCertificates} />}
+
+                  {activeTab === 'config' && <CourseConfig course={course} setCourse={setCourse} canModify={canModify} />}
                 </>
               )}
-
-              {activeTab === 'students' && <MyStudents courseId={course.id} courseLenght={course.studentsCount} deliverCertificatesTrigger={deliverCertificatesTrigger} course={course} instructor={instructor} setCanDeliverCertificates={setCanDeliverCertificates} />}
-              {activeTab === 'config' && <CourseConfig course={course} setCourse={setCourse} canModify={canModify} />}
             </div>
           </main>
         </div>
