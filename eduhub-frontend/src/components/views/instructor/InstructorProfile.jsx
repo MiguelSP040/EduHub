@@ -245,12 +245,12 @@ const InstructorProfile = () => {
                         </p>
                       )}
                     </div>
-                    <div className="d-flex justify-content-center mb-2">
-                      <button type="button" className="btn btn-purple-900" onClick={() => openModal(updateUserModalRef)}>
-                        Editar Perfil
+                    <div className="mb-2">
+                      <button type="button" className="btn btn-purple-900 mb-2" onClick={() => openModal(updateUserModalRef)}>
+                      <i className="bi bi-pencil-square"></i> Editar
                       </button>
-                      <button type="button" className="btn btn-purple-400 ms-1" onClick={() => openModal(updatePasswordModalRef)}>
-                        Cambiar contraseña
+                      <button type="button" className="btn btn-purple-400 ms-1 mb-2" onClick={() => openModal(updatePasswordModalRef)}>
+                      <i className="bi bi-pencil-square"></i> Cambiar contraseña
                       </button>
                     </div>
                   </div>
@@ -265,7 +265,7 @@ const InstructorProfile = () => {
                   <div className="card-body light-gray-bg">
                     <div className="row">
                       <div className="col-sm-3">
-                        <p className="mb-0">Nombre completo</p>
+                        <p className="mb-0 text">Nombre completo</p>
                       </div>
                       <div className="col-sm-9">
                         {userLogged ? (

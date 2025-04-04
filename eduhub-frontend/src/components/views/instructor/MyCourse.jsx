@@ -25,15 +25,14 @@ const MyCourse = () => {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const [instructor, setInstructor] = useState(null);
   const [course, setCourse] = useState(null);
-  const [activeFilter, setActiveFilter] = useState('all');
   const [sessions, setSessions] = useState([]);
   const [activeTab, setActiveTab] = useState('material');
   const [selectedSession, setSelectedSession] = useState(null);
   const [deliverCertificatesTrigger, setDeliverCertificatesTrigger] = useState(false);
   const [canDeliverCertificates, setCanDeliverCertificates] = useState(false);
-  // Estado para controlar la carga del curso
   const [isCourseLoading, setCourseLoading] = useState(true);
   const [isSessionLoading, setSessionLoading] = useState(true);
+  const [isLoading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -141,7 +140,7 @@ const MyCourse = () => {
                             setCourse(updated);
                           }}
                         >
-                          Empezar Curso (Prueba)
+                          <i className="bi bi-caret-right"></i> Empezar (Prueba)
                         </button>
                       )}
 
@@ -155,7 +154,7 @@ const MyCourse = () => {
                             setCourse(updated);
                           }}
                         >
-                          Finalizar Curso (Prueba)
+                          <i className="bi bi-stop-circle"></i> Finalizar (Prueba)
                         </button>
                       )}
 
@@ -169,7 +168,7 @@ const MyCourse = () => {
                             setCourse(updated);
                           }}
                         >
-                          Reiniciar Curso (Prueba)
+                          <i className="bi bi-arrow-clockwise"></i> Reiniciar (Prueba)
                         </button>
                       )}
 
@@ -182,7 +181,7 @@ const MyCourse = () => {
                         <>
                           {course?.status === 'Creado' && !course?.published && (
                             <button className="btn btn-purple-400 me-2" onClick={handlePublishCourse}>
-                              Publicar Curso
+                              <i className="bi bi-send"></i> Publicar Curso
                             </button>
                           )}
 
@@ -190,7 +189,7 @@ const MyCourse = () => {
                             <div>
                               <span className={`text-${course.status === 'Pendiente' ? 'warning' : 'danger'} fw-semibold me-3`}>Curso {course.status}</span>
                               <button className="btn btn-purple-400 me-2" onClick={handleRequestModification}>
-                                Modificar Curso
+                                <i className="bi bi-pencil-square"></i> Modificar Curso
                               </button>
                             </div>
                           )}
@@ -199,17 +198,33 @@ const MyCourse = () => {
                             <button
                               className="btn btn-outline-secondary me-2"
                               onClick={async () => {
+                                setLoading(true);
                                 const confirmed = window.confirm('¿Estás seguro de archivar este curso?');
                                 if (!confirmed) return;
-                                const response = await archiveCourse(course.id);
-                                alert(response.message);
-                                if (response.status === 200) {
-                                  const updated = await getCourseById(course.id);
-                                  setCourse(updated);
+                                try {
+                                  const response = await archiveCourse(course.id);
+                                  alert(response.message);
+                                  if (response.status === 200) {
+                                    const updated = await getCourseById(course.id);
+                                    setCourse(updated);
+                                  }
+                                } catch (error) {
+                                  console.error(error);
+                                } finally {
+                                  setLoading(false);
                                 }
                               }}
+                              disabled={isLoading}
                             >
-                              Archivar curso
+                              {isLoading ? (
+                                <div className="spinner-border spinner-border-sm text-secondary" role="status">
+                                  <span className="visually-hidden">Cargando...</span>
+                                </div>
+                              ) : (
+                                <>
+                                  <i className="bi bi-archive"></i> Archivar
+                                </>
+                              )}
                             </button>
                           )}
 
@@ -228,7 +243,7 @@ const MyCourse = () => {
                                 }
                               }}
                             >
-                              Crear copia de este curso
+                              <i className="bi bi-copy"></i> Crear copia de este curso
                             </button>
                           )}
 

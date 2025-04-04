@@ -154,7 +154,7 @@ const InstructorDashboard = () => {
                   </div>
                   <div className="col-12 col-sm text-md-end mt-3 mt-sm-0">
                     <button className="btn-purple-900" onClick={() => navigate('/instructor/new-course')}>
-                      Registrar curso
+                    <i className="bi bi-journal-plus"></i> Registrar curso
                     </button>
                   </div>
                 </div>

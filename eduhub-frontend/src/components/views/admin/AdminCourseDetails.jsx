@@ -43,7 +43,7 @@ const AdminCourseDetails = ({ course }) => {
                                 {course.price === 0 ? (
                                     <span className="badge badge-green-color">GRATIS</span>
                                 ) : (
-                                    <span className="badge badge-pink-color">${course.price}</span>
+                                    <span className="badge badge-green-color">${course.price}</span>
                                 )}
                             </p>
                         </div>

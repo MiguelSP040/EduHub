@@ -115,10 +115,10 @@ const AdminCourseSessions = () => {
                       {course?.status === 'Pendiente' && (
                         <div className="col-12 col-sm-auto mt-2 mt-sm-0 text-center text-sm-end">
                           <button className="btn btn-purple-900 me-2" onClick={() => handleApproveCourse(true)}>
-                            Aprobar Curso
+                            <i className="bi bi-journal-check"></i> Aprobar Curso
                           </button>
-                          <button className="btn btn-danger" onClick={() => handleApproveCourse(false)}>
-                            Rechazar Curso
+                          <button className="btn btn-purple-400" onClick={() => handleApproveCourse(false)}>
+                            <i className="bi bi-journal-x"></i> Rechazar Curso
                           </button>
                         </div>
                       )}
@@ -166,11 +166,12 @@ const AdminCourseSessions = () => {
                 </div>
               )}
 
-              {isCourseLoading || isSessionLoading && (
+              {isCourseLoading ||
+                (isSessionLoading && (
                   <div className="text-center py-5">
                     <Loading />
                   </div>
-                )}
+                ))}
 
               {/* RENDERIZADO DINÁMICO SEGÚN EL TAB */}
               {!isCourseLoading && !isSessionLoading && (

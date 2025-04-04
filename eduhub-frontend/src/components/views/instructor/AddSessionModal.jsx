@@ -69,7 +69,7 @@ const AddSessionModal = ({ courseId, fetchSessions, session }) => {
   return (
     <>
       <button className="btn btn-purple-900" onClick={openModal}>
-        {session ? 'Editar Sesión' : 'Añadir Sesión'}
+        {session ? <i className="bi bi-pencil-square"></i>  : <i className="bi bi-clipboard2-plus"></i> }{session ? ' Editar Sesión' : ' Añadir Sesión'}
       </button>
 
       {isOpen && (
