@@ -30,6 +30,21 @@ const InstructorRatings = () => {
     fetchCourses();
   }, []);
 
+  const getStatusBadgeClass = (status) => {
+    switch (status) {
+      case 'Pendiente':
+        return 'badge-blue-color';
+      case 'Aprobado':
+        return 'badge-green-color';
+      case 'Empezado':
+        return 'badge-pink-color';
+      case 'Finalizado':
+        return 'badge-red-color';
+      default:
+        return 'badge-gray-color';
+    }
+  };
+
   return (
     <div className="bg-main">
       {/* SIDEBAR */}
@@ -50,6 +65,7 @@ const InstructorRatings = () => {
                 <thead>
                   <tr>
                     <th>Curso</th>
+                    <th>Estado</th>
                     <th>Calificación Promedio</th>
                     <th>Reseñas</th>
                     <th>Acciones</th>
@@ -58,7 +74,7 @@ const InstructorRatings = () => {
                 <tbody className="align-middle">
                   {isLoading ? (
                     <tr>
-                      <td colSpan="4" className="text-center py-3">
+                      <td colSpan="5" className="text-center py-3">
                         <Loading/>
                       </td>
                     </tr>
@@ -68,6 +84,7 @@ const InstructorRatings = () => {
                       return (
                         <tr key={course.id}>
                           <td>{course.title}</td>
+                          <td><span className={`badge ${getStatusBadgeClass(course.status)} mb-3`}>{course.status}</span></td>
                           <td>
                             {[...Array(5)].map((_, i) => (
                               <i key={i} className={i < Math.round(averageRating) ? 'bi bi-star-fill text-warning' : 'bi bi-star text-muted'}></i>
@@ -76,7 +93,7 @@ const InstructorRatings = () => {
                           <td>{course.ratings.length === 0 ? 'Sin reseñas' : `${course.ratings.length} ${course.ratings.length === 1 ? 'reseña' : 'reseñas'}`}</td>
                           <td>
                             {course.status === 'Finalizado' ? 
-                            <button className="btn btn-primary" onClick={() => navigate('/instructor/ratings/course-ratings', { state: { course } })} title='Ver calificaciones'>
+                            <button className="btn btn-blue-600" onClick={() => navigate('/instructor/ratings/course-ratings', { state: { course } })} title='Ver calificaciones'>
                               <Eye />
                             </button> :
                               <span className='text-muted'>Sin acciones disponibles</span>
@@ -87,7 +104,7 @@ const InstructorRatings = () => {
                     })
                   ) : (
                     <tr>
-                      <td colSpan="4" className="text-center py-3">
+                      <td colSpan="5" className="text-center py-3">
                         No tienes cursos finalizados.
                       </td>
                     </tr>

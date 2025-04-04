@@ -9,7 +9,7 @@ import profilePlaceholder from '../../../assets/img/profileImage.png';
 import { Modal } from 'bootstrap';
 
 const AdminProfile = () => {
-  const { user } = useContext(AuthContext);
+  const { user, updateUser } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const [userLogged, setUserLogger] = useState(null);
   const navbarRef = useRef(null);
@@ -32,11 +32,11 @@ const AdminProfile = () => {
           const data = await findUserById(user.id);
           setUserLogger(data);
         } catch (error) {
-          console.error("Error al obtener usuario:", error);
+          console.error('Error al obtener usuario:', error);
         }
       }
     };
-  
+
     fetchUserData();
   }, [user, token]);
 
@@ -77,7 +77,7 @@ const AdminProfile = () => {
     const usernameChanged = userLogged?.username && formData.username !== userLogged.username;
 
     if (usernameChanged) {
-      const confirmed = window.confirm("Has cambiado tu nombre de usuario. Si continúas, se cerrará la sesión actual. ¿Deseas continuar?");
+      const confirmed = window.confirm('Has cambiado tu nombre de usuario. Si continúas, se cerrará la sesión actual. ¿Deseas continuar?');
       if (!confirmed) return;
     }
 
@@ -179,19 +179,19 @@ const AdminProfile = () => {
       };
 
       const response = await updateProfile(updatedUser, token);
-
       if (!response.ok) {
         alert('No se pudo actualizar la foto de perfil');
         return;
       }
 
       alert('Foto de perfil actualizada');
+      updateUser({ profileImage: base64Image });
+      localStorage.setItem('profileImage', base64Image);
       setUserLogger((prev) => ({
         ...prev,
         profileImage: base64Image,
       }));
 
-      // Cerrar modal
       const modal = Modal.getInstance(cameraModalRef.current);
       if (modal) modal.hide();
     } catch (error) {
@@ -213,7 +213,7 @@ const AdminProfile = () => {
   };
 
   return (
-    <div className='bg-main'>
+    <div className="bg-main">
       {/* SIDEBAR */}
       <Sidebar isExpanded={isSidebarExpanded} setIsExpanded={setIsSidebarExpanded} navbarRef={navbarRef} />
 
@@ -233,9 +233,12 @@ const AdminProfile = () => {
                 <div className="card shadow-sm mb-4">
                   <div className="card-body light-gray-bg text-center">
                     <div className="position-relative">
-                        <img src={userLogged?.profileImage ? `data:image/jpeg;base64,${userLogged.profileImage}` : profilePlaceholder} alt="avatar" className="rounded-circle img-fluid border border-4 border-blue p-1"
-                            style={{ width: '150px', height: '150px', objectFit: 'cover' }}
-                        />
+                      <img
+                        src={userLogged?.profileImage ? `data:image/jpeg;base64,${userLogged.profileImage}` : profilePlaceholder}
+                        alt="avatar"
+                        className="rounded-circle img-fluid border border-4 border-blue p-1"
+                        style={{ width: '150px', height: '150px', objectFit: 'cover' }}
+                      />
                       {/* Botón de cámara en posición absoluta */}
                       <button type="button" className="btn btn-blue-600 text-white rounded-circle position-absolute" style={{ bottom: '0px', right: 'calc(50% - 70px)' }} onClick={() => openModal(cameraModalRef)}>
                         <i className="bi bi-pencil-square" />

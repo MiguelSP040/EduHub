@@ -9,7 +9,7 @@ import profilePlaceholder from '../../../assets/img/profileImage.png';
 import { Modal } from 'bootstrap';
 
 const InstructorProfile = () => {
-  const { user } = useContext(AuthContext);
+  const { user, updateUser } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const [userLogged, setUserLogger] = useState(null);
   const navbarRef = useRef(null);
@@ -32,11 +32,11 @@ const InstructorProfile = () => {
           const data = await findUserById(user.id);
           setUserLogger(data);
         } catch (error) {
-          console.error("Error al obtener usuario:", error);
+          console.error('Error al obtener usuario:', error);
         }
       }
     };
-  
+
     fetchUserData();
   }, [user, token]);
 
@@ -75,23 +75,22 @@ const InstructorProfile = () => {
 
   const handleUpdate = async () => {
     const usernameChanged = userLogged?.username && formData.username !== userLogged.username;
-
     if (usernameChanged) {
-      const confirmed = window.confirm("Has cambiado tu nombre de usuario. Si continúas, se cerrará la sesión actual. ¿Deseas continuar?");
+      const confirmed = window.confirm('Has cambiado tu nombre de usuario. Si continúas, se cerrará la sesión actual. ¿Deseas continuar?');
       if (!confirmed) return;
     }
 
     setLoading(true);
-
     try {
       const response = await updateProfile(formData, token);
-
       if (!response.ok) {
         alert('Error de conexión con el servidor');
         return;
       }
-
       alert('Actualización completada con éxito');
+
+      // Actualizamos el usuario en el contexto
+      updateUser(formData);
 
       if (usernameChanged) {
         localStorage.removeItem('token');
@@ -100,11 +99,7 @@ const InstructorProfile = () => {
         return;
       }
 
-      setUserLogger((prevState) => ({
-        ...prevState,
-        ...formData,
-      }));
-
+      setUserLogger((prevState) => ({ ...prevState, ...formData }));
       const modal = Modal.getInstance(updateUserModalRef.current);
       if (modal) modal.hide();
     } catch (error) {
@@ -119,33 +114,25 @@ const InstructorProfile = () => {
       alert('Todos los campos son obligatorios');
       return;
     }
-
     if (newPassword !== confirmPassword) {
       alert('Las contraseñas no coinciden');
       return;
     }
-
     setLoading(true);
     try {
       const verifyResponse = await verifyPassword({ user: user.username, password: currentPassword });
-
       if (!verifyResponse.ok) {
         alert('Contraseña actual incorrecta');
         return;
       }
-
       const updateResponse = await updateProfile({ id: user.id, password: newPassword }, token);
-
       if (!updateResponse.ok) {
         alert('No se pudo actualizar la contraseña');
         return;
       }
-
       alert('Contraseña actualizada con éxito');
-
       const modal = Modal.getInstance(updatePasswordModalRef.current);
       if (modal) modal.hide();
-
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
@@ -172,25 +159,22 @@ const InstructorProfile = () => {
     setLoading(true);
     try {
       const base64Image = await readFileAsBase64(newProfileFile);
-
       const updatedUser = {
         id: userLogged.id,
         profileImage: base64Image,
       };
-
       const response = await updateProfile(updatedUser, token);
-
       if (!response.ok) {
         alert('No se pudo actualizar la foto de perfil');
         return;
       }
-
       alert('Foto de perfil actualizada');
+      updateUser({ profileImage: base64Image });
+      localStorage.setItem('profileImage', base64Image);
       setUserLogger((prev) => ({
         ...prev,
         profileImage: base64Image,
       }));
-
       const modal = Modal.getInstance(cameraModalRef.current);
       if (modal) modal.hide();
     } catch (error) {
@@ -212,7 +196,7 @@ const InstructorProfile = () => {
   };
 
   return (
-    <div className='bg-main'>
+    <div className="bg-main">
       {/* SIDEBAR */}
       <Sidebar isExpanded={isSidebarExpanded} setIsExpanded={setIsSidebarExpanded} navbarRef={navbarRef} />
 
@@ -225,14 +209,17 @@ const InstructorProfile = () => {
 
         {/* CONTENIDO PRINCIPAL */}
         <div className="overflow-auto vh-100">
-          <main className={'px-3 px-md-5 pt-5 mt-5 ms-md-5'}>
+          <main className="px-3 px-md-5 pt-5 mt-5 ms-md-5">
             <div className="row">
               {/* Sección de Perfil */}
               <section className="col-lg-4">
                 <div className="card shadow-sm mb-4">
                   <div className="card-body light-gray-bg text-center">
                     <div className="position-relative">
-                      <img src={userLogged?.profileImage ? `data:image/jpeg;base64,${userLogged.profileImage}` : profilePlaceholder} alt="avatar" className="rounded-circle img-fluid border border-4 border-blue p-1"
+                      <img
+                        src={userLogged?.profileImage ? `data:image/jpeg;base64,${userLogged.profileImage}` : profilePlaceholder}
+                        alt="avatar"
+                        className="rounded-circle img-fluid border border-4 border-blue p-1"
                         style={{ width: '150px', height: '150px', objectFit: 'cover' }}
                       />
                       {/* Botón de cámara en posición absoluta */}
@@ -476,14 +463,12 @@ const InstructorProfile = () => {
             <div className="modal-body">
               <h5 className="modal-title">Cambiar foto de perfil</h5>
               <hr />
-
               <div className="mb-3">
                 <label htmlFor="newProfileImage" className="form-label fw-bold">
                   Seleccionar imagen
                 </label>
                 <input type="file" id="newProfileImage" className="form-control" accept="image/*" onChange={handleFileChange} />
               </div>
-
               <div className="text-end">
                 <button type="button" className="btn btn-purple-900" onClick={handleSaveProfileImage} disabled={loading}>
                   {loading ? <div className="spinner-border spinner-border-sm text-light"></div> : 'Guardar'}

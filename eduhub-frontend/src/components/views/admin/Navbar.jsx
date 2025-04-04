@@ -1,31 +1,36 @@
-import { useState, useEffect, useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { AuthContext } from '../../../context/AuthContext';
-import { findUserById } from '../../../services/userService';
-import { List, Search } from 'react-feather';
 import { useNavigate } from 'react-router-dom';
 import profilePlaceholder from '../../../assets/img/profileImage.png';
+import eduhubIcon from '../../../assets/img/eduhub-icon.png';
+import { List, Search } from 'react-feather';
+import { findUserById } from '../../../services/userService';
 
 const Navbar = ({ toggleSidebar }) => {
-  const token = localStorage.getItem('token');
-
   const navigate = useNavigate();
-  const { user } = useContext(AuthContext);
-  const [userLogged, setUserLogger] = useState(null);
+  const { user, updateUser } = useContext(AuthContext);
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      if (user?.id) {
-        try {
-          const data = await findUserById(user.id); // ya es JSON
-          setUserLogger(data);
-        } catch (error) {
-          console.error('Error al obtener usuario:', error);
-        }
+    if (user && !user.profileImage) {
+      const storedImage = localStorage.getItem('profileImage');
+      if (storedImage) {
+        updateUser({ profileImage: storedImage });
+      } else {
+        const fetchProfileImage = async () => {
+          try {
+            const data = await findUserById(user.id);
+            if (data.profileImage) {
+              updateUser({ profileImage: data.profileImage });
+              localStorage.setItem('profileImage', data.profileImage);
+            }
+          } catch (error) {
+            console.error('Error fetching profile image:', error);
+          }
+        };
+        fetchProfileImage();
       }
-    };
-
-    fetchUserData();
-  }, [user, token]);
+    }
+  }, [user, updateUser]);
 
   return (
     <nav className="navbar navbar-expand-lg bg-body-tertiary shadow-sm fixed-top">
@@ -37,23 +42,23 @@ const Navbar = ({ toggleSidebar }) => {
           </button>
           <a
             className="navbar-brand ms-2"
-            href=""
+            href="#"
             onClick={(e) => {
-              e.stopPropagation();
-              navigate('/admin');
+              e.preventDefault();
+              navigate('/instructor');
             }}
           >
-            <img src="../../../src/assets/img/eduhub-icon.png" alt="brand" height={40} />
+            <img src={eduhubIcon} alt="brand" height={40} />
           </a>
           <a
             className="text-black"
-            href=""
+            href="#"
             onClick={(e) => {
-              e.stopPropagation();
-              navigate('/admin');
+              e.preventDefault();
+              navigate('/instructor');
             }}
           >
-            <h5 className="user-select-none">EduHub Admin</h5>
+            <h5 className="user-select-none">EduHub</h5>
           </a>
         </div>
 
@@ -68,13 +73,13 @@ const Navbar = ({ toggleSidebar }) => {
             </div>
           </form>
           <a
-            href=""
+            href="#"
             onClick={(e) => {
-              e.stopPropagation();
-              navigate('/profileAdmin');
+              e.preventDefault();
+              navigate('/profile');
             }}
           >
-            <img src={userLogged?.profileImage ? `data:image/jpeg;base64,${userLogged.profileImage}` : profilePlaceholder} alt="avatar" className="rounded-circle d-none d-md-block user-select-none" style={{ width: '40px', height: '40px', objectFit: 'cover' }} />
+            <img src={user && user.profileImage ? `data:image/jpeg;base64,${user.profileImage}` : profilePlaceholder} alt="avatar" className="rounded-circle d-none d-md-block user-select-none" style={{ width: '40px', height: '40px', objectFit: 'cover' }} />
           </a>
         </div>
       </div>
