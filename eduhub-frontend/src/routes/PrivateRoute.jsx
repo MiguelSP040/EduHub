@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import { AuthContext } from '../context/AuthContext';
@@ -6,7 +6,6 @@ import { AuthContext } from '../context/AuthContext';
 const PrivateRoute = ({ children, allowedRoles }) => {
   const { user } = useContext(AuthContext);
   const location = useLocation();
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   const token = localStorage.getItem('token');
   if (!token) {
@@ -25,8 +24,6 @@ const PrivateRoute = ({ children, allowedRoles }) => {
     localStorage.removeItem('user');
     return <Navigate to="/" state={{ from: location }} replace />;
   }
-
-  if (isCheckingAuth) return null;
 
   if (!user) {
     return <Navigate to="/" state={{ from: location }} replace />;
