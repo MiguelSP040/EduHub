@@ -45,7 +45,7 @@ const Navbar = ({ toggleSidebar }) => {
             href="#"
             onClick={(e) => {
               e.preventDefault();
-              navigate('/instructor');
+              navigate('/admin');
             }}
           >
             <img src={eduhubIcon} alt="brand" height={40} />
@@ -55,28 +55,20 @@ const Navbar = ({ toggleSidebar }) => {
             href="#"
             onClick={(e) => {
               e.preventDefault();
-              navigate('/instructor');
+              navigate('/admin');
             }}
           >
-            <h5 className="user-select-none">EduHub</h5>
+            <h5 className="user-select-none text-gray">EduHub Admin</h5>
           </a>
         </div>
 
         {/* Derecha: Búsqueda + Imagen usuario */}
         <div className="d-flex align-items-center">
-          <form className="me-3 d-none d-md-block">
-            <div className="input-group">
-              <button className="btn border" type="button">
-                <Search size={16} />
-              </button>
-              <input className="form-control bg-body-tertiary" type="search" placeholder="Buscar..." />
-            </div>
-          </form>
           <a
             href="#"
             onClick={(e) => {
               e.preventDefault();
-              navigate('/profile');
+              navigate('/profileAdmin');
             }}
           >
             <img src={user && user.profileImage ? `data:image/jpeg;base64,${user.profileImage}` : profilePlaceholder} alt="avatar" className="rounded-circle d-none d-md-block user-select-none" style={{ width: '40px', height: '40px', objectFit: 'cover' }} />

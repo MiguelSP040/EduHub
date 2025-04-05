@@ -58,20 +58,12 @@ const Navbar = ({ toggleSidebar }) => {
               navigate('/instructor');
             }}
           >
-            <h5 className="user-select-none">EduHub</h5>
+            <h5 className="user-select-none text-gray">EduHub</h5>
           </a>
         </div>
 
         {/* Derecha: Búsqueda + Imagen usuario */}
         <div className="d-flex align-items-center">
-          <form className="me-3 d-none d-md-block">
-            <div className="input-group">
-              <button className="btn border" type="button">
-                <Search size={16} />
-              </button>
-              <input className="form-control bg-body-tertiary" type="search" placeholder="Buscar..." />
-            </div>
-          </form>
           <a
             href="#"
             onClick={(e) => {

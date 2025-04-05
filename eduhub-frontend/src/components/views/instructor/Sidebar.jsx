@@ -31,7 +31,7 @@ const Sidebar = ({ isExpanded, setIsExpanded, navbarRef }) => {
     };
   }, [isExpanded, setIsExpanded, navbarRef]);
 
-  const getHoverStyle = (btnName) => (isExpanded && hoveredButton === btnName ? { backgroundColor: '#e9ecef', borderRight: '4px solid #AA39AD' } : {});
+  const getHoverStyle = (btnName) => (isExpanded && hoveredButton === btnName ? { backgroundColor: '#e9ecef', color: '#800080' , borderRight: '4px solid #AA39AD' } : { color: '#444444' });
 
   return (
     <div
@@ -52,7 +52,7 @@ const Sidebar = ({ isExpanded, setIsExpanded, navbarRef }) => {
       <div className="d-flex flex-column h-100 w-100 pt-1">
         {/* Botones del Sidebar */}
         <button
-          className="btn my-1 d-flex align-items-center col-12 mt-3"
+          className="btn border-top-0 border-start-0 border-bottom-0 border-top-0 my-1 d-flex align-items-center col-12 mt-3"
           onMouseEnter={() => setHoveredButton('Inicio')}
           onMouseLeave={() => setHoveredButton(null)}
           onClick={
@@ -70,7 +70,7 @@ const Sidebar = ({ isExpanded, setIsExpanded, navbarRef }) => {
         </button>
 
         <button
-          className="btn my-1 d-flex align-items-center col-12"
+          className="btn border-top-0 border-start-0 border-bottom-0 border-top-0 my-1 d-flex align-items-center col-12"
           onMouseEnter={() => setHoveredButton('Perfil')}
           onMouseLeave={() => setHoveredButton(null)}
           onClick={
@@ -88,7 +88,7 @@ const Sidebar = ({ isExpanded, setIsExpanded, navbarRef }) => {
         </button>
 
         <button
-          className="btn my-1 d-flex align-items-center col-12"
+          className="btn border-top-0 border-start-0 border-bottom-0 border-top-0 my-1 d-flex align-items-center col-12"
           onMouseEnter={() => setHoveredButton('Mis calificaciones')}
           onMouseLeave={() => setHoveredButton(null)}
           onClick={
@@ -106,7 +106,7 @@ const Sidebar = ({ isExpanded, setIsExpanded, navbarRef }) => {
         </button>
 
         <button
-          className="btn my-1 d-flex align-items-center col-12"
+          className="btn border-top-0 border-start-0 border-bottom-0 border-top-0 my-1 d-flex align-items-center col-12"
           onMouseEnter={() => setHoveredButton('Notificaciones')}
           onMouseLeave={() => setHoveredButton(null)}
           onClick={
@@ -126,7 +126,7 @@ const Sidebar = ({ isExpanded, setIsExpanded, navbarRef }) => {
         <div className="mt-auto">
           <hr />
           <button
-            className="btn d-flex align-items-center col-12"
+            className="btn border-top-0 border-start-0 border-bottom-0 border-top-0 d-flex align-items-center col-12"
             onMouseEnter={() => setHoveredButton('Cerrar sesión')}
             onMouseLeave={() => setHoveredButton(null)}
             onClick={
@@ -140,7 +140,7 @@ const Sidebar = ({ isExpanded, setIsExpanded, navbarRef }) => {
             style={getHoverStyle('Cerrar sesión')}
           >
             <LogOut size={24} className="flex-shrink-0" />
-            <div className="ms-2 text-truncate">{isExpanded && 'Cerrar sesión'}</div>
+            <div className={'ms-2 text-truncate'}>{isExpanded && 'Cerrar sesión'}</div>
           </button>
         </div>
       </div>

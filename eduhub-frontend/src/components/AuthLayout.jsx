@@ -8,7 +8,7 @@ const AuthLayout = ({ children }) => {
                         {/* Sección Izquierda */}
                             <div className="col-md-6 bg-purple-800 rounded-3 text-white d-flex flex-column text-center p-5 d-none d-md-block">
                                 <div className="d-flex align-items-center justify-content-center">
-                                <img src="./src/assets/img/eduhub-icon.png" alt="EduHub" height="350" />
+                                <img src="./src/assets/img/eduhub-icon.png" alt="EduHub" className="m-5" height="250" />
                                 </div>
                                 <p>EduHubPro 2025 - Copyright</p>
                             </div>

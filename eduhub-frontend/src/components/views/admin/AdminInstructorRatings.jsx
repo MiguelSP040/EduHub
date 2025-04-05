@@ -18,7 +18,7 @@ const AdminInstructorRatings = () => {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [ratingsByCourse, setRatingsByCourse] = useState({});
   const [expandedComments, setExpandedComments] = useState({});
-  
+
   const [isCoursesLoading, setCoursesLoading] = useState(true);
   const [isLoading, setLoading] = useState(true);
 
@@ -138,22 +138,9 @@ const AdminInstructorRatings = () => {
                     <h5 className="fw-semibold mb-0 me-3">
                       {instructor.name} {instructor.surname} - Calificaciones
                     </h5>
-                    <select
-                      className="form-select form-select-sm w-auto"
-                      value={selectedCourse?.id || ''}
-                      onChange={(e) =>
-                        setSelectedCourse(
-                          courses.find((c) => c.id.toString() === e.target.value)
-                        )
-                      }
-                      disabled={isCoursesLoading || courses.length === 0}
-                    >
+                    <select className="form-select form-select-sm w-auto" value={selectedCourse?.id || ''} onChange={(e) => setSelectedCourse(courses.find((c) => c.id.toString() === e.target.value))} disabled={isCoursesLoading || courses.length === 0}>
                       <option value="" disabled>
-                        {isCoursesLoading
-                          ? 'Cargando cursos...'
-                          : courses.length > 0
-                          ? 'Selecciona un curso'
-                          : 'No hay cursos finalizados'}
+                        {isCoursesLoading ? 'Cargando cursos...' : courses.length > 0 ? 'Selecciona un curso' : 'No hay cursos finalizados'}
                       </option>
                       {courses.map((course) => (
                         <option key={course.id} value={course.id.toString()}>
@@ -164,7 +151,7 @@ const AdminInstructorRatings = () => {
                   </div>
                   <div className="col-12 col-md-auto text-md-end mt-2 mt-md-0">
                     <button className="btn btn-outline-secondary" onClick={() => navigate('/instructors')}>
-                    <i className="bi bi-arrow-90deg-left"></i>
+                      <i class="bi bi-arrow-left"></i> Volver
                     </button>
                   </div>
                 </div>
@@ -200,14 +187,10 @@ const AdminInstructorRatings = () => {
                             <strong>Apodo:</strong> {instructor.username}
                           </p>
                           <p className="mb-1">
-                            <strong>Cursos aprobados:</strong>{' '}
-                            {allCourses.filter((c) => c.status !== 'Pendiente' && c.status !== 'Creado').length}
+                            <strong>Cursos aprobados:</strong> {allCourses.filter((c) => c.status !== 'Pendiente' && c.status !== 'Creado').length}
                           </p>
                           <p className="mb-0">
-                            <strong>Estado:</strong>{' '}
-                            <span className={`badge ${instructor.active ? 'bg-success' : 'bg-secondary'}`}>
-                              {instructor.active ? 'Activo' : 'Inactivo'}
-                            </span>
+                            <strong>Estado:</strong> <span className={`badge ${instructor.active ? 'bg-success' : 'bg-secondary'}`}>{instructor.active ? 'Activo' : 'Inactivo'}</span>
                           </p>
                         </div>
                       </div>
@@ -221,14 +204,8 @@ const AdminInstructorRatings = () => {
                 <div className="card rounded-4 border-0 shadow-sm h-100 px-0">
                   <div className="card-body align-center">
                     <h5 className="fw-semibold mb-2">Promedio general del instructor</h5>
-                    <h3 className="text-primary mb-0">
-                      {courseStats ? overallAverage : '--'} / 5
-                    </h3>
-                    {courseStats ? (
-                      <small className="text-muted">Basado en todas las calificaciones de sus cursos</small>
-                    ) : (
-                      <span>Aún no hay cursos calificados</span>
-                    )}
+                    <h3 className="text-primary mb-0">{courseStats ? overallAverage : '--'} / 5</h3>
+                    {courseStats ? <small className="text-muted">Basado en todas las calificaciones de sus cursos</small> : <span>Aún no hay cursos calificados</span>}
                   </div>
                 </div>
               </div>
@@ -247,8 +224,7 @@ const AdminInstructorRatings = () => {
                       <h5 className="fw-semibold mb-2">Promedio general del curso</h5>
                       <h4 className="text-primary">{courseStats.avg.toFixed(1)} / 5</h4>
                       <small className="text-muted">
-                        {courseStats.total}{' '}
-                        {courseStats.total === 1 ? 'calificación' : 'calificaciones'}
+                        {courseStats.total} {courseStats.total === 1 ? 'calificación' : 'calificaciones'}
                       </small>
                     </div>
                   </div>
@@ -264,10 +240,7 @@ const AdminInstructorRatings = () => {
                             <span>{courseStats.percentages[star]}%</span>
                           </div>
                           <div className="progress" style={{ height: '8px' }}>
-                            <div
-                              className="progress-bar bg-warning"
-                              style={{ width: `${courseStats.percentages[star]}%` }}
-                            ></div>
+                            <div className="progress-bar bg-warning" style={{ width: `${courseStats.percentages[star]}%` }}></div>
                           </div>
                         </div>
                       ))}
@@ -279,12 +252,7 @@ const AdminInstructorRatings = () => {
                       {courseStats.stars.map((star) => (
                         <div key={star} className="d-flex align-items-center justify-content-center mb-2">
                           {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              size={16}
-                              className={i < star ? 'text-warning' : 'text-muted'}
-                              fill={i < star ? '#ffc107' : 'none'}
-                            />
+                            <Star key={i} size={16} className={i < star ? 'text-warning' : 'text-muted'} fill={i < star ? '#ffc107' : 'none'} />
                           ))}
                           <span className="ms-2">({courseStats.counts[star]})</span>
                         </div>
@@ -298,11 +266,7 @@ const AdminInstructorRatings = () => {
                       <div key={i} className="border-0 rounded-4 p-3 bg-white shadow-sm mb-3">
                         <div className="d-flex align-items-center">
                           <img
-                            src={
-                              r.studentPhoto
-                                ? `data:image/jpeg;base64,${r.studentPhoto}`
-                                : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'
-                            }
+                            src={r.studentPhoto ? `data:image/jpeg;base64,${r.studentPhoto}` : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}
                             alt="Foto de perfil"
                             className="rounded-circle me-3 border"
                             style={{ width: '60px', height: '60px', objectFit: 'cover' }}
@@ -311,12 +275,7 @@ const AdminInstructorRatings = () => {
                             <h6 className="mb-1 fw-bold text-start">{r.studentName}</h6>
                             <div className="d-flex justify-content-start">
                               {[...Array(5)].map((_, index) => (
-                                <Star
-                                  key={index}
-                                  size={16}
-                                  className={index < r.rating ? 'text-warning' : 'text-muted'}
-                                  fill={index < r.rating ? '#ffc107' : 'none'}
-                                />
+                                <Star key={index} size={16} className={index < r.rating ? 'text-warning' : 'text-muted'} fill={index < r.rating ? '#ffc107' : 'none'} />
                               ))}
                             </div>
                           </div>
@@ -324,17 +283,9 @@ const AdminInstructorRatings = () => {
                         <div className="mt-3 ps-1">
                           {r.comment ? (
                             <div className="text-end">
-                              <p className="mb-1 text-start">
-                                {r.comment.length > 350 && !expandedComments[i]
-                                  ? `${r.comment.slice(0, 350)}...`
-                                  : r.comment}
-                              </p>
+                              <p className="mb-1 text-start">{r.comment.length > 350 && !expandedComments[i] ? `${r.comment.slice(0, 350)}...` : r.comment}</p>
                               {r.comment.length > 150 && (
-                                <button
-                                  className="btn btn-link p-0 ms-1"
-                                  style={{ fontSize: '0.875rem' }}
-                                  onClick={() => toggleComment(i)}
-                                >
+                                <button className="btn btn-link p-0 ms-1" style={{ fontSize: '0.875rem' }} onClick={() => toggleComment(i)}>
                                   {expandedComments[i] ? 'Mostrar menos' : 'Mostrar más'}
                                 </button>
                               )}
@@ -351,7 +302,7 @@ const AdminInstructorRatings = () => {
                 </div>
               </div>
             ) : (
-              <p className="text-muted">Aún no hay cursos calificados.</p>
+              <p className="text-muted">Aún no hay reseñas.</p>
             )}
           </main>
         </div>
