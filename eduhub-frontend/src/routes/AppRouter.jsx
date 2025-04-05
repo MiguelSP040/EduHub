@@ -6,7 +6,7 @@ import Login from '../components/Login';
 import Recover from '../components/Recover';
 import ResetPassword from '../components/ResetPassword';
 import AdminDashboard from '../components/views/admin/AdminDashboard';
-import PrivateRoute from './PrivateRouter';
+import PrivateRoute from './PrivateRoute';
 import PublicRoute from './PublicRoute';
 import { useState } from 'react';
 import AdminProfile from '../components/views/admin/AdminProfile';

@@ -11,7 +11,6 @@ const PublicRoute = ({ children }) => {
     try {
       const decoded = jwtDecode(token);
       if (decoded.exp * 1000 > Date.now()) {
-        // Aquí redirigimos según el rol del usuario
         if (user && user.role) {
           if (user.role === "ROLE_ADMIN") return <Navigate to="/admin" replace />;
           if (user.role === "ROLE_INSTRUCTOR") return <Navigate to="/instructor" replace />;

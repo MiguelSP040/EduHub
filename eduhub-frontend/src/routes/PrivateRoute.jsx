@@ -8,22 +8,23 @@ const PrivateRoute = ({ children, allowedRoles }) => {
   const location = useLocation();
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const decoded = jwtDecode(token);
-        if (decoded.exp * 1000 < Date.now()) {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-        }
-      } catch (error) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-      }
+  const token = localStorage.getItem('token');
+  if (!token) {
+    return <Navigate to="/" state={{ from: location }} replace />;
+  }
+
+  try {
+    const decoded = jwtDecode(token);
+    if (decoded.exp * 1000 < Date.now()) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      return <Navigate to="/" state={{ from: location }} replace />;
     }
-    setIsCheckingAuth(false);
-  }, [user]);
+  } catch (error) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    return <Navigate to="/" state={{ from: location }} replace />;
+  }
 
   if (isCheckingAuth) return null;
 
