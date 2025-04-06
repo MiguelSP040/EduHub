@@ -196,12 +196,24 @@ body {
 
 .sidebar-btn-default {
   color: #444444 !important;
+  border-bottom: 0px !important;
+  border-top: 0px !important;
+  border-left: 0px !important;
 }
 
 .sidebar-btn-hover {
   background-color: #e9ecef !important;
   color: #800080 !important;
   border-right: 4px solid #AA39AD !important;
+  border-bottom: 0px !important;
+  border-top: 0px !important;
+  border-left: 0px !important;
+}
+
+.sidebar-btn-hover:active, .sidebar-btn-default:active {
+  border-bottom: 0px !important;
+  border-top: 0px !important;
+  border-left: 0px !important;
 }
 
 

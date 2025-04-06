@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
 import { getCourses, getStudentsByCourse, manageEnrollment, viewVoucherFile } from '../../../services/courseService';
@@ -14,6 +14,8 @@ const AdminEnrollments = () => {
   const [courses, setCourses] = useState([]);
   const [isLoading, setLoading] = useState(true);
   const [isStudentsLoading, setStudentsLoading] = useState(true);
+  const [sortColumn, setSortColumn] = useState(null); // 'nombre' | 'fecha' | 'estado'
+  const [sortDirection, setSortDirection] = useState('asc'); // 'asc' | 'desc'
 
   const fetchData = async () => {
     try {
@@ -45,9 +47,11 @@ const AdminEnrollments = () => {
   };
 
   const handleCourseChange = async (event) => {
+    setStudentsLoading(true);
     const courseId = event.target.value;
-    setSelectedCourse(courseId);
-    fetchStudents(courseId);
+     setSelectedCourse(courseId);
+    await  fetchStudents(courseId);
+    setStudentsLoading(false);
   };
 
   const handleManageEnrollment = async (studentId, accept) => {
@@ -56,12 +60,57 @@ const AdminEnrollments = () => {
     const response = await manageEnrollment(selectedCourse, studentId, accept);
     if (response.status === 200) {
       alert(response.message);
-      setStudents((prevStudents) =>
-        accept ? prevStudents.map((student) => (student.id === studentId ? { ...student, status: 'Aceptado' } : student)) : prevStudents.map((student) => (student.id === studentId ? { ...student, status: 'Rechazado', tempRejected: true } : student))
-      );
+      setStudents((prevStudents) => prevStudents.map((student) => (student.id === studentId ? { ...student, status: accept ? 'Aceptado' : 'Rechazado', tempRejected: !accept } : student)));
     } else {
       alert(`Error: ${response.message}`);
     }
+  };
+
+  const handleSort = (column) => {
+    if (sortColumn === column) {
+      setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
+
+  const sortedStudents = useMemo(() => {
+    if (!sortColumn) return students;
+
+    const sorted = [...students];
+    sorted.sort((a, b) => {
+      let valA, valB;
+      switch (sortColumn) {
+        case 'nombre':
+          valA = (a.name + '' + a.surname + ' ' + (a.lastname || '')).toLowerCase();
+          valB = (b.name + '' + b.surname + ' ' + (b.lastname || '')).toLowerCase();
+          break;
+        case 'fecha':
+          valA = a.enrolledDate ? new Date(a.enrolledDate).getTime() : 0;
+          valB = b.enrolledDate ? new Date(b.enrolledDate).getTime() : 0;
+          break;
+        case 'estado':
+          valA = a.status?.toLowerCase() || '';
+          valB = b.status?.toLowerCase() || '';
+          break;
+        default:
+          valA = '';
+          valB = '';
+          break;
+      }
+      if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+      if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+    return sorted;
+  }, [students, sortColumn, sortDirection]);
+
+  const getCaretIcon = (column) => {
+    if (sortColumn !== column) {
+      return <i className="bi bi-caret-down-fill text-muted ms-1"></i>;
+    }
+    return sortDirection === 'asc' ? <i className="bi bi-caret-up-fill ms-1"></i> : <i className="bi bi-caret-down-fill ms-1"></i>;
   };
 
   return (
@@ -115,23 +164,38 @@ const AdminEnrollments = () => {
                 <table className="table table-striped text-nowrap">
                   <thead className="position-sticky top-0">
                     <tr>
-                      <th>Nombre</th>
-                      <th>Fecha de Inscripción</th>
-                      <th>Estado</th>
+                      <th colSpan="5" className="text-center">
+                        <h4 className="mb-0">
+                          Estudiantes Inscritos - {isStudentsLoading ? '--' : students.length}/{courses.find((course) => course.id === selectedCourse)?.studentsCount}
+                        </h4>
+                      </th>
+                    </tr>
+                    <tr>
+                      <th style={{ cursor: 'pointer' }} onClick={() => handleSort('nombre')}>
+                        Nombre
+                        {getCaretIcon('nombre')}
+                      </th>
+                      <th style={{ cursor: 'pointer' }} onClick={() => handleSort('fecha')}>
+                        Fecha de Inscripción
+                        {getCaretIcon('fecha')}
+                      </th>
+                      <th style={{ cursor: 'pointer' }} onClick={() => handleSort('estado')}>
+                        Estado
+                        {getCaretIcon('estado')}
+                      </th>
                       <th>Comprobante</th>
                       <th>Acciones</th>
                     </tr>
                   </thead>
                   <tbody className="align-middle">
-                  {isStudentsLoading ? (
-                    <tr>
-                      <td colSpan="5" className="text-center py-3">
-                        <Loading/>
-                      </td>
-                    </tr>
-                  ) : 
-                    students.length > 0 ? (
-                      students.map((student) => (
+                    {isStudentsLoading ? (
+                      <tr>
+                        <td colSpan="5" className="text-center py-3">
+                          <Loading />
+                        </td>
+                      </tr>
+                    ) : sortedStudents.length > 0 ? (
+                      sortedStudents.map((student) => (
                         <tr key={student.id}>
                           <td>
                             {student.name} {student.surname} {student.lastname && student.lastname}

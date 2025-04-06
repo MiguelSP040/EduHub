@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
 import { findAllUsers, activateInstructor } from '../../../services/userService';
@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { getCoursesByInstructor } from '../../../services/courseService';
 import { payInstructorForCourse } from '../../../services/financeService';
 import Loading from '../../utilities/Loading';
+import { Search } from 'react-feather';
 
 const AdminInstructors = () => {
   const navigate = useNavigate();
@@ -17,6 +18,9 @@ const AdminInstructors = () => {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const [instructors, setInstructors] = useState([]);
   const [isLoading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortColumn, setSortColumn] = useState(null); // "nombre" | "correo" | "apodo" | "estado"
+  const [sortDirection, setSortDirection] = useState('asc'); // 'asc' | 'desc'
 
   const fetchInstructors = async () => {
     setLoading(true);
@@ -95,40 +99,128 @@ const AdminInstructors = () => {
     }
   };
 
+  const filteredInstructors = useMemo(() => {
+    if (!searchTerm.trim()) return instructors;
+    return instructors.filter((inst) => {
+      const fullName = (inst.name + ' ' + inst.surname + ' ' + (inst.lastname || '')).toLowerCase();
+      const email = inst.email.toLowerCase();
+      const username = inst.username.toLowerCase();
+      const term = searchTerm.toLowerCase();
+      return fullName.includes(term) || email.includes(term) || username.includes(term);
+    });
+  }, [instructors, searchTerm]);
+
+  const handleSort = (column) => {
+    if (sortColumn === column) {
+      setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
+
+  const getCaretIcon = (column) => {
+    if (sortColumn !== column) {
+      return <i className="bi bi-caret-down-fill text-muted ms-1"></i>;
+    }
+    if (sortDirection === 'asc') {
+      return <i className="bi bi-caret-up-fill ms-1"></i>;
+    }
+    return <i className="bi bi-caret-down-fill ms-1"></i>;
+  };
+
+  const sortedInstructors = useMemo(() => {
+    if (!sortColumn) return filteredInstructors;
+    const sorted = [...filteredInstructors];
+    sorted.sort((a, b) => {
+      let valA, valB;
+      switch (sortColumn) {
+        case 'nombre':
+          valA = (a.name + ' ' + a.surname + ' ' + (a.lastname || '')).toLowerCase();
+          valB = (b.name + ' ' + b.surname + ' ' + (b.lastname || '')).toLowerCase();
+          break;
+        case 'correo':
+          valA = a.email.toLowerCase();
+          valB = b.email.toLowerCase();
+          break;
+        case 'apodo':
+          valA = a.username.toLowerCase();
+          valB = b.username.toLowerCase();
+          break;
+        case 'estado':
+          valA = a.active ? '1' : '0'; // Activo=1, Inactivo=0
+          valB = b.active ? '1' : '0';
+          break;
+        default:
+          valA = '';
+          valB = '';
+          break;
+      }
+      if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+      if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+    return sorted;
+  }, [filteredInstructors, sortColumn, sortDirection]);
+
   return (
     <div className="bg-main">
-      {/* SIDEBAR */}
       <Sidebar isExpanded={isSidebarExpanded} setIsExpanded={setIsSidebarExpanded} navbarRef={navbarRef} />
 
-      {/* CONTENEDOR PRINCIPAL */}
       <div className="flex-grow-1">
-        {/* NAVBAR */}
         <div ref={navbarRef}>
           <Navbar toggleSidebar={() => setIsSidebarExpanded(!isSidebarExpanded)} />
         </div>
 
-        {/* CONTENIDO PRINCIPAL */}
         <div className="overflow-auto vh-100">
           <main className="px-3 px-md-5 pt-5 mt-5 ms-md-5">
+            {/* Barra de navegación secundaria */}
             <div className="bg-white shadow-sm mb-4">
               <div className="container-fluid px-4 py-2">
-                <div className="row gx-3 align-items-center">
-                  <div className="col-12 col-sm d-flex justify-content-center justify-content-sm-start">
-                    <span className="fw-semibold fs-5">Gestión de Instructores</span>
+                <div className="row flex-nowrap align-items-center justify-content-between w-100 gx-3">
+                  <div className="col-auto d-flex align-items-center">
+                    <span className="fw-semibold fs-5 me-3">Gestión de Instructores</span>
+                  </div>
+
+                  <div className="col-auto d-flex align-items-center">
+                    <div className="search-container">
+                      <div className="search-icon">
+                        <i className="bi bi-search text-muted"></i>
+                      </div>
+                      <input type="search" className="search-input" placeholder="Buscar instructor" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Tabla de instructores */}
             <div className="table-responsive rounded-3" style={{ maxHeight: '35rem' }}>
               <table className="table table-striped text-nowrap">
                 <thead className="position-sticky top-0">
                   <tr>
-                    <th>Nombre Completo</th>
-                    <th>Correo Electrónico</th>
-                    <th>Apodo</th>
-                    <th>Estado</th>
+                    <th colSpan="5" className="text-center">
+                      <h4 className="mb-0">
+                        Instructores
+                      </h4>
+                    </th>
+                  </tr>
+                  <tr>
+                    <th style={{ cursor: 'pointer' }} onClick={() => handleSort('nombre')}>
+                      Nombre Completo
+                      {getCaretIcon('nombre')}
+                    </th>
+                    <th style={{ cursor: 'pointer' }} onClick={() => handleSort('correo')}>
+                      Correo Electrónico
+                      {getCaretIcon('correo')}
+                    </th>
+                    <th style={{ cursor: 'pointer' }} onClick={() => handleSort('apodo')}>
+                      Apodo
+                      {getCaretIcon('apodo')}
+                    </th>
+                    <th style={{ cursor: 'pointer' }} onClick={() => handleSort('estado')}>
+                      Estado
+                      {getCaretIcon('estado')}
+                    </th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
@@ -139,9 +231,9 @@ const AdminInstructors = () => {
                         <Loading />
                       </td>
                     </tr>
-                  ) : instructors.length > 0 ? (
-                    instructors.map((instructor, index) => (
-                      <tr key={instructor._id || index}>
+                  ) : sortedInstructors.length > 0 ? (
+                    sortedInstructors.map((instructor, index) => (
+                      <tr key={instructor._id || instructor.id || index}>
                         <td>
                           {instructor.name} {instructor.surname} {instructor.lastname}
                         </td>
@@ -218,7 +310,7 @@ const AdminInstructors = () => {
               <div className="row mb-3">
                 <div className="col-12">
                   <h5>Descripción</h5>
-                  <span>{instructors[instructorIndex]?.description ? instructors[instructorIndex]?.description : 'Sin descripción'}</span>
+                  <span>{instructors[instructorIndex]?.description ? instructors[instructorIndex].description : 'Sin descripción'}</span>
                 </div>
               </div>
             </div>
