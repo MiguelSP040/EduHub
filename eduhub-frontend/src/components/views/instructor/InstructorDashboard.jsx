@@ -1,11 +1,98 @@
-import { useState, useRef, useEffect, useContext, useMemo } from 'react';
+import { useState, useRef, useEffect, useContext, useMemo, useLayoutEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Loading from '../../utilities/Loading';
+import { motion } from 'framer-motion';
 import Sidebar from './Sidebar';
 import Navbar from '../Navbar';
 import { AuthContext } from '../../../context/AuthContext';
 import { getCourses, getCoursesByInstructor } from '../../../services/courseService';
 import { BookOpen, Archive, Search } from 'react-feather';
+import CourseBanner from '../../../assets/img/CourseBanner.jpg';
+import Loading from '../../utilities/Loading';
+
+const ToggleTabs = ({ activeTab, setActiveTab }) => {
+  const tabs = useMemo(
+    () => [
+      { value: 'myCourses', label: 'Mis Cursos', icon: <BookOpen size={20} /> },
+      { value: 'archived', label: 'Archivo', icon: <Archive size={20} /> },
+    ],
+    []
+  );
+
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 576);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 576);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const containerRef = useRef(null);
+  const tabRefs = useRef([]);
+
+  const [sliderStyle, setSliderStyle] = useState({ left: 0, width: 0 });
+
+  useLayoutEffect(() => {
+    const index = tabs.findIndex((t) => t.value === activeTab);
+    if (index < 0) return;
+
+    const activeButton = tabRefs.current[index];
+    const containerRect = containerRef.current?.getBoundingClientRect();
+    const buttonRect = activeButton?.getBoundingClientRect();
+    if (containerRect && buttonRect) {
+      setSliderStyle({
+        left: buttonRect.left - containerRect.left,
+        width: buttonRect.width,
+      });
+    }
+  }, [activeTab, tabs]);
+
+  const containerStyle = {
+    display: 'inline-flex',
+    position: 'relative',
+    marginBottom: '7px',
+  };
+
+  const buttonStyle = {
+    background: 'transparent',
+    border: 'none',
+    cursor: 'pointer',
+    padding: '0.5rem 1rem',
+    fontSize: '0.875rem',
+    fontWeight: 500,
+    position: 'relative',
+    zIndex: 1,
+    color: '#444',
+  };
+
+  return (
+    <div ref={containerRef} style={containerStyle}>
+      {tabs.map((tab, i) => (
+        <button
+          key={tab.value}
+          ref={(el) => (tabRefs.current[i] = el)}
+          onClick={() => setActiveTab(tab.value)}
+          style={{
+            ...buttonStyle,
+            color: activeTab === tab.value ? '#000' : '#666',
+          }}
+        >
+          {isMobile ? tab.icon : tab.label}
+        </button>
+      ))}
+      <motion.div
+        animate={{ left: sliderStyle.left, width: sliderStyle.width }}
+        transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          height: '4px',
+          borderRadius: '9999px',
+          background: 'linear-gradient(to right, #8e2de2, #4a00e0)',
+          zIndex: 0,
+        }}
+      />
+    </div>
+  );
+};
 
 const InstructorDashboard = () => {
   const navigate = useNavigate();
@@ -17,7 +104,6 @@ const InstructorDashboard = () => {
   const [myCourses, setMyCourses] = useState([]);
   const [archivedCourses, setArchivedCourses] = useState([]);
   const [courses, setCourses] = useState([]);
-  const [hoverSearch, setHoverSearch] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setLoading] = useState(true);
 
@@ -81,6 +167,7 @@ const InstructorDashboard = () => {
         return 'badge-green-color';
       case 'Empezado':
         return 'badge-pink-color';
+      case 'Rechazado':
       case 'Finalizado':
         return 'badge-red-color';
       default:
@@ -93,7 +180,7 @@ const InstructorDashboard = () => {
       filteredCourses.map((course) => (
         <div key={course.id} className="col-12 col-md-5 col-lg-4 course-width mb-4">
           <div className="card p-0 text-start">
-            <img src={course?.coverImage ? `data:image/jpeg;base64,${course.coverImage}` : 'https://t3.ftcdn.net/jpg/04/67/96/14/360_F_467961418_UnS1ZAwAqbvVVMKExxqUNi0MUFTEJI83.jpg'} height={120} className="card-img-top" alt={course.title} />
+            <img src={course?.coverImage ? `data:image/jpeg;base64,${course.coverImage}` : CourseBanner} height={120} className="card-img-top" alt={course.title} />
             <div className="card-body course-body-height">
               <div className="d-flex justify-content-between align-items-center mb-2">
                 <h5 className="card-title text-truncate">{course.title}</h5>
@@ -146,18 +233,11 @@ const InstructorDashboard = () => {
           <main className="px-3 px-md-5 pt-5 mt-5 ms-md-5">
             {/* BARRA DE NAVEGACIÓN SECUNDARIA */}
             <div className="bg-white shadow-sm mb-4">
-              <div className="container-fluid px-md-4 py-2">
+              <div className="container-fluid px-4 py-2">
                 <div className="row flex-nowrap align-items-center justify-content-between w-100 gx-3">
+                  {/* Columna Izquierda: ToggleTabs */}
                   <div className="col-auto d-flex">
-                    {[
-                      { tab: 'myCourses', icon: <BookOpen size={20} className="d-sm-none" />, label: 'Mis Cursos' },
-                      { tab: 'archived', icon: <Archive size={20} className="d-sm-none" />, label: 'Archivo' },
-                    ].map(({ tab, icon, label }) => (
-                      <button key={tab} type="button" className={`btn border-0 ${activeTab === tab ? 'border-bottom border-purple border-3 fw-semibold' : ''}`} onClick={() => setActiveTab(tab)}>
-                        {icon}
-                        <span className="d-none d-sm-inline">{label}</span>
-                      </button>
-                    ))}
+                    <ToggleTabs activeTab={activeTab} setActiveTab={setActiveTab} />
                   </div>
 
                   <div className="col-8 col-md-6 px-0">

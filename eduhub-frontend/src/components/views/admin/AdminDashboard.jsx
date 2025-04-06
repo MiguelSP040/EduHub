@@ -1,15 +1,101 @@
-import { useState, useRef, useEffect, useContext, useMemo } from 'react';
+import { useState, useRef, useEffect, useContext, useMemo, useLayoutEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, Clock, CheckCircle, XCircle, Search } from 'react-feather';
+import { motion } from 'framer-motion';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
 import { AuthContext } from '../../../context/AuthContext';
 import { getCourses } from '../../../services/courseService';
+import CourseBanner from '../../../assets/img/CourseBanner.jpg';
 import Loading from '../../utilities/Loading';
+
+const ToggleTabs = ({ activeTab, setActiveTab }) => {
+  const tabs = useMemo(() => [
+    { value: 'allCourses', label: 'Todos', icon: <BookOpen size={20} /> },
+    { value: 'Pendiente', label: 'Pendientes', icon: <Clock size={20} /> },
+    { value: 'Aprobado', label: 'Aprobados', icon: <CheckCircle size={20} /> },
+    { value: 'Empezado', label: 'Empezados', icon: <XCircle size={20} /> },
+  ], []);
+
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 576);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 576);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const containerRef = useRef(null);
+  const tabRefs = useRef([]);
+
+  const [sliderStyle, setSliderStyle] = useState({ left: 0, width: 0 });
+
+  useLayoutEffect(() => {
+    const index = tabs.findIndex((t) => t.value === activeTab);
+    if (index < 0) return;
+
+    const activeButton = tabRefs.current[index];
+    const containerRect = containerRef.current?.getBoundingClientRect();
+    const buttonRect = activeButton?.getBoundingClientRect();
+    if (containerRect && buttonRect) {
+      setSliderStyle({
+        left: buttonRect.left - containerRect.left,
+        width: buttonRect.width,
+      });
+    }
+  }, [activeTab, tabs]);
+
+  const containerStyle = {
+    display: 'inline-flex',
+    position: 'relative',
+    marginBottom: '7px',
+  };
+
+  const buttonStyle = {
+    background: 'transparent',
+    border: 'none',
+    cursor: 'pointer',
+    padding: '0.5rem 1rem',
+    fontSize: '0.875rem',
+    fontWeight: 500,
+    position: 'relative',
+    zIndex: 1,
+    color: '#444',
+  };
+
+  return (
+    <div ref={containerRef} style={containerStyle}>
+      {tabs.map((tab, i) => (
+        <button
+          key={tab.value}
+          ref={(el) => (tabRefs.current[i] = el)}
+          onClick={() => setActiveTab(tab.value)}
+          style={{
+            ...buttonStyle,
+            color: activeTab === tab.value ? '#000' : '#666',
+          }}
+        >
+          {isMobile ? tab.icon : tab.label}
+        </button>
+      ))}
+      <motion.div
+        animate={{ left: sliderStyle.left, width: sliderStyle.width }}
+        transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          height: '4px',
+          borderRadius: '9999px',
+          background: 'linear-gradient(to right, #8e2de2, #4a00e0)',
+          zIndex: 0,
+        }}
+      />
+    </div>
+  );
+};
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const { user } = useContext(AuthContext); // Por si llega ser necesario
+  const { user } = useContext(AuthContext);
   const navbarRef = useRef(null);
 
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
@@ -24,7 +110,7 @@ const AdminDashboard = () => {
       allCourses = allCourses.filter((course) => course.published);
       setAvailableCourses(allCourses || []);
     } catch (error) {
-      console.error('Error al obtener los cursos:', error);
+      console.error('Error al obtener cursos:', error);
       setAvailableCourses([]);
     } finally {
       setLoading(false);
@@ -33,7 +119,6 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     fetchData();
-    // Polling: actualizar cada 30 segundos para reflejar cambios en tiempo real
     const intervalId = setInterval(fetchData, 30000);
     return () => clearInterval(intervalId);
   }, []);
@@ -44,16 +129,16 @@ const AdminDashboard = () => {
       courses = courses.filter((course) => course.status === activeTab);
     }
     if (searchTerm.trim() !== '') {
-      courses = courses.filter((course) => (course.title && course.title.toLowerCase().includes(searchTerm.toLowerCase())) || (course.category && course.category.toLowerCase().includes(searchTerm.toLowerCase())));
+      courses = courses.filter(
+        (course) =>
+          (course.title && course.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
+          (course.category && course.category.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
     }
     return courses;
   }, [availableCourses, activeTab, searchTerm]);
 
-  const coursesByStatus = useMemo(() => {
-    if (activeTab === 'allCourses') return availableCourses;
-    return availableCourses.filter((course) => course.status === activeTab);
-  }, [activeTab, availableCourses]);
-
+  // Formatear fechas
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('es-ES', {
@@ -79,19 +164,33 @@ const AdminDashboard = () => {
     }
   };
 
+  // Renderizar cursos
   const renderCourses = () =>
     filteredCourses.length > 0 ? (
       filteredCourses.map((course) => (
         <div key={course.id} className="col-12 col-md-5 col-lg-4 course-width mb-4">
           <div className="card p-0 text-start">
-            <img src={course?.coverImage ? `data:image/jpeg;base64,${course.coverImage}` : 'https://t3.ftcdn.net/jpg/04/67/96/14/360_F_467961418_UnS1ZAwAqbvVVMKExxqUNi0MUFTEJI83.jpg'} height={120} className="card-img-top" alt={course.title} />
+            <img
+              src={
+                course?.coverImage
+                  ? `data:image/jpeg;base64,${course.coverImage}`
+                  : CourseBanner
+              }
+              height={120}
+              className="card-img-top"
+              alt={course.title}
+            />
             <div className="card-body course-body-height">
               <div className="d-flex justify-content-between align-items-center mb-2">
                 <h5 className="card-title text-truncate">{course.title}</h5>
-                <span className="badge badge-purple-color px-3 m-2">{course.price === 0 ? 'GRATIS' : `$${course.price}`}</span>
+                <span className="badge badge-purple-color px-3 m-2">
+                  {course.price === 0 ? 'GRATIS' : `$${course.price}`}
+                </span>
               </div>
               <div className="d-flex justify-content-between">
-                <span className={`badge ${getStatusBadgeClass(course.status)} mb-3`}>{course.status}</span>
+                <span className={`badge ${getStatusBadgeClass(course.status)} mb-3`}>
+                  {course.status}
+                </span>
                 <div>
                   {course.hasCertificate ? (
                     <div className="text-success">
@@ -111,7 +210,10 @@ const AdminDashboard = () => {
               </div>
             </div>
             <div className="card-footer bg-white border-0 text-start">
-              <button className="btn rounded-5 btn-blue-600" onClick={() => navigate('/admin/course', { state: { course } })}>
+              <button
+                className="btn rounded-5 btn-blue-600"
+                onClick={() => navigate('/admin/course', { state: { course } })}
+              >
                 <i className="bi bi-gear-fill"></i> Gestionar
               </button>
             </div>
@@ -125,7 +227,11 @@ const AdminDashboard = () => {
   return (
     <div className="bg-main">
       {/* SIDEBAR */}
-      <Sidebar isExpanded={isSidebarExpanded} setIsExpanded={setIsSidebarExpanded} navbarRef={navbarRef} />
+      <Sidebar
+        isExpanded={isSidebarExpanded}
+        setIsExpanded={setIsSidebarExpanded}
+        navbarRef={navbarRef}
+      />
 
       {/* CONTENEDOR PRINCIPAL */}
       <div className="flex-grow-1">
@@ -139,26 +245,23 @@ const AdminDashboard = () => {
             <div className="bg-white shadow-sm mb-4">
               <div className="container-fluid px-4 py-2">
                 <div className="row flex-nowrap align-items-center justify-content-between w-100 gx-3">
-                  {/* Columna Izquierda: Tabs */}
+                  {/* Columna Izquierda: ToggleTabs */}
                   <div className="col-auto d-flex">
-                    {['allCourses', 'Pendiente', 'Aprobado', 'Empezado'].map((tab) => (
-                      <button key={tab} type="button" className={`btn border-0 ${activeTab === tab ? 'border-bottom border-purple border-3 fw-semibold' : ''}`} onClick={() => setActiveTab(tab)}>
-                        {tab === 'allCourses' ? <BookOpen size={20} className="d-sm-none" /> : null}
-                        {tab === 'Pendiente' ? <Clock size={20} className="d-sm-none" /> : null}
-                        {tab === 'Aprobado' ? <CheckCircle size={20} className="d-sm-none" /> : null}
-                        {tab === 'Empezado' ? <XCircle size={20} className="d-sm-none" /> : null}
-                        <span className="d-none d-sm-inline">{tab === 'allCourses' ? 'Todos' : tab === 'Pendiente' ? 'Pendientes' : tab === 'Aprobado' ? 'Aprobados' : 'Empezados'}</span>
-                      </button>
-                    ))}
+                    <ToggleTabs activeTab={activeTab} setActiveTab={setActiveTab} />
                   </div>
-
-                  {/* Columna Derecha: Campo de búsqueda animado */}
+                  {/* Columna Derecha: Campo de búsqueda */}
                   <div className="col-auto d-flex align-items-center">
                     <div className="search-container">
                       <div className="search-icon">
                         <Search size={16} className="text-muted" />
                       </div>
-                      <input type="search" className="search-input" placeholder="Buscar Curso" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                      <input
+                        type="search"
+                        className="search-input"
+                        placeholder="Buscar Curso"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
                     </div>
                   </div>
                 </div>

@@ -4,6 +4,11 @@ import { createCourse } from '../../../services/courseService';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Navbar from '../Navbar';
+import { InputSwitch } from 'primereact/inputswitch';
+import { InputNumber } from 'primereact/inputnumber';
+import 'primereact/resources/themes/lara-light-indigo/theme.css'; // Ajusta el tema que uses
+import 'primereact/resources/primereact.min.css';
+import 'primeicons/primeicons.css';
 
 const NewCourse = () => {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
@@ -30,7 +35,7 @@ const NewCourse = () => {
   const tomorrow = new Date(today.getTime() + 1000 * 60 * 60 * 24);
 
   const handleCreateCourse = async () => {
-    if (!title.trim() || !description.trim() || !dateStart || !dateEnd || !studentsCount.trim() || !price.trim() || !category.trim()) {
+    if (!title.trim() || !description.trim() || !dateStart || !dateEnd || !studentsCount.trim() || !price.toString().trim() || !category.trim()) {
       setErrorMsg('Todos los campos son obligatorios.');
       return;
     }
@@ -55,7 +60,7 @@ const NewCourse = () => {
     const newCourse = {
       title,
       description,
-      price: price === '0' ? 0 : Number(price) || 0,
+      price: price === 0 ? 0 : Number(price) || 0,
       dateStart: start.toISOString(),
       dateEnd: end.toISOString(),
       category,
@@ -93,7 +98,7 @@ const NewCourse = () => {
   };
 
   return (
-    <div className='bg-main'>
+    <div className="bg-main">
       {/* SIDEBAR */}
       <Sidebar isExpanded={isSidebarExpanded} setIsExpanded={setIsSidebarExpanded} navbarRef={navbarRef} />
 
@@ -107,11 +112,11 @@ const NewCourse = () => {
         {/* CONTENIDO */}
         <div className="overflow-auto vh-100">
           <main className="px-3 px-md-5 pt-5 mt-5 ms-md-5 text-start">
-            <div className="card mx-md-5 px-md-5">
+            <div className="card border-0 shadow mx-md-5 px-md-5">
               {errorMsg && <div className="alert alert-danger">{errorMsg}</div>}
 
               <div className="bg-light text-center">
-                <h3>Nuevo Curso</h3>
+                <h3 className='text-gray'>Registrar un Curso</h3>
               </div>
               <hr />
 
@@ -130,7 +135,7 @@ const NewCourse = () => {
                 <div className="col-12 col-md-6">
                   <div className="mb-3 fw-bold">
                     <label>Cantidad de estudiantes</label>
-                    <input type="number" className="form-control" min={1} value={studentsCount} onChange={(e) => setStudentsCount(e.target.value)} />
+                    <input type="number" className="form-control" min={1} max={30} value={studentsCount < 1 ? 1 : studentsCount > 30 ? 30 : studentsCount} placeholder="1 - 30" onChange={(e) => setStudentsCount(e.target.value)} />
                   </div>
                 </div>
                 <div className="col-12 col-md-6">
@@ -152,20 +157,7 @@ const NewCourse = () => {
                 <div className="col-12 col-md-6">
                   <div className="mb-3 fw-bold">
                     <label>Precio del curso</label>
-                    <input
-                      type="text"
-                      maxLength={6}
-                      className="form-control"
-                      value={price === '0' ? 'Gratis' : price}
-                      onChange={(e) => {
-                        let value = e.target.value;
-                        if (value.toLowerCase() === 'gratis') {
-                          setPrice('0');
-                        } else if (/^\d*\.?\d*$/.test(value)) {
-                          setPrice(value);
-                        }
-                      }}
-                    />
+                    <InputNumber value={price === '0' ? 'Gratis' : price} onValueChange={(e) => setPrice(e.value)} mode="currency" currency="USD" locale="en-US" minFractionDigits={2} placeholder="$USD" className="w-100" />
                   </div>
                 </div>
               </div>
@@ -206,11 +198,11 @@ const NewCourse = () => {
                 </div>
               </div>
 
-              <div className="form-check mb-3 fw-bold">
-                <input type="checkbox" className="form-check-input" id="hasCertificate" checked={hasCertificate} onChange={(e) => setHasCertificate(e.target.checked)} />
-                <label className="form-check-label" htmlFor="hasCertificate">
-                  ¿Este curso incluye certificado?
-                </label>
+              {/* InputSwitch para certificado */}
+              <div className="mb-3 fw-bold d-flex align-items-center">
+                <label className="me-2">¿Incluir certificado?</label>
+                <InputSwitch checked={hasCertificate} onChange={(e) => setHasCertificate(e.value)} />
+                <span className='ms-2 fw-semibold'>{hasCertificate ? 'Sí' : 'No'}</span>
               </div>
 
               {/* BOTONES */}
@@ -218,8 +210,14 @@ const NewCourse = () => {
                 <button className="btn btn-outline-secondary me-2" disabled={loading} onClick={() => navigate('/instructor')}>
                   Cancelar
                 </button>
-                <button className="btn btn-purple-900" disabled={loading} onClick={handleCreateCourse}>
-                  {loading ? <div className="spinner-border spinner-border-sm text-light"></div> : 'Confirmar'}
+                <button className="btn btn-purple-900" disabled={loading} onClick={handleCreateCourse} title="Crear curso">
+                  {loading ? (
+                    <div className="spinner-border spinner-border-sm text-light"></div>
+                  ) : (
+                    <div>
+                      <i className="bi bi-journal-plus"></i> Confirmar
+                    </div>
+                  )}
                 </button>
               </div>
             </div>
