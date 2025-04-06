@@ -150,7 +150,7 @@ export default function InstructorNotifications() {
                   });
 
                   return (
-                    <div key={n.id} className={`card rounded-4 shadow-sm p-3 notification-card ${n.read ? 'bg-light' : 'bg-white'} ${fadingNotifications.includes(n.id) ? 'fade-out' : ''}`} style={{ cursor: 'pointer' }} onClick={() => handleNotificationClick(n)}>
+                    <div key={n.id} className={`card rounded-4 shadow-sm p-3 notification-card ${n.read ? 'bg-notifications' : 'bg-notifications-read'} ${fadingNotifications.includes(n.id) ? 'fade-out' : ''}`} style={{ cursor: 'pointer' }} onClick={() => handleNotificationClick(n)}>
                       <div className="d-flex justify-content-between align-items-center">
                         <div className="d-flex align-items-top">
                           <h4>{renderIcon(n.type)}</h4>

@@ -267,7 +267,7 @@ const AdminProfile = () => {
                         <i className="bi bi-pencil-square"></i> Editar
                       </button>
                       <button type="button" className="btn btn-purple-400 ms-1 mb-1" onClick={() => openModal(updatePasswordModalRef)}>
-                        <i className="bi bi-pencil-square"></i> Cambiar contraseña
+                        <i className="bi bi-shield-lock"></i> Cambiar contraseña
                       </button>
                     </div>
                   </div>

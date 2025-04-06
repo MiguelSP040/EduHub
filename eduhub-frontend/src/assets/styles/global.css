@@ -12,6 +12,9 @@ html {
   --bg-success: #a5dc86;
   --bg-warning: #f8bb86;
   --bg-danger: #f27474;
+
+  --bg-unread: #fff;
+  --bg-read: #f8f9fa;
 }
 
 .bg-green-success {
@@ -157,6 +160,26 @@ body {
   transform: translateY(-10px);
 }
 
+.bg-notifications {
+  background-color: var(--bg-unread) !important;
+  transition: background-color 0.2s ease, filter 0.2s ease;
+}
+
+.bg-notifications:hover,
+.bg-notifications:active {
+  filter: brightness(0.95);
+}
+
+.bg-notifications-read {
+  background-color: var(--bg-read) !important;
+  transition: background-color 0.2s ease, filter 0.2s ease;
+}
+
+.bg-notifications-read:hover,
+.bg-notifications-read:active {
+  filter: brightness(0.93);
+}
+
 /*==== FINANZAS ====*/
 .recharts-wrapper :focus {
   outline: none !important;
@@ -174,13 +197,14 @@ body {
   height: 38px;
   display: flex;
   align-items: center;
+  border-radius: 25px;
 }
 
 .search-icon {
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  padding: 0 0.4rem;
+  padding: 0 0.7rem;
 }
 
 .search-input {
