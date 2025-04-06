@@ -113,39 +113,44 @@ const Navbar = ({ toggleSidebar }) => {
                 cursor: 'pointer',
                 background: '#f8f9fa',
                 transition: 'width 0.3s ease',
-                width: isHovered || showDropdown ? '270px' : '94px',
+                // Usamos un ancho fijo que se expande cuando hay hover o dropdown, pero la imagen se queda a la derecha
+                width: isHovered || showDropdown ? '300px' : '94px',
+                justifyContent: 'space-between',
               }}
               onMouseEnter={() => setHovered(true)}
               onMouseLeave={() => setHovered(false)}
               onClick={() => setShowDropdown((prev) => !prev)}
             >
-              {/* Ícono de caret, siempre visible */}
-              <div className="me-2" style={{ fontSize: '1.25rem' }}>
-                {showDropdown ? <i className="bi bi-caret-up"></i> : <i className="bi bi-caret-down"></i>}
-              </div>
-              {/* Bloque de texto: se anima su opacidad y su tamaño mediante max-width */}
-              <div
-                className="me-2 text-start"
-                style={{
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  transition: 'max-width 0.3s ease, opacity 0.3s ease',
-                  maxWidth: isHovered || showDropdown ? '200px' : '0px',
-                  opacity: isHovered || showDropdown ? 1 : 0,
-                }}
-              >
-                <div className="fw-semibold small text-dark">
-                  {user?.name} {user?.surname} {user?.lastname}
+              {/* Contenedor izquierdo: caret + texto animado */}
+              <div className="d-flex align-items-center">
+                {/* Ícono de caret */}
+                <div className="me-2" style={{ fontSize: '1.25rem' }}>
+                  {showDropdown ? <i className="bi bi-caret-up"></i> : <i className="bi bi-caret-down"></i>}
                 </div>
-                <div className="text-muted small">{getRoleName(user?.role)}</div>
+                {/* Bloque de texto: se anima su opacidad y se expande mediante max-width */}
+                <div
+                  className="me-2 text-start"
+                  style={{
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    transition: 'max-width 0.3s ease, opacity 0.3s ease',
+                    maxWidth: isHovered || showDropdown ? '200px' : '0px',
+                    opacity: isHovered || showDropdown ? 1 : 0,
+                  }}
+                >
+                  <div className="fw-semibold small text-dark">
+                    {user?.name} {user?.surname} {user?.lastname}
+                  </div>
+                  <div className="text-muted small">{getRoleName(user?.role)}</div>
+                </div>
               </div>
-              {/* Imagen de perfil: siempre visible */}
+              {/* Contenedor derecho: Imagen de perfil, siempre visible y fija */}
               <div style={{ flexShrink: 0 }}>
                 <img src={user?.profileImage ? `data:image/jpeg;base64,${user.profileImage}` : profilePlaceholder} alt="avatar" className="rounded-circle user-select-none" style={{ width: '40px', height: '40px', objectFit: 'cover' }} />
               </div>
             </div>
 
-            {/* Dropdown: se muestra al hacer click */}
+            {/* Dropdown: se muestra al hacer click en la card */}
             {showDropdown && (
               <div className="position-absolute end-0 p-3 bg-white border rounded shadow" style={{ zIndex: 10, top: 'calc(100% + 10px)' }}>
                 <img src={eduhubIcon} alt="brand" height={50} />

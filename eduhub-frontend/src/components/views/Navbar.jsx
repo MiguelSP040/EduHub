@@ -93,6 +93,7 @@ const Navbar = ({ toggleSidebar }) => {
 
         {/* DERECHA */}
         <div className="d-flex align-items-center">
+          {/* Versión móvil: solo la imagen */}
           <div className="d-flex d-sm-none align-items-center">
             <a
               href="#"
@@ -101,10 +102,11 @@ const Navbar = ({ toggleSidebar }) => {
                 navigate('/profileAdmin');
               }}
             >
-              <img src={user && user.profileImage ? `data:image/jpeg;base64,${user.profileImage}` : profilePlaceholder} alt="avatar" className="rounded-circle user-select-none" style={{ width: '40px', height: '40px', objectFit: 'cover' }} />
+              <img src={user?.profileImage ? `data:image/jpeg;base64,${user.profileImage}` : profilePlaceholder} alt="avatar" className="rounded-circle user-select-none" style={{ width: '40px', height: '40px', objectFit: 'cover' }} />
             </a>
           </div>
 
+          {/* Versión sm+: Card con caret, texto e imagen anclada a la derecha */}
           <div className="d-none d-sm-flex align-items-center position-relative" ref={cardRef}>
             <div
               className="d-none d-sm-flex align-items-center rounded border px-2 py-1"
@@ -112,37 +114,44 @@ const Navbar = ({ toggleSidebar }) => {
                 cursor: 'pointer',
                 background: '#f8f9fa',
                 transition: 'all 0.3s ease',
-                width: isHovered || showDropdown ? '270px' : '94px',
+                width: isHovered || showDropdown ? '300px' : '94px',
+                justifyContent: 'space-between',
               }}
               onMouseEnter={() => setHovered(true)}
               onMouseLeave={() => setHovered(false)}
               onClick={() => setShowDropdown((prev) => !prev)}
             >
-              <div className="me-2" style={{ fontSize: '1.25rem' }}>
-                {showDropdown ? <i className="bi bi-caret-up"></i> : <i className="bi bi-caret-down"></i>}
-              </div>
-
-              <div
-                className="me-2 text-start"
-                style={{
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  transition: 'max-width 0.3s ease, opacity 0.3s ease',
-                  maxWidth: isHovered || showDropdown ? '200px' : '0px',
-                  opacity: isHovered || showDropdown ? 1 : 0,
-                }}
-              >
-                <div className="fw-semibold small text-dark">
-                  {user?.name} {user?.surname} {user?.lastname}
+              {/* Contenedor izquierda: caret + texto animado */}
+              <div className="d-flex align-items-center">
+                {/* Ícono caret */}
+                <div className="me-2" style={{ fontSize: '1.25rem' }}>
+                  {showDropdown ? <i className="bi bi-caret-up"></i> : <i className="bi bi-caret-down"></i>}
                 </div>
-                <div className="text-muted small">{getRoleName(user?.role)}</div>
+                {/* Texto con max-width y opacidad */}
+                <div
+                  className="text-start"
+                  style={{
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    transition: 'max-width 0.3s ease, opacity 0.3s ease',
+                    maxWidth: isHovered || showDropdown ? '200px' : '0px',
+                    opacity: isHovered || showDropdown ? 1 : 0,
+                  }}
+                >
+                  <div className="fw-semibold small text-dark">
+                    {user?.name} {user?.surname} {user?.lastname}
+                  </div>
+                  <div className="text-muted small">{getRoleName(user?.role)}</div>
+                </div>
               </div>
 
+              {/* Imagen a la derecha, fija */}
               <div style={{ flexShrink: 0 }}>
                 <img src={user?.profileImage ? `data:image/jpeg;base64,${user.profileImage}` : profilePlaceholder} alt="avatar" className="rounded-circle user-select-none" style={{ width: '40px', height: '40px', objectFit: 'cover' }} />
               </div>
             </div>
 
+            {/* Dropdown: se muestra al hacer click */}
             {showDropdown && (
               <div className="position-absolute end-0 p-3 bg-white border rounded shadow" style={{ zIndex: 10, top: 'calc(100% + 10px)' }}>
                 <img src={eduhubIcon} alt="brand" height={50} />
@@ -151,7 +160,7 @@ const Navbar = ({ toggleSidebar }) => {
                 </p>
                 <p className="mb-1 small text-muted">{getRoleName(user?.role)}</p>
                 <p className="mb-2 small text-muted">{user?.email}</p>
-                <button className="btn btn-sm btn-purple-900 w-100" onClick={() => navigate('/profile')}>
+                <button className="btn btn-sm btn-purple-900 w-100" onClick={() => navigate('/profileAdmin')}>
                   Gestionar tu perfil
                 </button>
               </div>
