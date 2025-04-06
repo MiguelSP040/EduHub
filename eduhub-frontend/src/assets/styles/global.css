@@ -133,17 +133,12 @@ body {
 .session-content {
   text-align: initial !important;
 }
-
-/* Y aplica la alineación que Quill genera en sus clases */
-
 .session-content .ql-align-center {
   text-align: center !important;
 }
-
 .session-content .ql-align-right {
   text-align: right !important;
 }
-
 .session-content .ql-align-justify {
   text-align: justify !important;
 }
@@ -159,22 +154,18 @@ body {
   opacity: 0;
   transform: translateY(-10px);
 }
-
 .bg-notifications {
   background-color: var(--bg-unread) !important;
   transition: background-color 0.2s ease, filter 0.2s ease;
 }
-
 .bg-notifications:hover,
 .bg-notifications:active {
   filter: brightness(0.95);
 }
-
 .bg-notifications-read {
   background-color: var(--bg-read) !important;
   transition: background-color 0.2s ease, filter 0.2s ease;
 }
-
 .bg-notifications-read:hover,
 .bg-notifications-read:active {
   filter: brightness(0.93);
@@ -184,6 +175,35 @@ body {
 .recharts-wrapper :focus {
   outline: none !important;
 }
+
+/*==== SIDEBAR ====*/
+.sidebar button,
+.sidebar button:focus,
+.sidebar button:active,
+.sidebar button:hover {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+.sidebar .btn:hover,
+.sidebar .btn:focus,
+.sidebar .btn:active {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+.sidebar-btn-default {
+  color: #444444 !important;
+}
+
+.sidebar-btn-hover {
+  background-color: #e9ecef !important;
+  color: #800080 !important;
+  border-right: 4px solid #AA39AD !important;
+}
+
 
 /*==== BUSCADOR ====*/
 .search-container {
