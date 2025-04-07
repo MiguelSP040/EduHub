@@ -1,110 +1,99 @@
-const API_URL = "http://localhost:8080/eduhub";
+const API_URL = 'http://localhost:8080/eduhub';
 
 export const login = async (user, password) => {
-    try {
-        const response = await fetch(`${API_URL}/auth`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ user, password }),
-        });
+  try {
+    const response = await fetch(`${API_URL}/auth`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user, password }),
+    });
 
-        if (!response.ok) {
-            throw new Error(`Error HTTP: ${response.status}`);
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error("Error en la solicitud de login:", error);
-        return null;
+    if (!response.ok) {
+      throw new Error(`Error HTTP: ${response.status}`);
     }
+    return await response.json();
+  } catch (error) {
+    console.error('Error en la solicitud de login:', error);
+    return null;
+  }
 };
 
 export const registerUser = async (userData) => {
-    try {
-        const response = await fetch(`${API_URL}/api/user`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(userData),
-        });
+  try {
+    const response = await fetch(`${API_URL}/api/user`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userData),
+    });
 
-        const text = await response.text();
+    const text = await response.text();
 
-        if (!response.ok) {
-            return { status: response.status, message: text };
-        }
-
-        return { status: response.status, message: "Usuario registrado con éxito" };
-    } catch (error) {
-        console.error("Error en el registro:", error);
-        return { status: 500, message: "Error interno del servidor" };
+    if (!response.ok) {
+      return { status: response.status, message: text };
     }
+
+    return { status: response.status, message: 'Usuario registrado con éxito' };
+  } catch (error) {
+    console.error('Error en el registro:', error);
+    return { status: 500, message: 'Error interno del servidor' };
+  }
 };
 
-
 export const checkEmail = async (email) => {
-    const response = await fetch(`${API_URL}/auth/check-email?email=${email}`);
-    return response.json();
+  const response = await fetch(`${API_URL}/auth/check-email?email=${encodeURIComponent(email)}`);
+  return response.text();
 };
 
 export const verifyPassword = async (authLoginDto) => {
-    const response = await fetch(`${API_URL}/auth/verify-password`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(authLoginDto),
-    });
-    return response;
+  const response = await fetch(`${API_URL}/auth/verify-password`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(authLoginDto),
+  });
+  return response;
 };
 
 export const requestPasswordReset = async (email) => {
-    try {
-        const response = await fetch(`${API_URL}/auth/forgot-password`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email }),
-        });
+  try {
+    const response = await fetch(`${API_URL}/auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
 
-        const text = await response.text();
-        
-        if (!response.ok) {
-            throw new Error(`Error HTTP: ${response.status} - ${text}`);
-        }
-
-        try {
-            return JSON.parse(text);
-        } catch {
-            return { message: text };
-        }
-    } catch (error) {
-        console.error("Error al solicitar restablecimiento de contraseña:", error);
-        return { message: "Error en la solicitud. Intenta de nuevo." };
-    }
+    const text = await response.text();
+    return { message: text };
+  } catch (error) {
+    return { message: 'Error en la solicitud. Intenta de nuevo.' };
+  }
 };
 
-
 export const resetPassword = async (token, newPassword) => {
-    try {
-        localStorage.clear();
+  try {
+    localStorage.clear();
 
-        const response = await fetch(`${API_URL}/auth/reset-password`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ token, newPassword }),
-        });
+    const response = await fetch(`${API_URL}/auth/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, newPassword }),
+    });
 
-        if (!response.ok) {
-            throw new Error(`Error HTTP: ${response.status}`);
-        }
-
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) {
-            return await response.json();
-        } else {
-            return { message: await response.text() };
-        }
-    } catch (error) {
-        console.error("Error al restablecer la contraseña:", error);
-        return { message: "Error al actualizar la contraseña. Intenta de nuevo." };
+    if (!response.ok) {
+      throw new Error(`Error HTTP: ${response.status}`);
     }
+
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      return await response.json();
+    } else {
+      return { message: await response.text() };
+    }
+  } catch (error) {
+    console.error('Error al restablecer la contraseña:', error);
+    return { message: 'Error al actualizar la contraseña. Intenta de nuevo.' };
+  }
 };

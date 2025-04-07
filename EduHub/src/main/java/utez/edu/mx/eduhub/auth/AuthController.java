@@ -40,10 +40,7 @@ public class AuthController {
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody PasswordResetRequestDto requestDto) {
         boolean emailSent = service.sendPasswordResetEmail(requestDto);
-        if (!emailSent) {
-            return ResponseEntity.status(404).body("Correo no registrado.");
-        }
-        return ResponseEntity.ok("Se ha enviado un correo de recuperación.");
+        return ResponseEntity.ok("Si el correo está registrado, se ha enviado un mensaje de recuperación." + emailSent);
     }
 
     @PostMapping("/reset-password")

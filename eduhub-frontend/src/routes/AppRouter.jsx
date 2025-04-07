@@ -1,4 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { useState } from 'react';
+import { ToastProvider } from '../components/utilities/ToastProvider';
 import AuthLayout from '../components/AuthLayout';
 import RegisterStep1 from '../components/RegisterStep1';
 import RegisterStep2 from '../components/RegisterStep2';
@@ -8,7 +10,6 @@ import ResetPassword from '../components/ResetPassword';
 import AdminDashboard from '../components/views/admin/AdminDashboard';
 import PrivateRoute from './PrivateRoute';
 import PublicRoute from './PublicRoute';
-import { useState } from 'react';
 import AdminProfile from '../components/views/admin/AdminProfile';
 import AdminFinance from '../components/views/admin/AdminFinance';
 import InstructorDashboard from '../components/views/instructor/InstructorDashboard';
@@ -41,6 +42,7 @@ const AppRouter = () => {
 
   return (
     <Router>
+      <ToastProvider>
       <Routes>
         {/* Rutas públicas: login, registro, recover y reset-password */}
         <Route
@@ -217,6 +219,7 @@ const AppRouter = () => {
         {/* Ruta 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>
+      </ToastProvider>
     </Router>
   );
 };

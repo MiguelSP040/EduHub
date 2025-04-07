@@ -1,10 +1,13 @@
 import { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from './utilities/ToastProvider';
 import { AuthContext } from '../context/AuthContext';
 import { login } from '../services/authService';
 import PasswordInput from './PasswordInput';
 
 const Login = ({ setView }) => {
+  const { showSuccess, showError, showWarn } = useToast();
+
   const [user, setUser] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -29,29 +32,29 @@ const Login = ({ setView }) => {
       const response = await login(user, password);
 
       if (!response || !response.statusCode) {
-        alert('Error en la autenticación. Intenta de nuevo.');
+        showError('Error', 'Error en la autenticación. Intenta de nuevo');
         return;
       }
 
       if (response.statusCode === 'NOT_FOUND' || response.statusCode === 'UNAUTHORIZED') {
-        alert('Usuario o contraseña incorrectos');
+        showError('Error', 'Usuario o contraseña incorrectos');
         return;
       }
 
       if (response.statusCode === 'FORBIDDEN') {
-        alert('Tu cuenta no ha sido verificada por un administrador.');
+        showWarn('Usuario no verificado', 'Tu cuenta no ha sido verificada por un administrador');
         return;
       }
 
       if (response.statusCode !== 'OK') {
-        alert('Error inesperado. Intenta de nuevo.');
+        showError('Error', 'Error inesperado. Intenta de nuevo');
         return;
       }
 
       const { token, user: userData } = response.body;
 
       if (!token || !userData) {
-        alert('Error en la autenticación. Intenta de nuevo.');
+        showError('Error', 'Error en la autenticación. Intenta de nuevo');
         return;
       }
 
@@ -61,18 +64,19 @@ const Login = ({ setView }) => {
       // Redirigir según el rol
       switch (userData.role) {
         case 'ROLE_ADMIN':
+          showSuccess('Bienvenido Administrador', `¡Qué gusto verte, ${userData.name}!`)
           navigate('/admin');
           break;
         case 'ROLE_INSTRUCTOR':
+          showSuccess('Bienvenido', `¡Qué gusto verte, ${userData.name}!`)
           navigate('/instructor');
           break;
         default:
-          alert('Rol desconocido. Contacta con el administrador.');
+          showWarn('Rol desconocido', 'Contacta con el administrador.');
           navigate('/');
       }
     } catch (error) {
-      console.error('Error al iniciar sesión:', error);
-      alert('Error al iniciar sesión.');
+      showError('Error', 'Error al iniciar sesión.');
     } finally {
       setLoading(false);
     }
@@ -100,7 +104,7 @@ const Login = ({ setView }) => {
         <div className="row">
           <div className="col-12">
             <div className="w-100 text-end text-blue mt-1">
-              <a onClick={() => setView('recover')} className="text-decoration-underline">
+              <a onClick={() => setView('recover')} className="text-decoration-underline" style={{ cursor: 'pointer' }} title='Haz click aquí para recuperar tu cuenta'>
                 <small>¿Olvidaste tu contraseña?</small>
               </a>
             </div>

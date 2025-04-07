@@ -1,26 +1,30 @@
 import { useState } from 'react';
 import { updateCourse } from '../../../services/courseService';
+import { useToast } from '../../utilities/ToastProvider';
+import { InputSwitch } from 'primereact/inputswitch';
+import { InputNumber } from 'primereact/inputnumber';
+import 'primeicons/primeicons.css';
 
 const CourseConfig = ({ course, setCourse }) => {
+  const { showSuccess, showError, showWarn } = useToast();
+
   const [title, setTitle] = useState(course.title);
   const [description, setDescription] = useState(course.description);
   const [studentsCount, setStudentsCount] = useState(course.studentsCount ? String(course.studentsCount) : '');
-  const [price, setPrice] = useState(course.price === 0 ? 'Gratis' : course.price.toString());
+  const [price, setPrice] = useState(course.price === 0 ? '0' : course.price.toString());
   const [category, setCategory] = useState(course.category || '');
   const [coverImage, setCoverImage] = useState('');
   const [hasCertificate, setHasCertificate] = useState(course.hasCertificate || false);
   const [dateStart, setDateStart] = useState(new Date(course.dateStart).toISOString().split('T')[0]);
   const [dateEnd, setDateEnd] = useState(new Date(course.dateEnd).toISOString().split('T')[0]);
-  const [errorMsg, setErrorMsg] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const tomorrow = new Date(today.getTime() + 1000 * 60 * 60 * 24);
 
   const handleSave = async () => {
-    if (!title.trim() || !description.trim() || !dateStart || !dateEnd || studentsCount === '' || isNaN(studentsCount) || !price.trim() || !category.trim()) {
-      setErrorMsg('Todos los campos son obligatorios.');
+    if (!title.trim() || !description.trim() || !dateStart || !dateEnd || studentsCount === '' || isNaN(studentsCount) || !price.toString().trim() || !category.trim()) {
+      showWarn('Campos obligatorios', 'Todos los campos son obligatorios');
       return;
     }
 
@@ -28,12 +32,12 @@ const CourseConfig = ({ course, setCourse }) => {
     const end = new Date(dateEnd);
 
     if (start <= today) {
-      setErrorMsg('La fecha de inicio debe ser al menos un día después de la fecha actual.');
+      showWarn('Fecha inválida', 'La fecha de inicio debe ser al menos un día después de la fecha actual');
       return;
     }
 
     if (end.getTime() <= start.getTime()) {
-      setErrorMsg('La fecha de fin debe ser al menos un día después que la fecha de inicio.');
+      showWarn('Fecha inválida', 'La fecha de fin debe ser al menos un día después que la fecha de inicio');
       return;
     }
 
@@ -62,13 +66,13 @@ const CourseConfig = ({ course, setCourse }) => {
       const response = await updateCourse(formData);
       if (response.status === 200) {
         setCourse(updatedCourse);
-        alert('Curso actualizado correctamente.');
+        showSuccess('Actualización exitosa', 'Curso actualizado correctamente.');
       } else {
-        alert(response.message || 'Error al actualizar el curso.');
+        showError('Error', response.message || 'Error al actualizar el curso.');
       }
     } catch (error) {
       console.error('Error al actualizar el curso:', error);
-      alert('No se pudo conectar con el servidor.');
+      showError('Error', 'No se pudo conectar con el servidor.');
     } finally {
       setIsSaving(false);
     }
@@ -77,8 +81,6 @@ const CourseConfig = ({ course, setCourse }) => {
   return (
     <div className="px-3 px-md-5 pt-3 text-start">
       <h2 className="mb-4 text-center">Configuración del Curso</h2>
-
-      {errorMsg && <div className="alert alert-danger">{errorMsg}</div>}
 
       <div className="mb-3 fw-bold">
         <label>Título del curso</label>
@@ -109,18 +111,22 @@ const CourseConfig = ({ course, setCourse }) => {
         <div className="col-12 col-md-6">
           <div className="mb-3 fw-bold">
             <label>Precio del curso</label>
-            <input
-              type="text"
-              className="form-control"
+            <InputNumber
               value={price === '0' ? 'Gratis' : price}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (value.toLowerCase() === 'gratis') {
+              onValueChange={(e) => {
+                const value = e.value;
+                if (value === 0) {
                   setPrice('0');
-                } else if (/^\d*\.?\d*$/.test(value)) {
+                } else {
                   setPrice(value);
                 }
               }}
+              mode="currency"
+              currency="USD"
+              locale="en-US"
+              minFractionDigits={2}
+              placeholder="$USD"
+              className="w-100"
               disabled={course && course.status !== 'Creado'}
             />
           </div>
@@ -168,16 +174,23 @@ const CourseConfig = ({ course, setCourse }) => {
         </div>
       </div>
 
-      <div className="form-check mb-3 fw-bold">
-        <input type="checkbox" className="form-check-input" id="editHasCertificate" checked={hasCertificate} onChange={(e) => setHasCertificate(e.target.checked)} disabled={course && course.status !== 'Creado'} />
-        <label className="form-check-label" htmlFor="editHasCertificate">
+      <div className="mb-3 fw-bold d-flex align-items-center">
+        <label className="form-check-label me-2" htmlFor="editHasCertificate">
           ¿Este curso incluye certificado?
         </label>
+        <InputSwitch checked={hasCertificate} onChange={(e) => setHasCertificate(e.value)} disabled={course && course.status !== 'Creado'} />
+        <span className="ms-2 fw-semibold">{hasCertificate ? 'Sí' : 'No'}</span>
       </div>
 
       {course.status === 'Creado' && (
         <button className="btn btn-purple-900 mt-3" onClick={handleSave} disabled={isSaving}>
-          {isSaving ? <div className="spinner-border text-light"></div> : 'Guardar Cambios'}
+          {isSaving ? (
+            <div className="spinner-border text-light"></div>
+          ) : (
+            <div>
+              <i className="bi bi-floppy"></i> Guardar Cambios
+            </div>
+          )}
         </button>
       )}
     </div>
