@@ -6,7 +6,8 @@ import Sidebar from './Sidebar';
 import Navbar from '../Navbar';
 import { InputSwitch } from 'primereact/inputswitch';
 import { InputNumber } from 'primereact/inputnumber';
-import 'primereact/resources/themes/lara-light-indigo/theme.css'; // Ajusta el tema que uses
+import { useToast } from '../../utilities/ToastProvider';
+import 'primereact/resources/themes/lara-light-indigo/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 
@@ -15,6 +16,7 @@ const NewCourse = () => {
   const navbarRef = useRef(null);
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
+  const { showSuccess, showError, showWarn } = useToast();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -25,7 +27,6 @@ const NewCourse = () => {
   const [dateEnd, setDateEnd] = useState('');
   const [coverImage, setCoverImage] = useState(null);
   const [hasCertificate, setHasCertificate] = useState(false);
-  const [errorMsg, setErrorMsg] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const start = new Date(dateStart + 'T00:00:00');
@@ -36,22 +37,22 @@ const NewCourse = () => {
 
   const handleCreateCourse = async () => {
     if (!title.trim() || !description.trim() || !dateStart || !dateEnd || !studentsCount.trim() || !price.toString().trim() || !category.trim()) {
-      setErrorMsg('Todos los campos son obligatorios.');
+      showWarn('Campos obligatorios', 'Todos los campos son obligatorios.');
       return;
     }
 
     if (Number(studentsCount) < 1) {
-      setErrorMsg('El curso debe permitir al menos 1 estudiante.');
+      showWarn('Cantidad inválida', 'El curso debe permitir al menos 1 estudiante.');
       return;
     }
 
     if (start <= today) {
-      setErrorMsg('La fecha de inicio debe ser al menos un día después de la fecha actual.');
+      showWarn('Fecha de inicio inválida', 'La fecha de inicio debe ser al menos un día después de la fecha actual.');
       return;
     }
 
     if (end < start) {
-      setErrorMsg('La fecha de fin no puede ser menor a la de inicio.');
+      showWarn('Fecha de fin inválida', 'La fecha de fin no puede ser menor a la de inicio.');
       return;
     }
 
@@ -78,15 +79,15 @@ const NewCourse = () => {
     try {
       const resp = await createCourse(newCourse, coverImage);
       if (resp.status !== 200) {
-        setErrorMsg(resp.message || 'Error al crear el curso');
+        showError('Error', resp.message || 'Error al crear el curso');
         setLoading(false);
         return;
       }
-      alert('Curso registrado con éxito. Pendiente de aprobación.');
+      showSuccess('Curso registrado', 'Pendiente de aprobación por parte de un administrador');
       navigate('/instructor');
     } catch (error) {
       console.error(error);
-      setErrorMsg('No se pudo conectar con el servidor.');
+      showError('Error', 'No se pudo conectar con el servidor');
     } finally {
       setLoading(false);
     }
@@ -113,10 +114,8 @@ const NewCourse = () => {
         <div className="overflow-auto vh-100">
           <main className="px-3 px-md-5 pt-5 mt-5 ms-md-5 text-start">
             <div className="card border-0 shadow mx-md-5 px-md-5">
-              {errorMsg && <div className="alert alert-danger">{errorMsg}</div>}
-
               <div className="bg-light text-center">
-                <h3 className='text-gray'>Registrar un Curso</h3>
+                <h3 className="text-gray">Registrar un Curso</h3>
               </div>
               <hr />
 
@@ -202,7 +201,7 @@ const NewCourse = () => {
               <div className="mb-3 fw-bold d-flex align-items-center">
                 <label className="me-2">¿Incluir certificado?</label>
                 <InputSwitch checked={hasCertificate} onChange={(e) => setHasCertificate(e.value)} />
-                <span className='ms-2 fw-semibold'>{hasCertificate ? 'Sí' : 'No'}</span>
+                <span className="ms-2 fw-semibold">{hasCertificate ? 'Sí' : 'No'}</span>
               </div>
 
               {/* BOTONES */}
@@ -215,7 +214,7 @@ const NewCourse = () => {
                     <div className="spinner-border spinner-border-sm text-light"></div>
                   ) : (
                     <div>
-                      <i className="bi bi-journal-plus"></i> Confirmar
+                      <i class="bi bi-clipboard-check"></i> Confirmar
                     </div>
                   )}
                 </button>
