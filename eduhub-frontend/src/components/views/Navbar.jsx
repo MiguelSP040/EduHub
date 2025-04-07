@@ -5,7 +5,6 @@ import profilePlaceholder from '../../assets/img/profileImage.png';
 import eduhubIcon from '../../assets/img/eduhub-icon.png';
 import { List } from 'react-feather';
 import { findUserById } from '../../services/userService';
-import { Modal } from 'bootstrap';
 
 const Navbar = ({ toggleSidebar }) => {
   const navigate = useNavigate();
@@ -14,7 +13,6 @@ const Navbar = ({ toggleSidebar }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const cardRef = useRef(null);
 
-  // Si el usuario no trae profileImage, intentamos obtenerlo y guardarlo en contexto y localStorage
   useEffect(() => {
     if (user && !user.profileImage) {
       const storedImage = localStorage.getItem('profileImage');
@@ -37,7 +35,6 @@ const Navbar = ({ toggleSidebar }) => {
     }
   }, [user, updateUser]);
 
-  // Cierra el dropdown si se hace click fuera de la card
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (cardRef.current && !cardRef.current.contains(e.target)) {
@@ -77,7 +74,7 @@ const Navbar = ({ toggleSidebar }) => {
               navigate('/instructor');
             }}
           >
-            <img src={eduhubIcon} alt="brand" height={40} />
+            <img src={eduhubIcon} className='user-select-none' alt="brand" height={40} />
           </a>
           <a
             className="text-black"
@@ -93,7 +90,6 @@ const Navbar = ({ toggleSidebar }) => {
 
         {/* DERECHA */}
         <div className="d-flex align-items-center">
-          {/* Versión móvil: solo la imagen */}
           <div className="d-flex d-sm-none align-items-center">
             <a
               href="#"
@@ -106,7 +102,6 @@ const Navbar = ({ toggleSidebar }) => {
             </a>
           </div>
 
-          {/* Versión sm+: Card con caret, texto e imagen anclada a la derecha */}
           <div className="d-none d-sm-flex align-items-center position-relative" ref={cardRef}>
             <div
               className="d-none d-sm-flex align-items-center rounded border px-2 py-1"
@@ -121,13 +116,11 @@ const Navbar = ({ toggleSidebar }) => {
               onMouseLeave={() => setHovered(false)}
               onClick={() => setShowDropdown((prev) => !prev)}
             >
-              {/* Contenedor izquierda: caret + texto animado */}
               <div className="d-flex align-items-center">
                 {/* Ícono caret */}
                 <div className="me-2" style={{ fontSize: '1.25rem' }}>
                   {showDropdown ? <i className="bi bi-caret-up"></i> : <i className="bi bi-caret-down"></i>}
                 </div>
-                {/* Texto con max-width y opacidad */}
                 <div
                   className="text-start"
                   style={{
@@ -138,14 +131,13 @@ const Navbar = ({ toggleSidebar }) => {
                     opacity: isHovered || showDropdown ? 1 : 0,
                   }}
                 >
-                  <div className="fw-semibold small text-dark">
+                  <div className="fw-semibold small text-dark user-select-none">
                     {user?.name} {user?.surname} {user?.lastname}
                   </div>
-                  <div className="text-muted small">{getRoleName(user?.role)}</div>
+                  <div className="text-muted small user-select-none">{getRoleName(user?.role)}</div>
                 </div>
               </div>
 
-              {/* Imagen a la derecha, fija */}
               <div style={{ flexShrink: 0 }}>
                 <img src={user?.profileImage ? `data:image/jpeg;base64,${user.profileImage}` : profilePlaceholder} alt="avatar" className="rounded-circle user-select-none" style={{ width: '40px', height: '40px', objectFit: 'cover' }} />
               </div>
@@ -160,7 +152,7 @@ const Navbar = ({ toggleSidebar }) => {
                 </p>
                 <p className="mb-1 small text-muted">{getRoleName(user?.role)}</p>
                 <p className="mb-2 small text-muted">{user?.email}</p>
-                <button className="btn btn-sm btn-purple-900 w-100" onClick={() => navigate('/profileAdmin')}>
+                <button className="btn btn-sm btn-purple-900 w-100" onClick={() => navigate('/profile')}>
                   Gestionar tu perfil
                 </button>
               </div>

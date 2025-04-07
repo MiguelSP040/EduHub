@@ -13,7 +13,6 @@ const Navbar = ({ toggleSidebar }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const cardRef = useRef(null);
 
-  // Si el usuario no trae profileImage, intentamos obtenerlo y guardarlo
   useEffect(() => {
     if (user && !user.profileImage) {
       const storedImage = localStorage.getItem('profileImage');
@@ -36,7 +35,6 @@ const Navbar = ({ toggleSidebar }) => {
     }
   }, [user, updateUser]);
 
-  // Cerrar dropdown si se hace click fuera de la card
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (cardRef.current && !cardRef.current.contains(e.target)) {
@@ -76,7 +74,7 @@ const Navbar = ({ toggleSidebar }) => {
               navigate('/admin');
             }}
           >
-            <img src={eduhubIcon} alt="brand" height={40} />
+            <img src={eduhubIcon} className='user-select-none' alt="brand" height={40} />
           </a>
           <a
             className="text-black"
@@ -92,7 +90,6 @@ const Navbar = ({ toggleSidebar }) => {
 
         {/* DERECHA */}
         <div className="d-flex align-items-center">
-          {/* Versión móvil: muestra solo la imagen */}
           <div className="d-flex d-sm-none align-items-center">
             <a
               href="#"
@@ -105,7 +102,6 @@ const Navbar = ({ toggleSidebar }) => {
             </a>
           </div>
 
-          {/* Versión sm+: Card con imagen, texto y dropdown */}
           <div className="d-none d-sm-flex align-items-center position-relative" ref={cardRef}>
             <div
               className="d-none d-sm-flex align-items-center rounded border px-2 py-1"
@@ -113,7 +109,6 @@ const Navbar = ({ toggleSidebar }) => {
                 cursor: 'pointer',
                 background: '#f8f9fa',
                 transition: 'width 0.3s ease',
-                // Usamos un ancho fijo que se expande cuando hay hover o dropdown, pero la imagen se queda a la derecha
                 width: isHovered || showDropdown ? '300px' : '94px',
                 justifyContent: 'space-between',
               }}
@@ -127,7 +122,6 @@ const Navbar = ({ toggleSidebar }) => {
                 <div className="me-2" style={{ fontSize: '1.25rem' }}>
                   {showDropdown ? <i className="bi bi-caret-up"></i> : <i className="bi bi-caret-down"></i>}
                 </div>
-                {/* Bloque de texto: se anima su opacidad y se expande mediante max-width */}
                 <div
                   className="me-2 text-start"
                   style={{
@@ -138,19 +132,17 @@ const Navbar = ({ toggleSidebar }) => {
                     opacity: isHovered || showDropdown ? 1 : 0,
                   }}
                 >
-                  <div className="fw-semibold small text-dark">
+                  <div className="fw-semibold small text-dark user-select-none">
                     {user?.name} {user?.surname} {user?.lastname}
                   </div>
-                  <div className="text-muted small">{getRoleName(user?.role)}</div>
+                  <div className="text-muted small user-select-none">{getRoleName(user?.role)}</div>
                 </div>
               </div>
-              {/* Contenedor derecho: Imagen de perfil, siempre visible y fija */}
               <div style={{ flexShrink: 0 }}>
                 <img src={user?.profileImage ? `data:image/jpeg;base64,${user.profileImage}` : profilePlaceholder} alt="avatar" className="rounded-circle user-select-none" style={{ width: '40px', height: '40px', objectFit: 'cover' }} />
               </div>
             </div>
 
-            {/* Dropdown: se muestra al hacer click en la card */}
             {showDropdown && (
               <div className="position-absolute end-0 p-3 bg-white border rounded shadow" style={{ zIndex: 10, top: 'calc(100% + 10px)' }}>
                 <img src={eduhubIcon} alt="brand" height={50} />
