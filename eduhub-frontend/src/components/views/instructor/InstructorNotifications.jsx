@@ -7,6 +7,7 @@ import { BookOpen } from 'react-feather';
 import { getNotifications, markAsRead } from '../../../services/notificationService';
 import { getCourseById } from '../../../services/courseService';
 import Loading from '../../utilities/Loading';
+import { deleteReadNotifications } from '../../../services/notificationService';
 
 const ToggleTabs = ({ activeTab, setActiveTab, unreadCount }) => {
   const tabs = useMemo(
@@ -142,6 +143,15 @@ export default function InstructorNotifications() {
     }
   };
 
+  const handleDeleteReadNotifications = async () => {
+      try {
+        await deleteReadNotifications();
+        await loadNotifications(); 
+      } catch (error) {
+        console.error('Error al eliminar las notificaciones leídas', error);
+      }
+    };
+
   const handleNotificationClick = async (notification) => {
     if (!notification.read) {
       await markAsRead(notification.id, true);
@@ -200,9 +210,19 @@ export default function InstructorNotifications() {
             <div className="bg-white shadow-sm mb-4">
               <div className="container-fluid px-4 py-2">
                 <div className="row gx-3 align-items-center">
-                  <div className="col-12 col-sm d-flex justify-content-center justify-content-sm-start">
+                <div className="col-12 col-sm d-flex justify-content-center justify-content-sm-start">
                     {/* ToggleTabs + badge en 'pending' si unreadCount > 0 */}
-                    <ToggleTabs activeTab={activeTab} setActiveTab={setActiveTab} unreadCount={unreadCount} />
+                    <ToggleTabs activeTab={activeTab} setActiveTab={setActiveTab} unreadCount={unreadCount} onDeleteReadNotifications={handleDeleteReadNotifications} />
+
+                    {activeTab === 'allNotifications' && (
+                      <button
+                        className="btn btn-sm btn-outline-danger ms-auto" // ms-auto empuja el botón hacia la derecha
+                        onClick={handleDeleteReadNotifications}
+                        title="Eliminar notificaciones leídas"
+                      >
+                        <i className="bi bi-trash"></i>
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
