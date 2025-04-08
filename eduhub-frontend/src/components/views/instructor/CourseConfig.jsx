@@ -1,14 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { updateCourse } from '../../../services/courseService';
+import { useToast } from '../../utilities/ToastProvider';
+import { InputSwitch } from 'primereact/inputswitch';
+import { InputNumber } from 'primereact/inputnumber';
 
 const CourseConfig = ({ course, setCourse }) => {
+  const { showSuccess, showError, showWarn } = useToast();
+
   const [title, setTitle] = useState(course.title);
   const [titleError, setTitleError] = useState('');
   const [description, setDescription] = useState(course.description);
   const [descriptionError, setDescriptionError] = useState('');
   const [studentsCount, setStudentsCount] = useState(course.studentsCount ? String(course.studentsCount) : '');
   const [studentsError, setStudentsError] = useState('');
-  const [price, setPrice] = useState(course.price === 0 ? 'Gratis' : course.price.toString());
+  const [price, setPrice] = useState(course.price === 0 ? '0' : course.price.toString());
   const [priceError, setPriceError] = useState('');
   const [category, setCategory] = useState(course.category || '');
   const [categoryError, setCategoryError] = useState('');
@@ -16,53 +21,19 @@ const CourseConfig = ({ course, setCourse }) => {
   const [hasCertificate, setHasCertificate] = useState(course.hasCertificate || false);
   const [dateStart, setDateStart] = useState(new Date(course.dateStart).toISOString().split('T')[0]);
   const [dateEnd, setDateEnd] = useState(new Date(course.dateEnd).toISOString().split('T')[0]);
-  const [errorMsg, setErrorMsg] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // useEffect para quitar el mensaje global si los errores individuales se han corregido
-  useEffect(() => {
-    if (
-      title.trim() &&
-      description.trim() &&
-      studentsCount !== '' &&
-      price.trim() &&
-      category.trim() &&
-      !titleError &&
-      !descriptionError &&
-      !studentsError &&
-      !priceError &&
-      !categoryError
-    ) {
-      setErrorMsg('');
-    }
-  }, [
-    title, titleError,
-    description, descriptionError,
-    studentsCount, studentsError,
-    price, priceError,
-    category, categoryError,
-  ]);
-
   const handleSave = async () => {
-    if (
-      !title.trim() ||
-      !description.trim() ||
-      !dateStart ||
-      !dateEnd ||
-      studentsCount === '' ||
-      !price.trim() ||
-      !category.trim()
-    ) {
-      setErrorMsg('Todos los campos son obligatorios.');
+    // Validaciones globales: si falta algún campo o si el formato es incorrecto, se muestra un Toast warning
+    if (!title.trim() || !description.trim() || !dateStart || !dateEnd || studentsCount === '' || !price.toString().trim() || !category.trim()) {
+      showWarn('Campos obligatorios', 'Todos los campos son obligatorios.');
       return;
     }
-
-    // Si existen errores de validación en tiempo real, no se permite enviar
     if (titleError || descriptionError || studentsError || priceError || categoryError) {
-      setErrorMsg('Corrija los errores en el formulario.');
+      showWarn('Errores en el formulario', 'Corrija los errores en el formulario.');
       return;
     }
 
@@ -70,12 +41,11 @@ const CourseConfig = ({ course, setCourse }) => {
     const end = new Date(dateEnd);
 
     if (start <= today) {
-      setErrorMsg('La fecha de inicio debe ser al menos un día después de la fecha actual.');
+      showWarn('Fecha inválida', 'La fecha de inicio debe ser al menos un día después de la fecha actual.');
       return;
     }
-
     if (end.getTime() <= start.getTime()) {
-      setErrorMsg('La fecha de fin debe ser al menos un día después que la fecha de inicio.');
+      showWarn('Fecha inválida', 'La fecha de fin debe ser al menos un día después que la fecha de inicio.');
       return;
     }
 
@@ -104,13 +74,13 @@ const CourseConfig = ({ course, setCourse }) => {
       const response = await updateCourse(formData);
       if (response.status === 200) {
         setCourse(updatedCourse);
-        alert('Curso actualizado correctamente.');
+        showSuccess('Actualización exitosa', 'Curso actualizado correctamente.');
       } else {
-        alert(response.message || 'Error al actualizar el curso.');
+        showError('Error', response.message || 'Error al actualizar el curso.');
       }
     } catch (error) {
       console.error('Error al actualizar el curso:', error);
-      alert('No se pudo conectar con el servidor.');
+      showError('Error', 'No se pudo conectar con el servidor.');
     } finally {
       setIsSaving(false);
     }
@@ -119,8 +89,6 @@ const CourseConfig = ({ course, setCourse }) => {
   return (
     <div className="px-3 px-md-5 pt-3 text-start">
       <h2 className="mb-4 text-center">Configuración del Curso</h2>
-
-      {errorMsg && <div className="alert alert-danger">{errorMsg}</div>}
 
       {/* Título */}
       <div className="mb-3 fw-bold">
@@ -172,7 +140,7 @@ const CourseConfig = ({ course, setCourse }) => {
             <input
               type="number"
               className={`form-control ${studentsError ? 'is-invalid' : ''}`}
-              value={studentsCount}
+              value={studentsCount < 1 ? 1 : studentsCount > 30 ? 30 : studentsCount}
               onChange={(e) => {
                 const val = e.target.value;
                 setStudentsCount(val);
@@ -192,13 +160,7 @@ const CourseConfig = ({ course, setCourse }) => {
         <div className="col-12 col-md-6">
           <div className="mb-3 fw-bold">
             <label>Imagen de portada</label>
-            <input
-              type="file"
-              className="form-control"
-              accept="image/*"
-              onChange={(e) => setCoverImage(e.target.files[0])}
-              disabled={course && course.status !== 'Creado'}
-            />
+            <input type="file" className="form-control" accept="image/*" onChange={(e) => setCoverImage(e.target.files[0])} disabled={course && course.status !== 'Creado'} />
           </div>
         </div>
       </div>
@@ -208,22 +170,22 @@ const CourseConfig = ({ course, setCourse }) => {
         <div className="col-12 col-md-6">
           <div className="mb-3 fw-bold">
             <label>Precio del curso</label>
-            <input
-              type="text"
-              className={`form-control ${priceError ? 'is-invalid' : ''}`}
+            <InputNumber
               value={price === '0' ? 'Gratis' : price}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (value.toLowerCase() === 'gratis') {
+              onValueChange={(e) => {
+                const value = e.value;
+                if (value === 0) {
                   setPrice('0');
-                  setPriceError('');
-                } else if (value === '' || /^\d+(\.\d*)?$/.test(value)) {
-                  setPrice(value);
-                  setPriceError('');
                 } else {
-                  setPriceError('Solo se permiten números con decimales válidos (ej.: 12 o 12.34).');
+                  setPrice(value);
                 }
               }}
+              mode="currency"
+              currency="USD"
+              locale="en-US"
+              minFractionDigits={2}
+              placeholder="$USD"
+              className="w-100"
               disabled={course && course.status !== 'Creado'}
             />
             {priceError && <div className="invalid-feedback">{priceError}</div>}
@@ -279,37 +241,19 @@ const CourseConfig = ({ course, setCourse }) => {
               type="date"
               className={`form-control ${dateStart && dateEnd && new Date(dateEnd) <= new Date(dateStart) ? 'is-invalid' : ''}`}
               value={dateEnd}
-              min={
-                dateStart
-                  ? new Date(new Date(dateStart).getTime() + 1000 * 60 * 60 * 24)
-                      .toISOString()
-                      .split('T')[0]
-                  : ''
-              }
+              min={dateStart ? new Date(new Date(dateStart).getTime() + 1000 * 60 * 60 * 24).toISOString().split('T')[0] : ''}
               onChange={(e) => setDateEnd(e.target.value)}
               disabled={!dateStart || course.status !== 'Creado'}
             />
-            {dateStart && dateEnd && new Date(dateEnd) <= new Date(dateStart) && (
-              <div className="invalid-feedback">
-                La fecha de fin debe ser al menos un día después que la fecha de inicio.
-              </div>
-            )}
+            {dateStart && dateEnd && new Date(dateEnd) <= new Date(dateStart) && <div className="invalid-feedback">La fecha de fin debe ser al menos un día después que la fecha de inicio.</div>}
           </div>
         </div>
       </div>
 
-      <div className="form-check mb-3 fw-bold">
-        <input
-          type="checkbox"
-          className="form-check-input"
-          id="editHasCertificate"
-          checked={hasCertificate}
-          onChange={(e) => setHasCertificate(e.target.checked)}
-          disabled={course && course.status !== 'Creado'}
-        />
-        <label className="form-check-label" htmlFor="editHasCertificate">
-          ¿Este curso incluye certificado?
-        </label>
+      <div className="mb-3 fw-bold d-flex align-items-center">
+        <label className="me-2" htmlFor="editHasCertificate">¿Incluir certificado?</label>
+        <InputSwitch checked={hasCertificate} onChange={(e) => setHasCertificate(e.value)} disabled={course && course.status !== 'Creado'} />
+        <span className="ms-2 fw-semibold">{hasCertificate ? 'Sí' : 'No'}</span>
       </div>
 
       {course.status === 'Creado' && (

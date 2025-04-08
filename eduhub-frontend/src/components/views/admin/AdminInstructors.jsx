@@ -6,10 +6,13 @@ import { Modal } from 'bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { getCoursesByInstructor } from '../../../services/courseService';
 import { payInstructorForCourse } from '../../../services/financeService';
+import { useToast } from '../../utilities/ToastProvider';
 import Loading from '../../utilities/Loading';
 import { Search } from 'react-feather';
 
 const AdminInstructors = () => {
+  const { showSuccess, showError, showWarn } = useToast();
+
   const navigate = useNavigate();
   const navbarRef = useRef(null);
   const viewInstructorModalRef = useRef(null);
@@ -49,7 +52,7 @@ const AdminInstructors = () => {
   };
 
   const handlePayToInstructor = async (instructorId) => {
-    const confirmAction = window.confirm('¿Estás seguro de que deseas pagar al instructor? Esta acción no se puede deshacer.');
+    const confirmAction = window.confirm('¿Estás seguro de que deseas pagar al instructor? Esta acción no se puede deshacer');
     if (!confirmAction) return;
 
     try {
@@ -57,7 +60,7 @@ const AdminInstructors = () => {
       const unpaidCourses = courses.filter((course) => course.payment === false);
 
       if (unpaidCourses.length === 0) {
-        alert('Este instructor no tiene cursos pendientes de pago.');
+        showWarn('Sin cursos pendientes de pago', 'Este instructor no tiene cursos pendientes de pago');
         return;
       }
 
@@ -70,13 +73,13 @@ const AdminInstructors = () => {
         if (res.status !== 200) allSuccessful = false;
       }
 
-      alert(messages.join('\n'));
       if (allSuccessful) {
-        console.log('Todos los pagos procesados exitosamente.');
+        showSuccess('Pagado', messages.join('\n'));
+        console.log('Todos los pagos procesados exitosamente');
       }
     } catch (error) {
       console.error('Error al pagar al instructor:', error);
-      alert('Error inesperado al procesar el pago.');
+      showError('Error', 'Error inesperado al procesar el pago');
     }
   };
 
@@ -84,10 +87,10 @@ const AdminInstructors = () => {
     const response = await activateInstructor(instructorId);
 
     if (response.status === 200) {
-      alert(response.message);
+      showSuccess('Instructor aceptado', response.message);
       setInstructors((prevInstructors) => prevInstructors.map((instructor) => (instructor.id === instructorId ? { ...instructor, active: true } : instructor)));
     } else {
-      alert('Error al activar el instructor.');
+      showError('Error', 'Error al activar el instructor');
     }
   };
 

@@ -1,10 +1,13 @@
 import { useEffect, useState, useMemo } from 'react';
-import { getStudentsByCourse, deliverCertificates } from '../../../services/courseService';
 import { CheckCircle, AlertCircle, FileText } from 'react-feather';
+import { useToast } from '../../utilities/ToastProvider';
+import { getStudentsByCourse, deliverCertificates } from '../../../services/courseService';
 import jsPDF from 'jspdf';
 import Loading from '../../utilities/Loading';
 
 const MyStudents = ({ courseId, courseLenght, deliverCertificatesTrigger, course, instructor, setCanDeliverCertificates }) => {
+  const { showSuccess, showError, showWarn } = useToast();
+
   const [students, setStudents] = useState([]);
   const [certificateStatus, setCertificateStatus] = useState({});
   const [isStudentsLoading, setIsStudentsLoading] = useState(true);
@@ -91,7 +94,7 @@ const MyStudents = ({ courseId, courseLenght, deliverCertificatesTrigger, course
     const eligibleStudents = students.filter((s) => certificateStatus[s.id] === 'Con derecho');
 
     if (eligibleStudents.length === 0) {
-      alert('No hay estudiantes con derecho al certificado o ya entregado.');
+      showWarn('Certificados no disponibles', 'No hay estudiantes disponibles para el certificado.');
       return;
     }
 
@@ -109,12 +112,12 @@ const MyStudents = ({ courseId, courseLenght, deliverCertificatesTrigger, course
       });
       setCertificateStatus(updatedStatus);
 
-      alert('¡Certificados generados y marcados como entregados en el backend!');
+      showSuccess('Certificados entregados', 'Certificados generados y entregados a los estudiantes');
 
       const updated = await getStudentsByCourse(courseId);
       setStudents(updated);
     } else {
-      alert('Error al marcar certificados como entregados: ' + response.message);
+      showError('Error', 'Error al entregar certificados');
     }
   };
 

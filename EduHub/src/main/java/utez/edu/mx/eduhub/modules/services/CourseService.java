@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import utez.edu.mx.eduhub.modules.entities.UserEntity;
 import utez.edu.mx.eduhub.modules.entities.course.*;
 import utez.edu.mx.eduhub.modules.entities.Finance;
+import utez.edu.mx.eduhub.modules.entities.dto.ApproveRequest;
 import utez.edu.mx.eduhub.modules.entities.dto.CertificateData;
 import utez.edu.mx.eduhub.modules.repositories.CourseRepository;
 import utez.edu.mx.eduhub.modules.repositories.UserRepository;
@@ -351,14 +352,14 @@ public class CourseService {
     }
 
     // APROBAR O RECHAZAR UN CURSO POR PARTE DE UN ADMINISTRADOR
-    public ResponseEntity<?> approveCourse(String courseId, boolean approve, String adminId) {
+    public ResponseEntity<?> approveCourse(String courseId, boolean approve, String rejectReason, String adminId) {
         Optional<Course> optionalCourse = repository.findById(courseId);
 
         if (optionalCourse.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Curso no encontrado");
         }
 
-        if (!optionalCourse.orElseThrow().getPublished()) {
+        if (!optionalCourse.get().getPublished()) {
             return ResponseEntity.badRequest().body("El curso no está publicado");
         }
 
@@ -367,8 +368,6 @@ public class CourseService {
         if (approve) {
             course.setStatus("Aprobado");
             course.setPublished(true);
-
-            // Notificar al instructor sobre la aprobación
             notificationService.sendNotification(
                     course.getDocenteId(),
                     "Curso aprobado",
@@ -379,13 +378,10 @@ public class CourseService {
         } else {
             course.setStatus("Rechazado");
             course.setPublished(false);
-
-            // Notificar al instructor sobre el rechazo
             notificationService.sendNotification(
                     course.getDocenteId(),
                     "Curso rechazado",
-                    "Tu curso \"" + course.getTitle()
-                            + "\" ha sido rechazado. Por favor, revisa el contenido de tu curso.",
+                    rejectReason != null && !rejectReason.isBlank() ? rejectReason : "Tu curso ha sido rechazado.",
                     "Error",
                     "Course",
                     courseId);

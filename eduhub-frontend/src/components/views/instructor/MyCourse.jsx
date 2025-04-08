@@ -1,7 +1,8 @@
 import { useState, useEffect, useContext, useRef, useMemo, useLayoutEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { BookOpen, Users, Settings, ArrowLeft, Search } from 'react-feather';
+import { BookOpen, Users, Settings, ArrowLeft } from 'react-feather';
 import { motion } from 'framer-motion';
+import { useToast } from '../../utilities/ToastProvider'
 import Sidebar from './Sidebar';
 import Navbar from '../Navbar';
 import { AuthContext } from '../../../context/AuthContext';
@@ -97,6 +98,8 @@ const ToggleTabs = ({ activeTab, setActiveTab }) => {
 };
 
 const MyCourse = () => {
+  const { showSuccess, showError, showWarn } = useToast();
+
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useContext(AuthContext);
@@ -155,8 +158,13 @@ const MyCourse = () => {
 
   const handlePublishCourse = async () => {
     const response = await publishCourse(course.id);
-    alert(response.message);
+    if (response.status !== 200) {
+      showError('Error', response.message);
+      return;
+    }
+    
     if (response.status === 200) {
+      showSuccess('Curso publicado', response.message);
       const updatedCourse = await getCourseById(course.id);
       setCourse(updatedCourse);
     }
@@ -164,8 +172,12 @@ const MyCourse = () => {
 
   const handleRequestModification = async () => {
     const response = await requestModification(course.id);
-    alert(response.message);
+    if (response.status !== 200) {
+      showError('Error', response.message);
+      return;
+    }
     if (response.status === 200) {
+      showSuccess(response.message);
       const updatedCourse = await getCourseById(course.id);
       setCourse(updatedCourse);
     }
@@ -204,7 +216,7 @@ const MyCourse = () => {
                           className="btn btn-warning me-2"
                           onClick={async () => {
                             const response = await startCourse(course.id);
-                            alert(response.message);
+                            showSuccess('Curso empezado', response.message);
                             const updated = await getCourseById(course.id);
                             setCourse(updated);
                           }}
@@ -218,7 +230,7 @@ const MyCourse = () => {
                           className="btn btn-danger me-2"
                           onClick={async () => {
                             const response = await finishCourse(course.id);
-                            alert(response.message);
+                            showSuccess('Curso finalizado', response.message);
                             const updated = await getCourseById(course.id);
                             setCourse(updated);
                           }}
@@ -232,7 +244,7 @@ const MyCourse = () => {
                           className="btn btn-success me-2"
                           onClick={async () => {
                             const response = await resetCourseToApproved(course.id);
-                            alert(response.message);
+                            showSuccess('Curso reiniciado', response.message);
                             const updated = await getCourseById(course.id);
                             setCourse(updated);
                           }}
@@ -272,8 +284,12 @@ const MyCourse = () => {
                                 if (!confirmed) return;
                                 try {
                                   const response = await archiveCourse(course.id);
-                                  alert(response.message);
+                                  if (response.status !== 200) {
+                                    showError('Error', response.message);
+                                    return;
+                                  }
                                   if (response.status === 200) {
+                                    showSuccess('Curso archivado', response.message);
                                     const updated = await getCourseById(course.id);
                                     setCourse(updated);
                                   }
@@ -305,10 +321,10 @@ const MyCourse = () => {
                                 if (!confirmed) return;
                                 const response = await duplicateCourse(course.id);
                                 if (response.status === 200) {
-                                  alert('Curso duplicado correctamente.');
+                                  showSuccess('Copia creada', 'Curso duplicado correctamente.');
                                   navigate('/instructor');
                                 } else {
-                                  alert(response.message || 'Error al duplicar el curso.');
+                                  showError('Error', response.message || 'Error al duplicar el curso.');
                                 }
                               }}
                             >
