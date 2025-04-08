@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useState } from 'react';
 import { ToastProvider } from '../components/utilities/ToastProvider';
+import { ConfirmDialogProvider } from '../components/utilities/ConfirmDialogsProvider';
 import AuthLayout from '../components/AuthLayout';
 import RegisterStep1 from '../components/RegisterStep1';
 import RegisterStep2 from '../components/RegisterStep2';
@@ -44,6 +45,8 @@ const AppRouter = () => {
   return (
     <Router>
       <ToastProvider>
+      <ConfirmDialogProvider>
+      
       <Routes>
         {/* Rutas públicas: login, registro, recover y reset-password */}
         <Route
@@ -220,6 +223,7 @@ const AppRouter = () => {
         {/* Ruta 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>
+      </ConfirmDialogProvider>
       </ToastProvider>
     </Router>
   );

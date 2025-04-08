@@ -278,28 +278,40 @@ const NewCourse = () => {
                 </div>
               </div>
 
-              {/* InputSwitch para certificado */}
-              <div className="mb-3 fw-bold d-flex align-items-center">
-                <label className="me-2">¿Incluir certificado?</label>
-                <InputSwitch checked={hasCertificate} onChange={(e) => setHasCertificate(e.value)} />
-                <span className="ms-2 fw-semibold">{hasCertificate ? 'Sí' : 'No'}</span>
+              <div className="row mt-5 align-items-center">
+                {/* SWITCH al inicio */}
+                <div className="col-md-6 d-flex align-items-center fw-bold">
+                  <label className="me-2">¿Incluir certificado?</label>
+                  <InputSwitch checked={hasCertificate} onChange={(e) => setHasCertificate(e.value)} />
+                  <span className="ms-2 fw-semibold">{hasCertificate ? 'Sí' : 'No'}</span>
+                </div>
+
+                {/* BOTONES al final de la fila alineados a la derecha */}
+                <div className="col-md-6 text-end">
+                  <button
+                    className="btn btn-outline-secondary me-2"
+                    disabled={loading}
+                    onClick={() => navigate('/instructor')}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    className="btn btn-purple-900"
+                    disabled={loading}
+                    onClick={handleCreateCourse}
+                    title="Crear curso"
+                  >
+                    {loading ? (
+                      <div className="spinner-border spinner-border-sm text-light"></div>
+                    ) : (
+                      <div>
+                        <i className="bi bi-journal-plus"></i> Confirmar
+                      </div>
+                    )}
+                  </button>
+                </div>
               </div>
 
-              {/* BOTONES */}
-              <div>
-                <button className="btn btn-outline-secondary me-2" disabled={loading} onClick={() => navigate('/instructor')}>
-                  Cancelar
-                </button>
-                <button className="btn btn-purple-900" disabled={loading} onClick={handleCreateCourse} title="Crear curso">
-                  {loading ? (
-                    <div className="spinner-border spinner-border-sm text-light"></div>
-                  ) : (
-                    <div>
-                      <i className="bi bi-journal-plus"></i> Confirmar
-                    </div>
-                  )}
-                </button>
-              </div>
             </div>
           </main>
         </div>

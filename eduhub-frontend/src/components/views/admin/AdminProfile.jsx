@@ -8,11 +8,12 @@ import Sidebar from './Sidebar';
 import Navbar from './Navbar';
 import profilePlaceholder from '../../../assets/img/profileImage.png';
 import { Modal } from 'bootstrap';
-import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+import { useConfirmDialog} from '../../utilities/ConfirmDialogsProvider';
 
 
 const AdminProfile = () => {
   const { showSuccess, showError, showWarn } = useToast();
+  const { confirmAction } = useConfirmDialog();
 
   const { user, updateUser } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
@@ -143,48 +144,65 @@ const AdminProfile = () => {
     setLoading(false);
   };
 
-  const handlePasswordUpdate = async () => {
+  const handlePasswordUpdate = () => {
+    // Primero validaciones:
     if (!currentPassword || !newPassword || !confirmPassword) {
       showWarn('Campos obligatorios', 'Todos los campos son obligatorios');
       return;
     }
-
     if (newPassword !== confirmPassword) {
       showWarn('Contraseñas no coinciden', 'Las contraseñas no son iguales');
       return;
     }
-
-    setLoading(true);
-    try {
-      const verifyResponse = await verifyPassword({ user: user.username, password: currentPassword });
-
-      if (!verifyResponse.ok) {
-        showError('Error', 'Contraseña actual incorrecta');
-        return;
+  
+    // Si todo está OK, acá lanzas el confirmAction
+    confirmAction({
+      message: '¿Estás seguro que deseas actualizar tu contraseña?',
+      header: 'Confirmación',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Sí, actualizar',
+      rejectLabel: 'Cancelar',
+      acceptClassName: 'p-confirm-dialog-accept', 
+      rejectClassName: 'p-confirm-dialog-reject', 
+      onAccept: async () => {
+        setLoading(true);
+        try {
+          
+          const verifyResponse = await verifyPassword({
+            user: user.username,
+            password: currentPassword
+          });
+          if (!verifyResponse.ok) {
+            showError('Error', 'Contraseña actual incorrecta');
+            return;
+          }
+  
+          const updateResponse = await updateProfile(
+            { id: user.id, password: newPassword },
+            token
+          );
+          if (!updateResponse.ok) {
+            showError('Error', 'No se pudo actualizar la contraseña');
+            return;
+          }
+  
+          showSuccess('Contraseña actualizada', 'Tu contraseña ha sido cambiada exitosamente');
+  
+          const modal = Modal.getInstance(updatePasswordModalRef.current);
+          if (modal) modal.hide();
+          setCurrentPassword('');
+          setNewPassword('');
+          setConfirmPassword('');
+        } catch (error) {
+          console.error('Error al actualizar la contraseña:', error);
+          showError('Error', 'Error al actualizar la contraseña');
+        } finally {
+          setLoading(false);
+        }
       }
-
-      const updateResponse = await updateProfile({ id: user.id, password: newPassword }, token);
-
-      if (!updateResponse.ok) {
-        showError('Error', 'No se pudo actualizar la contraseña');
-        return;
-      }
-
-      showSuccess('Contraseña actualizada', 'Tu contraseña ha sido cambiada exitosamente');
-
-      const modal = Modal.getInstance(updatePasswordModalRef.current);
-      if (modal) modal.hide();
-
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-    } catch (error) {
-      console.error('Error al actualizar la contraseña:', error);
-      showError('Error', 'Error al actualizar la contraseña');
-    } finally {
-      setLoading(false);
-    }
+    });
   };
+  
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -270,25 +288,9 @@ const AdminProfile = () => {
     setTouched((prevTouched) => ({ ...prevTouched, [field]: true }));
   };
 
-  //CONFIRM DIALOG
-  const confirmPasswordUpdate = () => {
-    confirmDialog({
-      message: '¿Estás seguro que deseas actualizar tu contraseña?',
-      header: 'Confirmación',
-      icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Sí, actualizar',
-      rejectLabel: 'Cancelar',
-      acceptClassName: 'p-confirm-dialog-accept', 
-      rejectClassName: 'p-confirm-dialog-reject', 
-      accept: handlePasswordUpdate,
-    });
-  };
-  
-
   return (
     <div className="bg-main">
-      <ConfirmDialog />
-
+      
       {/* SIDEBAR */}
       <Sidebar isExpanded={isSidebarExpanded} setIsExpanded={setIsSidebarExpanded} navbarRef={navbarRef} />
 
@@ -590,7 +592,7 @@ const AdminProfile = () => {
                 </div>
                 <hr />
                 <div className="col-12 text-end">
-                  <button type="button" className="btn btn-purple-900 w-25" onClick={confirmPasswordUpdate}>
+                  <button type="button" className="btn btn-purple-900 w-25" onClick={handlePasswordUpdate}>
                     {loading ? <div className="spinner-border spinner-border-sm text-light" role="status"></div> : 'Actualizar'}
                   </button>
                   <button type="button" className="btn ms-2 btn-outline-secondary w-25" data-bs-dismiss="modal">

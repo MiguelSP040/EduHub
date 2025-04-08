@@ -250,17 +250,23 @@ const CourseConfig = ({ course, setCourse }) => {
         </div>
       </div>
 
-      <div className="mb-3 fw-bold d-flex align-items-center">
-        <label className="me-2" htmlFor="editHasCertificate">¿Incluir certificado?</label>
-        <InputSwitch checked={hasCertificate} onChange={(e) => setHasCertificate(e.value)} disabled={course && course.status !== 'Creado'} />
-        <span className="ms-2 fw-semibold">{hasCertificate ? 'Sí' : 'No'}</span>
-      </div>
+      <div className="row mt-5 align-items-center">
+        {/* SWITCH al inicio */}
+        <div className="col-md-6 d-flex align-items-center fw-bold">
+          <label className="me-2" htmlFor="editHasCertificate">¿Incluir certificado?</label>
+          <InputSwitch checked={hasCertificate} onChange={(e) => setHasCertificate(e.value)} disabled={course && course.status !== 'Creado'} />
+          <span className="ms-2 fw-semibold">{hasCertificate ? 'Sí' : 'No'}</span>
+        </div>
 
-      {course.status === 'Creado' && (
-        <button className="btn btn-purple-900 mt-3" onClick={handleSave} disabled={isSaving}>
-          {isSaving ? <div className="spinner-border text-light"></div> : 'Guardar Cambios'}
-        </button>
-      )}
+        {/* BOTÓN solo si el curso está en estado 'Creado' */}
+        {course.status === 'Creado' && (
+          <div className="col-md-6 text-end">
+            <button className="btn btn-purple-900" onClick={handleSave} disabled={isSaving}>
+              {isSaving ? <div className="spinner-border text-light"></div> : 'Guardar Cambios'}
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

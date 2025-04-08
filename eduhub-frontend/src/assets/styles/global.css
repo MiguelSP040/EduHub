@@ -317,12 +317,16 @@ body {
   background-color: transparent !important;
   color: rgb(89, 89, 89) !important; /* gris oscuro */
   border: 1px solid #6c757d !important;
-}
+} 
 
 .p-confirm-dialog .p-confirm-dialog-accept:hover {
   background-color: #a632aa !important;
 }
 
 .p-confirm-dialog .p-confirm-dialog-reject:hover {
-  background-color: rgba(2, 17, 30, 0.1) !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.p-dialog-header-close {
+  background-color: #fff;
 }
