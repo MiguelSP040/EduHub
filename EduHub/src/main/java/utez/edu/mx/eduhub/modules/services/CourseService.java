@@ -40,6 +40,9 @@ public class CourseService {
     @Autowired
     private FinanceService financeService;
 
+    @Autowired
+    private EmailService emailService;
+
     // OBTENER TODOS LOS CURSOS
     public ResponseEntity<?> findAll() {
         return ResponseEntity.ok(repository.findAll());
@@ -683,6 +686,23 @@ public class CourseService {
                                 "Success",
                                 "Certificate",
                                 courseId);
+
+                        // Enviar correo con el certificado adjunto
+                        Optional<UserEntity> studentOpt = userRepository.findById(enrollment.getStudentId());
+                        if (studentOpt.isPresent()) {
+                            UserEntity student = studentOpt.get();
+                            byte[] pdfBytes = Base64.getDecoder().decode(certData.getBase64());
+                            emailService.sendEmailWithAttachment(
+                                    student.getEmail(),
+                                    "Certificado: " + course.getTitle(),
+                                    "Hola " + student.getName() + ",\n\n" +
+                                            "¡Felicidades por completar el curso \"" + course.getTitle() + "\"!\n" +
+                                            "Adjunto encontrarás tu certificado en formato PDF.\n\n" +
+                                            "Saludos,\nEquipo de EduHub",
+                                    pdfBytes,
+                                    "Certificado_" + course.getTitle() + ".pdf"
+                            );
+                        }
                     }
                 }
             }
@@ -761,22 +781,33 @@ public class CourseService {
 
         // Notificar al docente
         notificationService.sendNotification(
-                course.getDocenteId(),
+            course.getDocenteId(),
+            "Curso iniciado",
+            "Tu curso \"" + course.getTitle() + "\" ha comenzado.",
+            "Info",
+            "Course",
+            courseId);
+
+        // Notificar y enviar correo a los alumnos inscritos
+        for (StudentEnrollment enrollment : course.getEnrollments()) {
+            notificationService.sendNotification(
+                enrollment.getStudentId(),
                 "Curso iniciado",
-                "Tu curso \"" + course.getTitle() + "\" ha comenzado.",
+                "El curso \"" + course.getTitle() + "\" al que estás inscrito ha comenzado.",
                 "Info",
                 "Course",
                 courseId);
 
-        // Notificar a los alumnos inscritos
-        for (StudentEnrollment enrollment : course.getEnrollments()) {
-            notificationService.sendNotification(
-                    enrollment.getStudentId(),
-                    "Curso iniciado",
-                    "El curso \"" + course.getTitle() + "\" al que estás inscrito ha comenzado.",
-                    "Info",
-                    "Course",
-                    courseId);
+            // Enviar correo electrónico
+            Optional<UserEntity> studentOpt = userRepository.findById(enrollment.getStudentId());
+            if (studentOpt.isPresent()) {
+                UserEntity student = studentOpt.get();
+                emailService.sendEmail(
+                    student.getEmail(),
+                    "Curso iniciado: " + course.getTitle(),
+                    "Hola " + student.getName() + ",\n\nEl curso \"" + course.getTitle() + "\" al que estás inscrito ha comenzado.\n\n¡Te deseamos mucho éxito!\n\nSaludos,\nEquipo de EduHub"
+                );
+            }
         }
 
         return new ResponseEntity<>("Curso marcado como empezado", HttpStatus.OK);
@@ -817,22 +848,33 @@ public class CourseService {
 
         // Notificar al docente
         notificationService.sendNotification(
-                course.getDocenteId(),
+            course.getDocenteId(),
+            "Curso finalizado",
+            "Tu curso \"" + course.getTitle() + "\" ha finalizado.",
+            "Info",
+            "Course",
+            courseId);
+
+        // Notificar y enviar correo a los alumnos inscritos
+        for (StudentEnrollment enrollment : course.getEnrollments()) {
+            notificationService.sendNotification(
+                enrollment.getStudentId(),
                 "Curso finalizado",
-                "Tu curso \"" + course.getTitle() + "\" ha finalizado.",
+                "El curso \"" + course.getTitle() + "\" al que estás inscrito ha finalizado.",
                 "Info",
                 "Course",
                 courseId);
 
-        // Notificar a los alumnos inscritos
-        for (StudentEnrollment enrollment : course.getEnrollments()) {
-            notificationService.sendNotification(
-                    enrollment.getStudentId(),
-                    "Curso finalizado",
-                    "El curso \"" + course.getTitle() + "\" al que estás inscrito ha finalizado.",
-                    "Info",
-                    "Course",
-                    courseId);
+            // Enviar correo electrónico
+            Optional<UserEntity> studentOpt = userRepository.findById(enrollment.getStudentId());
+            if (studentOpt.isPresent()) {
+                UserEntity student = studentOpt.get();
+                emailService.sendEmail(
+                    student.getEmail(),
+                    "Curso finalizado: " + course.getTitle(),
+                    "Hola " + student.getName() + ",\n\nEl curso \"" + course.getTitle() + "\" al que estás inscrito ha finalizado.\n\n¡Gracias por participar!\n\nSaludos,\nEquipo de EduHub"
+                );
+            }
         }
 
         return new ResponseEntity<>("Curso marcado como finalizado", HttpStatus.OK);
