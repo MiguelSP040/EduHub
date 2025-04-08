@@ -117,7 +117,7 @@ const RegisterStep2 = ({ setView, formData, setFormData }) => {
       <h5 className="fw-bold text-gray-600">¿Cómo te gustaría que te llamemos?</h5>
       <input
         type="text"
-        className={`form-control my-3 ${
+        className={`form-control my-3 mb-0 ${
           touched.username
             ? errors.username
               ? 'is-invalid'
@@ -150,7 +150,7 @@ const RegisterStep2 = ({ setView, formData, setFormData }) => {
           validateInput('password', value);
         }}
         placeholder="Contraseña"
-        className={`form-control mb-3 ${
+        className={`form-control my-3 mb-0 ${
           touched.password
             ? errors.password
               ? 'is-invalid'

@@ -68,7 +68,7 @@ const RegisterStep1 = ({ setView, formData, setFormData }) => {
             <h5 className="fw-bold text-gray-600">¡Crea tu cuenta y aprende sin límites!</h5>
             <input
                 type="text"
-                className={`form-control my-3 ${
+                className={`form-control my-3 mb-0 ${
                     touched.name
                         ? errors.name
                             ? "is-invalid"
@@ -91,7 +91,7 @@ const RegisterStep1 = ({ setView, formData, setFormData }) => {
 
             <input
                 type="text"
-                className={`form-control mb-3 ${
+                className={`form-control my-3 mb-0 ${
                     touched.surname
                         ? errors.surname
                             ? "is-invalid"
@@ -114,7 +114,7 @@ const RegisterStep1 = ({ setView, formData, setFormData }) => {
 
             <input
                 type="email"
-                className={`form-control mb-3 ${
+                className={`form-control my-3 mb-0 ${
                     touched.email
                         ? errors.email
                             ? "is-invalid"
@@ -136,7 +136,7 @@ const RegisterStep1 = ({ setView, formData, setFormData }) => {
             {touched.email && errors.email && <div className="invalid-feedback">Por favor, ingresa un correo electrónico válido.</div>}
 
             <button 
-                className="btn btn-purple-900 w-100 text-white mt-2 fw-bold" 
+                className="btn btn-purple-900 w-100 text-white mt-3 fw-bold" 
                 onClick={handleNext}
                 disabled={isDisabled || loading}
             >
