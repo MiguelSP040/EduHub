@@ -48,9 +48,12 @@ const AdminFinance = () => {
     try {
       const allCourses = await getCourses();
       const incomes = await getAllFinances();
+        console.log('allCourses', allCourses);
+        console.log('incomes', incomes);
+
 
       const result = allCourses.filter((course) => {
-        const hasIncome = incomes.some((fin) => fin.courseId === course.id && fin.transactionType === 'INCOME');
+        const hasIncome = incomes.some((fin) => fin.courseId === course.id && fin.transactionType === 'INCOME')
         return course.payment === true && course.paidToInstructor === false && ['Finalizado', 'Empezado'].includes(course.status) && hasIncome;
       });
 

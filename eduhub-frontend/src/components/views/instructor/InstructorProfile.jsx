@@ -8,6 +8,7 @@ import Navbar from '../Navbar';
 import profilePlaceholder from '../../../assets/img/profileImage.png';
 import { Modal } from 'bootstrap';
 
+
 const InstructorProfile = () => {
   const { user, updateUser } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
@@ -232,6 +233,21 @@ const InstructorProfile = () => {
       reader.readAsDataURL(file);
     });
   };
+
+  //CONFIRM DIALOG
+    const confirmPasswordUpdate = () => {
+      confirmDialog({
+        message: '¿Estás seguro que deseas actualizar tu contraseña?',
+        header: 'Confirmación',
+        icon: 'pi pi-exclamation-triangle',
+        acceptLabel: 'Sí, actualizar',
+        rejectLabel: 'Cancelar',
+        acceptClassName: 'p-confirm-dialog-accept', 
+        rejectClassName: 'p-confirm-dialog-reject', 
+        accept: handlePasswordUpdate,
+      });
+    };
+    
 
   return (
     <div className="bg-main">

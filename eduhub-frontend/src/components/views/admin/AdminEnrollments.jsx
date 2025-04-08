@@ -202,19 +202,37 @@ const AdminEnrollments = () => {
                           </td>
                           <td>{student.enrolledDate ? new Date(student.enrolledDate).toLocaleDateString() : 'No disponible'}</td>
                           <td>
-                            <span className={`badge d-inline-flex align-items-center text-${student.status === 'Aceptado' || student.status === 'Completado' ? 'bg-success' : 'bg-warning'}`}>
-                              <span className="fs-6 fw-normal">{student.status}</span>
-                              {student.status === 'Aceptado' || student.status === 'Completado' ? (
-                                <span className="fs-6">
-                                  <i className="bi bi-check-circle ms-2"></i>
-                                </span>
-                              ) : (
-                                <span className="fs-6">
-                                  <i className="bi bi-hourglass-split ms-2"></i>
-                                </span>
-                              )}
-                            </span>
-                          </td>
+  <span
+    className={`badge d-inline-flex align-items-center ${
+      student.status === 'Aceptado' || student.status === 'Completado'
+        ? 'bg-success'
+        : student.status === 'Rechazado'
+        ? 'bg-danger'
+        : 'bg-warning'
+    }`}
+  >
+    <span className="fs-6 fw-normal">
+      {student.status}
+    </span>
+    {student.status === 'Aceptado' || student.status === 'Completado' ? (
+      // Ícono de check
+      <span className="fs-6">
+        <i className="bi bi-check-circle ms-2"></i>
+      </span>
+    ) : student.status === 'Rechazado' ? (
+      // Ícono de "x"
+      <span className="fs-6">
+        <i className="bi bi-x-circle ms-2"></i>
+      </span>
+    ) : (
+      // Ícono de reloj de arena
+      <span className="fs-6">
+        <i className="bi bi-hourglass-split ms-2"></i>
+      </span>
+    )}
+  </span>
+</td>
+
                           <td>
                             {student.voucherFile ? (
                               (() => {

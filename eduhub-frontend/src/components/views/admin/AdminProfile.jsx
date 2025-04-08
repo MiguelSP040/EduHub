@@ -7,6 +7,8 @@ import Sidebar from './Sidebar';
 import Navbar from './Navbar';
 import profilePlaceholder from '../../../assets/img/profileImage.png';
 import { Modal } from 'bootstrap';
+import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+
 
 const AdminProfile = () => {
   const { user, updateUser } = useContext(AuthContext);
@@ -260,8 +262,25 @@ const AdminProfile = () => {
     setTouched((prevTouched) => ({ ...prevTouched, [field]: true }));
   };
 
+  //CONFIRM DIALOG
+  const confirmPasswordUpdate = () => {
+    confirmDialog({
+      message: '¿Estás seguro que deseas actualizar tu contraseña?',
+      header: 'Confirmación',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Sí, actualizar',
+      rejectLabel: 'Cancelar',
+      acceptClassName: 'p-confirm-dialog-accept', 
+      rejectClassName: 'p-confirm-dialog-reject', 
+      accept: handlePasswordUpdate,
+    });
+  };
+  
+
   return (
     <div className="bg-main">
+      <ConfirmDialog />
+
       {/* SIDEBAR */}
       <Sidebar isExpanded={isSidebarExpanded} setIsExpanded={setIsSidebarExpanded} navbarRef={navbarRef} />
 
@@ -563,7 +582,7 @@ const AdminProfile = () => {
                 </div>
                 <hr />
                 <div className="col-12 text-end">
-                  <button type="button" className="btn btn-purple-900 w-25" onClick={handlePasswordUpdate}>
+                  <button type="button" className="btn btn-purple-900 w-25" onClick={confirmPasswordUpdate}>
                     {loading ? <div className="spinner-border spinner-border-sm text-light" role="status"></div> : 'Actualizar'}
                   </button>
                   <button type="button" className="btn ms-2 btn-outline-secondary w-25" data-bs-dismiss="modal">

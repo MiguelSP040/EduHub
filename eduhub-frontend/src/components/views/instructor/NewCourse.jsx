@@ -134,8 +134,8 @@ const NewCourse = () => {
             <div className="card mx-md-5 px-md-5">
               {errorMsg && <div className="alert alert-danger">{errorMsg}</div>}
 
-              <div className="bg-light text-center">
-                <h3>Nuevo Curso</h3>
+              <div className=" text-center">
+                <h3>Curso Nuevo</h3>
               </div>
               <hr />
 
@@ -296,8 +296,8 @@ const NewCourse = () => {
                       min={
                         dateStart
                           ? new Date(new Date(dateStart).getTime() + 1000 * 60 * 60 * 24)
-                              .toISOString()
-                              .split('T')[0]
+                            .toISOString()
+                            .split('T')[0]
                           : ''
                       }
                       value={dateEnd}
@@ -313,32 +313,38 @@ const NewCourse = () => {
                 </div>
               </div>
 
-              <div className="form-check mb-3 fw-bold">
-                <input
-                  type="checkbox"
-                  className="form-check-input"
-                  id="hasCertificate"
-                  checked={hasCertificate}
-                  onChange={(e) => setHasCertificate(e.target.checked)}
-                />
-                <label className="form-check-label" htmlFor="hasCertificate">
-                  ¿Este curso incluye certificado?
-                </label>
+              <div className="row mt-5 align-items-center">
+              
+                <div className="col-md-6">
+                  <div className="form-check fw-bold">
+                    <input
+                      type="checkbox"
+                      className="form-check-input"
+                      id="hasCertificate"
+                      checked={hasCertificate}
+                      onChange={(e) => setHasCertificate(e.target.checked)}
+                    />
+                    <label className="form-check-label" htmlFor="hasCertificate">
+                      ¿Este curso incluye certificado?
+                    </label>
+                  </div>
+                </div>
+
+                
+                <div className="col-md-6 text-end">
+                  <button
+                    className="btn btn-outline-secondary me-2"
+                    disabled={loading}
+                    onClick={() => navigate('/instructor')}
+                  >
+                    Cancelar
+                  </button>
+                  <button className="btn btn-purple-900" disabled={loading} onClick={handleCreateCourse}>
+                    {loading ? <div className="spinner-border spinner-border-sm text-light"></div> : 'Confirmar'}
+                  </button>
+                </div>
               </div>
 
-              {/* BOTONES */}
-              <div>
-                <button
-                  className="btn btn-outline-secondary me-2"
-                  disabled={loading}
-                  onClick={() => navigate('/instructor')}
-                >
-                  Cancelar
-                </button>
-                <button className="btn btn-purple-900" disabled={loading} onClick={handleCreateCourse}>
-                  {loading ? <div className="spinner-border spinner-border-sm text-light"></div> : 'Confirmar'}
-                </button>
-              </div>
             </div>
           </main>
         </div>
