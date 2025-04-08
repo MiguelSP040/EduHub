@@ -1,10 +1,13 @@
 import { useEffect, useState, useRef, useMemo } from 'react';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
+import { useToast } from '../../utilities/ToastProvider';
 import { getCourses, getStudentsByCourse, manageEnrollment, viewVoucherFile } from '../../../services/courseService';
 import Loading from '../../utilities/Loading';
 
 const AdminEnrollments = () => {
+  const { showSuccess, showError, showWarn } = useToast();
+
   const navbarRef = useRef(null);
 
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
@@ -59,10 +62,10 @@ const AdminEnrollments = () => {
 
     const response = await manageEnrollment(selectedCourse, studentId, accept);
     if (response.status === 200) {
-      alert(response.message);
+      showSuccess(`Estudiante ${accept ? 'aceptado' : 'rechazado'}`, response.message);
       setStudents((prevStudents) => prevStudents.map((student) => (student.id === studentId ? { ...student, status: accept ? 'Aceptado' : 'Rechazado', tempRejected: !accept } : student)));
     } else {
-      alert(`Error: ${response.message}`);
+      showError('Error', 'Ocurrió un error al gestionar este estudiante');
     }
   };
 

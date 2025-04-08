@@ -12,19 +12,14 @@ const RegisterStep2 = ({ setView, formData, setFormData }) => {
   const [errors, setErrors] = useState({ username: false, password: false, confirmPassword: false });
   const [touched, setTouched] = useState({ username: false, password: false, confirmPassword: false });
 
-  const isDisabled =
-    !formData.username.trim() ||
-    !formData.password.trim() ||
-    !confirmPassword.trim() ||
-    !formData.role ||
-    Object.values(errors).some((error) => error);
+  const isDisabled = !formData.username.trim() || !formData.password.trim() || !confirmPassword.trim() || !formData.role || Object.values(errors).some((error) => error);
 
   const validateInput = (field, value) => {
     let isValid = true;
 
     switch (field) {
       case 'username':
-        isValid = /^[a-zA-Z0-9]+$/.test(value); // Solo letras y números
+        const isValid = /^[\p{L}0-9_\-]+$/u.test(value); // Solo letras y números
         break;
       case 'password':
         isValid = /^[^\s]+$/.test(value); // No permite espacios
@@ -86,6 +81,7 @@ const RegisterStep2 = ({ setView, formData, setFormData }) => {
         username: '',
         password: '',
         role: '',
+        description: '',
         isActive: false,
       });
       setView('login');
@@ -102,6 +98,7 @@ const RegisterStep2 = ({ setView, formData, setFormData }) => {
       username: '',
       password: '',
       role: '',
+      description: '',
     });
     setView('registerStep1');
   };
@@ -117,15 +114,7 @@ const RegisterStep2 = ({ setView, formData, setFormData }) => {
       <h5 className="fw-bold text-gray-600">¿Cómo te gustaría que te llamemos?</h5>
       <input
         type="text"
-        className={`form-control my-3 mb-0 ${
-          touched.username
-            ? errors.username
-              ? 'is-invalid'
-              : formData.username.trim() !== ''
-              ? 'is-valid'
-              : ''
-            : ''
-        }`}
+        className={`form-control my-3 mb-0 ${touched.username ? (errors.username ? 'is-invalid' : formData.username.trim() !== '' ? 'is-valid' : '') : ''}`}
         placeholder="Apodo"
         value={formData.username}
         onChange={(e) => {
@@ -137,6 +126,17 @@ const RegisterStep2 = ({ setView, formData, setFormData }) => {
         required
       />
       {touched.username && errors.username && <div className="invalid-feedback">El apodo solo puede contener letras y números.</div>}
+
+      <div className="my-3">
+        <textarea
+          className="form-control"
+          placeholder="Descripción (opcional)"
+          value={formData.description}
+          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          style={{ height: '55px', resize: 'none', overflowY: 'auto' }}
+          maxLength={300}
+        ></textarea>
+      </div>
 
       <div className="mb-2">
         <small className="text-blue-600">Piensa en una contraseña segura</small>
@@ -150,15 +150,7 @@ const RegisterStep2 = ({ setView, formData, setFormData }) => {
           validateInput('password', value);
         }}
         placeholder="Contraseña"
-        className={`form-control my-3 mb-0 ${
-          touched.password
-            ? errors.password
-              ? 'is-invalid'
-              : formData.password.trim() !== ''
-              ? 'is-valid'
-              : ''
-            : ''
-        }`}
+        className={`form-control my-3 mb-0 ${touched.password ? (errors.password ? 'is-invalid' : formData.password.trim() !== '' ? 'is-valid' : '') : ''}`}
         onBlur={() => handleBlur('password')}
       />
       {touched.password && errors.password && <div className="invalid-feedback">La contraseña no debe contener espacios.</div>}
@@ -171,15 +163,7 @@ const RegisterStep2 = ({ setView, formData, setFormData }) => {
           validateInput('confirmPassword', value);
         }}
         placeholder="Confirmar Contraseña"
-        className={`form-control mb-3 ${
-          touched.confirmPassword
-            ? errors.confirmPassword
-              ? 'is-invalid'
-              : confirmPassword.trim() !== ''
-              ? 'is-valid'
-              : ''
-            : ''
-        }`}
+        className={`form-control mb-3 ${touched.confirmPassword ? (errors.confirmPassword ? 'is-invalid' : confirmPassword.trim() !== '' ? 'is-valid' : '') : ''}`}
         onBlur={() => handleBlur('confirmPassword')}
       />
       {touched.confirmPassword && errors.confirmPassword && <div className="invalid-feedback">Las contraseñas no coinciden.</div>}

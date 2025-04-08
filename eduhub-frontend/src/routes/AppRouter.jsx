@@ -37,6 +37,7 @@ const AppRouter = () => {
     username: '',
     password: '',
     role: '',
+    description: '',
     isActive: false,
   });
 

@@ -2,6 +2,7 @@ import { useState, useRef, useContext, useEffect } from 'react';
 import { AuthContext } from '../../../context/AuthContext';
 import { updateProfile, findUserById } from '../../../services/userService';
 import { verifyPassword } from '../../../services/authService';
+import { useToast } from '../../utilities/ToastProvider';
 import PasswordInput from '../../PasswordInputRegister';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
@@ -11,13 +12,12 @@ import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 
 
 const AdminProfile = () => {
+  const { showSuccess, showError, showWarn } = useToast();
+
   const { user, updateUser } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const [userLogged, setUserLogger] = useState(null);
-  const navbarRef = useRef(null);
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
-  const updateUserModalRef = useRef(null);
-  const updatePasswordModalRef = useRef(null);
   const token = localStorage.getItem('token');
   const [formData, setFormData] = useState({
     id: '',
@@ -26,7 +26,7 @@ const AdminProfile = () => {
     lastname: '',
     username: '',
     description: '',
-  }); 
+  });
   const [errors, setErrors] = useState({ name: false, surname: false, lastname: false, username: false, description: false });
   const [touched, setTouched] = useState({ name: false, surname: false, lastname: false, username: false, description: false });
   const cameraModalRef = useRef(null);
@@ -35,6 +35,11 @@ const AdminProfile = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [newProfileFile, setNewProfileFile] = useState(null);
+
+  const updatePasswordModalRef = useRef(null);
+  const updateUserModalRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const navbarRef = useRef(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -94,7 +99,7 @@ const AdminProfile = () => {
 
   const handleUpdate = async () => {
     if (Object.values(errors).some((error) => error)) {
-      alert('Por favor, corrige los errores antes de continuar.');
+      showWarn('Campos inválidos', 'Por favor, corrige los errores antes de continuar');
       return;
     }
 
@@ -111,11 +116,11 @@ const AdminProfile = () => {
       const response = await updateProfile(formData, token);
 
       if (!response.ok) {
-        alert('Error de conexión con el servidor');
+        showError('Error', 'Error de conexión con el servidor');
         return;
       }
 
-      alert('Actualización completada con éxito');
+      showSuccess('Actualización exitosa', 'Actualización completada con éxito');
 
       if (usernameChanged) {
         localStorage.removeItem('token');
@@ -133,19 +138,19 @@ const AdminProfile = () => {
       if (modal) modal.hide();
     } catch (error) {
       console.error(`Error al actualizar el perfil ${error}`);
-      alert('No se pudo actualizar el perfil de usuario');
+      showError('Error', 'No se pudo actualizar el perfil de usuario');
     }
     setLoading(false);
   };
 
   const handlePasswordUpdate = async () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
-      alert('Todos los campos son obligatorios');
+      showWarn('Campos obligatorios', 'Todos los campos son obligatorios');
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      alert('Las contraseñas no coinciden');
+      showWarn('Contraseñas no coinciden', 'Las contraseñas no son iguales');
       return;
     }
 
@@ -154,18 +159,18 @@ const AdminProfile = () => {
       const verifyResponse = await verifyPassword({ user: user.username, password: currentPassword });
 
       if (!verifyResponse.ok) {
-        alert('Contraseña actual incorrecta');
+        showError('Error', 'Contraseña actual incorrecta');
         return;
       }
 
       const updateResponse = await updateProfile({ id: user.id, password: newPassword }, token);
 
       if (!updateResponse.ok) {
-        alert('No se pudo actualizar la contraseña');
+        showError('Error', 'No se pudo actualizar la contraseña');
         return;
       }
 
-      alert('Contraseña actualizada con éxito');
+      showSuccess('Contraseña actualizada', 'Tu contraseña ha sido cambiada exitosamente');
 
       const modal = Modal.getInstance(updatePasswordModalRef.current);
       if (modal) modal.hide();
@@ -175,7 +180,7 @@ const AdminProfile = () => {
       setConfirmPassword('');
     } catch (error) {
       console.error('Error al actualizar la contraseña:', error);
-      alert('Error al actualizar la contraseña');
+      showError('Error', 'Error al actualizar la contraseña');
     } finally {
       setLoading(false);
     }
@@ -190,7 +195,7 @@ const AdminProfile = () => {
 
   const handleSaveProfileImage = async () => {
     if (!newProfileFile) {
-      alert('Primero selecciona un archivo');
+      showWarn('No hay archivo', 'Primero selecciona un archivo');
       return;
     }
     setLoading(true);
@@ -204,11 +209,11 @@ const AdminProfile = () => {
 
       const response = await updateProfile(updatedUser, token);
       if (!response.ok) {
-        alert('No se pudo actualizar la foto de perfil');
+        showError('Error', 'No se pudo actualizar la foto de perfil');
         return;
       }
 
-      alert('Foto de perfil actualizada');
+      showSuccess('Foto actualizada', 'Se ha cambiado tu foto de perfil exitosamente');
       updateUser({ profileImage: base64Image });
       localStorage.setItem('profileImage', base64Image);
       setUserLogger((prev) => ({
@@ -220,10 +225,13 @@ const AdminProfile = () => {
       if (modal) modal.hide();
     } catch (error) {
       console.error('Error al actualizar foto de perfil:', error);
-      alert('Error al actualizar la foto de perfil');
+      showError('Error', 'Error al actualizar la foto de perfil');
     } finally {
       setLoading(false);
       setNewProfileFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
@@ -607,7 +615,7 @@ const AdminProfile = () => {
                 <label htmlFor="newProfileImage" className="form-label fw-bold">
                   Seleccionar imagen
                 </label>
-                <input type="file" id="newProfileImage" className="form-control" accept="image/*" onChange={handleFileChange} />
+                <input type="file" id="newProfileImage" className="form-control" accept="image/*" onChange={handleFileChange} ref={fileInputRef} />
               </div>
 
               <div className="text-end">

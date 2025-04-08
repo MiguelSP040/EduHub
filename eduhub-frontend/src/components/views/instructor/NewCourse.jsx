@@ -4,12 +4,19 @@ import { createCourse } from '../../../services/courseService';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Navbar from '../Navbar';
+import { InputSwitch } from 'primereact/inputswitch';
+import { InputNumber } from 'primereact/inputnumber';
+import { useToast } from '../../utilities/ToastProvider';
+import 'primereact/resources/themes/lara-light-indigo/theme.css';
+import 'primereact/resources/primereact.min.css';
+import 'primeicons/primeicons.css';
 
 const NewCourse = () => {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const navbarRef = useRef(null);
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
+  const { showSuccess, showError, showWarn } = useToast();
 
   const [title, setTitle] = useState('');
   const [titleError, setTitleError] = useState('');
@@ -25,7 +32,6 @@ const NewCourse = () => {
   const [dateEnd, setDateEnd] = useState('');
   const [coverImage, setCoverImage] = useState(null);
   const [hasCertificate, setHasCertificate] = useState(false);
-  const [errorMsg, setErrorMsg] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const start = new Date(dateStart + 'T00:00:00');
@@ -35,38 +41,24 @@ const NewCourse = () => {
   const tomorrow = new Date(today.getTime() + 1000 * 60 * 60 * 24);
 
   const handleCreateCourse = async () => {
-    // Validación de campos obligatorios
-    if (
-      !title.trim() ||
-      !description.trim() ||
-      !dateStart ||
-      !dateEnd ||
-      !studentsCount.trim() ||
-      !price.trim() ||
-      !category.trim()
-    ) {
-      setErrorMsg('Todos los campos son obligatorios.');
+    if (!title.trim() || !description.trim() || !dateStart || !dateEnd || !studentsCount.trim() || !price.toString().trim() || !category.trim()) {
+      showWarn('Campos obligatorios', 'Todos los campos son obligatorios.');
       return;
     }
-
-    // Si existen errores en tiempo real, no se permite enviar
     if (titleError || descriptionError || categoryError || studentsError || priceError) {
-      setErrorMsg('Corrija los errores en el formulario.');
+      showWarn('Errores en el formulario', 'Corrija los errores en el formulario.');
       return;
     }
-
     if (Number(studentsCount) < 1) {
-      setErrorMsg('El curso debe permitir al menos 1 estudiante.');
+      showWarn('Cantidad inválida', 'El curso debe permitir al menos 1 estudiante.');
       return;
     }
-
     if (start <= today) {
-      setErrorMsg('La fecha de inicio debe ser al menos un día después de la fecha actual.');
+      showWarn('Fecha de inicio inválida', 'La fecha de inicio debe ser al menos un día después de la fecha actual.');
       return;
     }
-
     if (end < start) {
-      setErrorMsg('La fecha de fin no puede ser menor a la de inicio.');
+      showWarn('Fecha de fin inválida', 'La fecha de fin no puede ser menor a la de inicio.');
       return;
     }
 
@@ -93,15 +85,15 @@ const NewCourse = () => {
     try {
       const resp = await createCourse(newCourse, coverImage);
       if (resp.status !== 200) {
-        setErrorMsg(resp.message || 'Error al crear el curso');
+        showError('Error', resp.message || 'Error al crear el curso');
         setLoading(false);
         return;
       }
-      alert('Curso registrado con éxito. Pendiente de aprobación.');
+      showSuccess('Curso registrado', 'Pendiente de aprobación');
       navigate('/instructor');
     } catch (error) {
       console.error(error);
-      setErrorMsg('No se pudo conectar con el servidor.');
+      showError('Error', 'No se pudo conectar con el servidor');
     } finally {
       setLoading(false);
     }
@@ -115,11 +107,7 @@ const NewCourse = () => {
   return (
     <div className="bg-main">
       {/* SIDEBAR */}
-      <Sidebar
-        isExpanded={isSidebarExpanded}
-        setIsExpanded={setIsSidebarExpanded}
-        navbarRef={navbarRef}
-      />
+      <Sidebar isExpanded={isSidebarExpanded} setIsExpanded={setIsSidebarExpanded} navbarRef={navbarRef} />
 
       {/* CONTENEDOR PRINCIPAL */}
       <div className="flex-grow-1">
@@ -131,11 +119,9 @@ const NewCourse = () => {
         {/* CONTENIDO */}
         <div className="overflow-auto vh-100">
           <main className="px-3 px-md-5 pt-5 mt-5 ms-md-5 text-start">
-            <div className="card mx-md-5 px-md-5">
-              {errorMsg && <div className="alert alert-danger">{errorMsg}</div>}
-
-              <div className=" text-center">
-                <h3>Curso Nuevo</h3>
+            <div className="card border-0 shadow mx-md-5 px-md-5">
+              <div className="bg-light text-center">
+                <h3 className="text-gray">Registrar un Curso</h3>
               </div>
               <hr />
 
@@ -187,11 +173,12 @@ const NewCourse = () => {
                       type="number"
                       className={`form-control ${studentsError ? 'is-invalid' : ''}`}
                       min={1}
-                      value={studentsCount}
+                      max={30}
+                      value={studentsCount < 1 ? 1 : studentsCount > 30 ? 30 : studentsCount}
+                      placeholder="1 - 30"
                       onChange={(e) => {
                         const val = e.target.value;
                         setStudentsCount(val);
-                        // Se permite solo dígitos
                         if (!/^\d*$/.test(val)) {
                           setStudentsError('Solo se permiten números enteros positivos.');
                         } else if (Number(val) < 0) {
@@ -207,12 +194,7 @@ const NewCourse = () => {
                 <div className="col-12 col-md-6">
                   <div className="mb-3 fw-bold">
                     <label>Imagen de portada</label>
-                    <input
-                      type="file"
-                      className="form-control"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                    />
+                    <input type="file" className="form-control" accept="image/*" onChange={handleImageChange} />
                   </div>
                 </div>
               </div>
@@ -242,26 +224,19 @@ const NewCourse = () => {
                 <div className="col-12 col-md-6">
                   <div className="mb-3 fw-bold">
                     <label>Precio del curso</label>
-                    <input
-                      type="text"
-                      maxLength={6}
-                      className={`form-control ${priceError ? 'is-invalid' : ''}`}
+                    <InputNumber
                       value={price === '0' ? 'Gratis' : price}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        if (value.toLowerCase() === 'gratis') {
-                          setPrice('0');
-                          setPriceError('');
-                        }
-                        // Se permite la cadena vacía y números decimales válidos:
-                        // ^\d+(\.\d*)?$ -> al menos un dígito antes del punto, y opcionalmente el punto con cero o más dígitos
-                        else if (value === '' || /^\d+(\.\d*)?$/.test(value)) {
-                          setPrice(value);
-                          setPriceError('');
-                        } else {
-                          setPriceError('Solo se permiten números con decimales válidos (ej.: 12 o 12.34).');
-                        }
+                      onValueChange={(e) => {
+                        setPrice(e.value);
+                        // Se omite validación adicional aquí, ya que InputNumber se encarga de números.
+                        setPriceError('');
                       }}
+                      mode="currency"
+                      currency="USD"
+                      locale="en-US"
+                      minFractionDigits={2}
+                      placeholder="$USD"
+                      className="w-100"
                     />
                     {priceError && <div className="invalid-feedback">{priceError}</div>}
                   </div>
@@ -293,58 +268,38 @@ const NewCourse = () => {
                     <input
                       type="date"
                       className={`form-control ${dateStart && dateEnd && new Date(dateEnd) <= new Date(dateStart) ? 'is-invalid' : ''}`}
-                      min={
-                        dateStart
-                          ? new Date(new Date(dateStart).getTime() + 1000 * 60 * 60 * 24)
-                            .toISOString()
-                            .split('T')[0]
-                          : ''
-                      }
+                      min={dateStart ? new Date(new Date(dateStart).getTime() + 1000 * 60 * 60 * 24).toISOString().split('T')[0] : ''}
                       value={dateEnd}
                       disabled={!dateStart}
                       onChange={(e) => setDateEnd(e.target.value)}
                     />
-                    {dateStart && dateEnd && new Date(dateEnd) <= new Date(dateStart) && (
-                      <div className="invalid-feedback">
-                        La fecha de fin debe ser al menos un día después que la fecha de inicio.
-                      </div>
-                    )}
+                    {dateStart && dateEnd && new Date(dateEnd) <= new Date(dateStart) && <div className="invalid-feedback">La fecha de fin debe ser al menos un día después que la fecha de inicio.</div>}
                   </div>
                 </div>
               </div>
 
-              <div className="row mt-5 align-items-center">
-              
-                <div className="col-md-6">
-                  <div className="form-check fw-bold">
-                    <input
-                      type="checkbox"
-                      className="form-check-input"
-                      id="hasCertificate"
-                      checked={hasCertificate}
-                      onChange={(e) => setHasCertificate(e.target.checked)}
-                    />
-                    <label className="form-check-label" htmlFor="hasCertificate">
-                      ¿Este curso incluye certificado?
-                    </label>
-                  </div>
-                </div>
-
-                
-                <div className="col-md-6 text-end">
-                  <button
-                    className="btn btn-outline-secondary me-2"
-                    disabled={loading}
-                    onClick={() => navigate('/instructor')}
-                  >
-                    Cancelar
-                  </button>
-                  <button className="btn btn-purple-900" disabled={loading} onClick={handleCreateCourse}>
-                    {loading ? <div className="spinner-border spinner-border-sm text-light"></div> : 'Confirmar'}
-                  </button>
-                </div>
+              {/* InputSwitch para certificado */}
+              <div className="mb-3 fw-bold d-flex align-items-center">
+                <label className="me-2">¿Incluir certificado?</label>
+                <InputSwitch checked={hasCertificate} onChange={(e) => setHasCertificate(e.value)} />
+                <span className="ms-2 fw-semibold">{hasCertificate ? 'Sí' : 'No'}</span>
               </div>
 
+              {/* BOTONES */}
+              <div>
+                <button className="btn btn-outline-secondary me-2" disabled={loading} onClick={() => navigate('/instructor')}>
+                  Cancelar
+                </button>
+                <button className="btn btn-purple-900" disabled={loading} onClick={handleCreateCourse} title="Crear curso">
+                  {loading ? (
+                    <div className="spinner-border spinner-border-sm text-light"></div>
+                  ) : (
+                    <div>
+                      <i className="bi bi-journal-plus"></i> Confirmar
+                    </div>
+                  )}
+                </button>
+              </div>
             </div>
           </main>
         </div>

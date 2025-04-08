@@ -2,18 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { createSession, updateSession } from '../../../services/sessionService';
 import { Editor } from 'primereact/editor';
 import { Paperclip } from 'react-feather';
+import { useToast } from '../../utilities/ToastProvider';
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import 'quill/dist/quill.snow.css';
 
 const AddSessionModal = ({ courseId, fetchSessions, session }) => {
+  const { showSuccess, showError, showWarn } = useToast();
+
   const [isOpen, setIsOpen] = useState(false);
   const [sessionData, setSessionData] = useState({ nameSession: '', content: '' });
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Cargar datos de sesión si existe (modo edición)
   useEffect(() => {
     if (session) {
       setSessionData({ nameSession: session.nameSession, content: session.content });
@@ -28,7 +30,7 @@ const AddSessionModal = ({ courseId, fetchSessions, session }) => {
 
   const handleSaveSession = async () => {
     if (!sessionData.nameSession.trim()) {
-      alert('El título de la sesión es obligatorio.');
+      showWarn('Campos obligatorios', 'El título de la sesión es obligatorio.');
       return;
     }
 
@@ -51,7 +53,7 @@ const AddSessionModal = ({ courseId, fetchSessions, session }) => {
       closeModal();
       fetchSessions();
     } else {
-      alert(response.message);
+      showError('Error', response.message);
     }
   };
 

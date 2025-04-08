@@ -4,11 +4,11 @@ import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import { motion } from 'framer-motion';
 import { BookOpen } from 'react-feather';
+import { useToast } from '../../utilities/ToastProvider';
 import { getNotifications, markAsRead } from '../../../services/notificationService';
 import { getCourseById } from '../../../services/courseService';
 import Loading from '../../utilities/Loading';
 import { deleteReadNotifications } from '../../../services/notificationService';
-
 
 const ToggleTabs = ({ activeTab, setActiveTab, unreadCount }) => {
   const tabs = useMemo(
@@ -19,9 +19,10 @@ const ToggleTabs = ({ activeTab, setActiveTab, unreadCount }) => {
     []
   );
 
+  const [sliderStyle, setSliderStyle] = useState({ left: 0, width: 0 });
+
   const containerRef = useRef(null);
   const tabRefs = useRef([]);
-  const [sliderStyle, setSliderStyle] = useState({ left: 0, width: 0 });
 
   useLayoutEffect(() => {
     const index = tabs.findIndex((t) => t.value === activeTab);
@@ -98,6 +99,8 @@ const ToggleTabs = ({ activeTab, setActiveTab, unreadCount }) => {
 };
 
 export default function AdminNotifications() {
+  const { showSuccess, showError, showWarn } = useToast();
+  
   const navbarRef = useRef(null);
   const navigate = useNavigate();
 
@@ -147,9 +150,11 @@ export default function AdminNotifications() {
   const handleDeleteReadNotifications = async () => {
     try {
       await deleteReadNotifications();
-      await loadNotifications(); // Recarga las notificaciones después de eliminarlas
+      await loadNotifications();
+      showSuccess('Notificaciones eliminadas', 'Todas las notificaciones leídas han sido eliminadas');
     } catch (error) {
       console.error('Error al eliminar las notificaciones leídas', error);
+      showError('Error', 'Error al eliminar las notificaciones');
     }
   };
 
@@ -168,10 +173,10 @@ export default function AdminNotifications() {
           if (course) {
             navigate('/admin/course', { state: { course } });
           } else {
-            alert('No se pudo cargar el curso.');
+            showError('Error', 'No se pudo cargar el curso.');
           }
         } catch (err) {
-          alert('Error al cargar el curso.');
+          showError('Error', 'Error al cargar el curso.');
         }
         break;
 
@@ -185,6 +190,10 @@ export default function AdminNotifications() {
 
       case 'Ratings':
         navigate(`/instructor/ratings/course-ratings?courseId=${relatedId}`);
+        break;
+
+      case 'User':
+        navigate(`/instructors`);
         break;
 
       default:
@@ -216,11 +225,7 @@ export default function AdminNotifications() {
                     <ToggleTabs activeTab={activeTab} setActiveTab={setActiveTab} unreadCount={unreadCount} onDeleteReadNotifications={handleDeleteReadNotifications} />
 
                     {activeTab === 'allNotifications' && (
-                      <button
-                        className="btn btn-sm btn-outline-danger ms-auto" // ms-auto empuja el botón hacia la derecha
-                        onClick={handleDeleteReadNotifications}
-                        title="Eliminar notificaciones leídas"
-                      >
+                      <button className="btn btn-outline-danger ms-auto" onClick={handleDeleteReadNotifications} title="Eliminar notificaciones leídas">
                         <i className="bi bi-trash"></i>
                       </button>
                     )}

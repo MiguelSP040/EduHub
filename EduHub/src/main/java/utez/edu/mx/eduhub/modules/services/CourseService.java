@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import utez.edu.mx.eduhub.modules.entities.UserEntity;
 import utez.edu.mx.eduhub.modules.entities.course.*;
 import utez.edu.mx.eduhub.modules.entities.Finance;
+import utez.edu.mx.eduhub.modules.entities.dto.ApproveRequest;
 import utez.edu.mx.eduhub.modules.entities.dto.CertificateData;
 import utez.edu.mx.eduhub.modules.repositories.CourseRepository;
 import utez.edu.mx.eduhub.modules.repositories.UserRepository;
@@ -39,6 +40,9 @@ public class CourseService {
 
     @Autowired
     private FinanceService financeService;
+
+    @Autowired
+    private EmailService emailService;
 
     // OBTENER TODOS LOS CURSOS
     public ResponseEntity<?> findAll() {
@@ -351,14 +355,14 @@ public class CourseService {
     }
 
     // APROBAR O RECHAZAR UN CURSO POR PARTE DE UN ADMINISTRADOR
-    public ResponseEntity<?> approveCourse(String courseId, boolean approve, String adminId) {
+    public ResponseEntity<?> approveCourse(String courseId, boolean approve, String rejectReason, String adminId) {
         Optional<Course> optionalCourse = repository.findById(courseId);
 
         if (optionalCourse.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Curso no encontrado");
         }
 
-        if (!optionalCourse.orElseThrow().getPublished()) {
+        if (!optionalCourse.get().getPublished()) {
             return ResponseEntity.badRequest().body("El curso no está publicado");
         }
 
@@ -367,8 +371,6 @@ public class CourseService {
         if (approve) {
             course.setStatus("Aprobado");
             course.setPublished(true);
-
-            // Notificar al instructor sobre la aprobación
             notificationService.sendNotification(
                     course.getDocenteId(),
                     "Curso aprobado",
@@ -379,13 +381,10 @@ public class CourseService {
         } else {
             course.setStatus("Rechazado");
             course.setPublished(false);
-
-            // Notificar al instructor sobre el rechazo
             notificationService.sendNotification(
                     course.getDocenteId(),
                     "Curso rechazado",
-                    "Tu curso \"" + course.getTitle()
-                            + "\" ha sido rechazado. Por favor, revisa el contenido de tu curso.",
+                    rejectReason != null && !rejectReason.isBlank() ? rejectReason : "Tu curso ha sido rechazado.",
                     "Error",
                     "Course",
                     courseId);
@@ -683,6 +682,23 @@ public class CourseService {
                                 "Success",
                                 "Certificate",
                                 courseId);
+
+                        // Enviar correo con el certificado adjunto
+                        Optional<UserEntity> studentOpt = userRepository.findById(enrollment.getStudentId());
+                        if (studentOpt.isPresent()) {
+                            UserEntity student = studentOpt.get();
+                            byte[] pdfBytes = Base64.getDecoder().decode(certData.getBase64());
+                            emailService.sendEmailWithAttachment(
+                                    student.getEmail(),
+                                    "Certificado: " + course.getTitle(),
+                                    "Hola " + student.getName() + ",\n\n" +
+                                            "¡Felicidades por completar el curso \"" + course.getTitle() + "\"!\n" +
+                                            "Adjunto encontrarás tu certificado en formato PDF.\n\n" +
+                                            "Saludos,\nEquipo de EduHub",
+                                    pdfBytes,
+                                    "Certificado_" + course.getTitle() + ".pdf"
+                            );
+                        }
                     }
                 }
             }
@@ -761,22 +777,33 @@ public class CourseService {
 
         // Notificar al docente
         notificationService.sendNotification(
-                course.getDocenteId(),
+            course.getDocenteId(),
+            "Curso iniciado",
+            "Tu curso \"" + course.getTitle() + "\" ha comenzado.",
+            "Info",
+            "Course",
+            courseId);
+
+        // Notificar y enviar correo a los alumnos inscritos
+        for (StudentEnrollment enrollment : course.getEnrollments()) {
+            notificationService.sendNotification(
+                enrollment.getStudentId(),
                 "Curso iniciado",
-                "Tu curso \"" + course.getTitle() + "\" ha comenzado.",
+                "El curso \"" + course.getTitle() + "\" al que estás inscrito ha comenzado.",
                 "Info",
                 "Course",
                 courseId);
 
-        // Notificar a los alumnos inscritos
-        for (StudentEnrollment enrollment : course.getEnrollments()) {
-            notificationService.sendNotification(
-                    enrollment.getStudentId(),
-                    "Curso iniciado",
-                    "El curso \"" + course.getTitle() + "\" al que estás inscrito ha comenzado.",
-                    "Info",
-                    "Course",
-                    courseId);
+            // Enviar correo electrónico
+            Optional<UserEntity> studentOpt = userRepository.findById(enrollment.getStudentId());
+            if (studentOpt.isPresent()) {
+                UserEntity student = studentOpt.get();
+                emailService.sendEmail(
+                    student.getEmail(),
+                    "Curso iniciado: " + course.getTitle(),
+                    "Hola " + student.getName() + ",\n\nEl curso \"" + course.getTitle() + "\" al que estás inscrito ha comenzado.\n\n¡Te deseamos mucho éxito!\n\nSaludos,\nEquipo de EduHub"
+                );
+            }
         }
 
         return new ResponseEntity<>("Curso marcado como empezado", HttpStatus.OK);
@@ -817,22 +844,33 @@ public class CourseService {
 
         // Notificar al docente
         notificationService.sendNotification(
-                course.getDocenteId(),
+            course.getDocenteId(),
+            "Curso finalizado",
+            "Tu curso \"" + course.getTitle() + "\" ha finalizado.",
+            "Info",
+            "Course",
+            courseId);
+
+        // Notificar y enviar correo a los alumnos inscritos
+        for (StudentEnrollment enrollment : course.getEnrollments()) {
+            notificationService.sendNotification(
+                enrollment.getStudentId(),
                 "Curso finalizado",
-                "Tu curso \"" + course.getTitle() + "\" ha finalizado.",
+                "El curso \"" + course.getTitle() + "\" al que estás inscrito ha finalizado.",
                 "Info",
                 "Course",
                 courseId);
 
-        // Notificar a los alumnos inscritos
-        for (StudentEnrollment enrollment : course.getEnrollments()) {
-            notificationService.sendNotification(
-                    enrollment.getStudentId(),
-                    "Curso finalizado",
-                    "El curso \"" + course.getTitle() + "\" al que estás inscrito ha finalizado.",
-                    "Info",
-                    "Course",
-                    courseId);
+            // Enviar correo electrónico
+            Optional<UserEntity> studentOpt = userRepository.findById(enrollment.getStudentId());
+            if (studentOpt.isPresent()) {
+                UserEntity student = studentOpt.get();
+                emailService.sendEmail(
+                    student.getEmail(),
+                    "Curso finalizado: " + course.getTitle(),
+                    "Hola " + student.getName() + ",\n\nEl curso \"" + course.getTitle() + "\" al que estás inscrito ha finalizado.\n\n¡Gracias por participar!\n\nSaludos,\nEquipo de EduHub"
+                );
+            }
         }
 
         return new ResponseEntity<>("Curso marcado como finalizado", HttpStatus.OK);
