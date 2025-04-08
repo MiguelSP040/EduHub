@@ -1,6 +1,5 @@
 package utez.edu.mx.eduhub.modules.entities.course;
 
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document

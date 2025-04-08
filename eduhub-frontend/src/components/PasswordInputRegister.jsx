@@ -17,6 +17,7 @@ const PasswordInput = ({ value, onChange, placeholder }) => {
                 type="button"
                 className="btn bg-white text-blue-600 border"
                 onClick={() => setShowPassword(!showPassword)}
+                title='Mostrar contraseña'
             >
                 {showPassword ? <EyeSlash /> : <Eye />}
             </button>

@@ -1,4 +1,5 @@
 package utez.edu.mx.eduhub.modules.services;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import utez.edu.mx.eduhub.modules.entities.Notification;
@@ -12,7 +13,8 @@ public class NotificationService {
     @Autowired
     private NotificationRepository repository;
 
-    public void sendNotification(String userId, String title, String message, String type, String relatedModule, String relatedId) {
+    public void sendNotification(String userId, String title, String message, String type, String relatedModule,
+            String relatedId) {
         Notification notification = new Notification(userId, title, message, type, relatedModule, relatedId);
         repository.save(notification);
     }
@@ -26,5 +28,10 @@ public class NotificationService {
             notification.setRead(read);
             repository.save(notification);
         });
+    }
+
+    public void deleteReadNotifications(String userId) {
+        List<Notification> readNotifications = repository.findByUserIdAndReadTrue(userId);
+        repository.deleteAll(readNotifications);
     }
 }

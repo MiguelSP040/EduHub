@@ -90,7 +90,7 @@ const CourseRatings = () => {
                     </div>
                     <div className="col-12 col-sm text-md-end mt-3 mt-sm-0">
                       <button className="btn btn-outline-secondary" onClick={() => navigate(-1)}>
-                        Volver
+                        <i className="bi bi-arrow-left"></i>
                       </button>
                     </div>
                   </div>
@@ -99,7 +99,7 @@ const CourseRatings = () => {
 
               {isLoading ? (
                 <Loading />
-              ) : (
+              ) : detailedRatings.length > 0 ? (
                 <div className="row">
                   {/* Cards de estadísticas */}
                   <div className="col-lg-4 col-xl-3 mb-4">
@@ -149,48 +149,50 @@ const CourseRatings = () => {
 
                   {/* Lista de calificaciones */}
                   <div className="col mb-3">
-                    {detailedRatings.length > 0 ? (
-                      <div className="d-flex flex-column gap-3">
-                        {detailedRatings.map((r, i) => (
-                          <div key={i} className="border-0 rounded-4 p-3 bg-white shadow-sm">
-                            <div className="d-flex align-items-center">
-                              <img
-                                src={r.studentPhoto ? `data:image/jpeg;base64,${r.studentPhoto}` : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}
-                                alt="Foto de perfil"
-                                className="rounded-circle me-3 border"
-                                style={{ width: '60px', height: '60px', objectFit: 'cover' }}
-                              />
-                              <div>
-                                <h6 className="mb-1 fw-bold text-start">{r.studentName}</h6>
-                                <div className="d-flex justify-content-start">
-                                  {[...Array(5)].map((_, index) => (
-                                    <Star key={index} size={16} className={index < r.rating ? 'text-warning' : 'text-muted'} fill={index < r.rating ? '#ffc107' : 'none'} />
-                                  ))}
-                                </div>
+                    <div className="d-flex flex-column gap-3">
+                      {detailedRatings.map((r, i) => (
+                        <div key={i} className="border-0 rounded-4 p-3 bg-white shadow-sm">
+                          <div className="d-flex align-items-center">
+                            <img
+                              src={r.studentPhoto ? `data:image/jpeg;base64,${r.studentPhoto}` : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}
+                              alt="Foto de perfil"
+                              className="rounded-circle me-3 border"
+                              style={{
+                                width: '60px',
+                                height: '60px',
+                                objectFit: 'cover',
+                              }}
+                            />
+                            <div>
+                              <h6 className="mb-1 fw-bold text-start">{r.studentName}</h6>
+                              <div className="d-flex justify-content-start">
+                                {[...Array(5)].map((_, index) => (
+                                  <Star key={index} size={16} className={index < r.rating ? 'text-warning' : 'text-muted'} fill={index < r.rating ? '#ffc107' : 'none'} />
+                                ))}
                               </div>
                             </div>
-                            <div className="mt-3 ps-1">
-                              {r.comment ? (
-                                <div className="text-end">
-                                  <p className="mb-1 text-start">{r.comment.length > 350 && !expandedComments[i] ? `${r.comment.slice(0, 350)}...` : r.comment}</p>
-                                  {r.comment.length > 150 && (
-                                    <button className="btn btn-link p-0 ms-1" style={{ fontSize: '0.875rem' }} onClick={() => toggleComment(i)}>
-                                      {expandedComments[i] ? 'Mostrar menos' : 'Mostrar más'}
-                                    </button>
-                                  )}
-                                </div>
-                              ) : (
-                                <i className="text-muted">Sin comentario</i>
-                              )}
-                            </div>
                           </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-muted">Este curso aún no tiene calificaciones.</p>
-                    )}
+                          <div className="mt-3 ps-1">
+                            {r.comment ? (
+                              <div className="text-end">
+                                <p className="mb-1 text-start">{r.comment.length > 350 && !expandedComments[i] ? `${r.comment.slice(0, 350)}...` : r.comment}</p>
+                                {r.comment.length > 150 && (
+                                  <button className="btn btn-link p-0 ms-1" style={{ fontSize: '0.875rem' }} onClick={() => toggleComment(i)}>
+                                    {expandedComments[i] ? 'Mostrar menos' : 'Mostrar más'}
+                                  </button>
+                                )}
+                              </div>
+                            ) : (
+                              <i className="text-muted">Sin comentario</i>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
+              ) : (
+                <p className="text-muted">Este curso aún no tiene calificaciones.</p>
               )}
             </div>
           </main>
