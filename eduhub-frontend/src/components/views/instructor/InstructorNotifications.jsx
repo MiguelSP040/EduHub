@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useLayoutEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useToast } from '../../utilities/ToastProvider';
 import Navbar from '../Navbar';
 import Sidebar from './Sidebar';
 import { BookOpen } from 'react-feather';
@@ -18,9 +19,10 @@ const ToggleTabs = ({ activeTab, setActiveTab, unreadCount }) => {
     []
   );
 
+  const [sliderStyle, setSliderStyle] = useState({ left: 0, width: 0 });
+
   const containerRef = useRef(null);
   const tabRefs = useRef([]);
-  const [sliderStyle, setSliderStyle] = useState({ left: 0, width: 0 });
 
   useLayoutEffect(() => {
     const index = tabs.findIndex((t) => t.value === activeTab);
@@ -97,6 +99,8 @@ const ToggleTabs = ({ activeTab, setActiveTab, unreadCount }) => {
 };
 
 export default function InstructorNotifications() {
+  const { showSuccess, showError, showWarn } = useToast();
+  
   const navbarRef = useRef(null);
   const navigate = useNavigate();
 
@@ -144,13 +148,15 @@ export default function InstructorNotifications() {
   };
 
   const handleDeleteReadNotifications = async () => {
-      try {
-        await deleteReadNotifications();
-        await loadNotifications(); 
-      } catch (error) {
-        console.error('Error al eliminar las notificaciones leídas', error);
-      }
-    };
+    try {
+      await deleteReadNotifications();
+      await loadNotifications();
+      showSuccess('Notificaciones eliminadas', 'Todas las notificaciones leídas han sido eliminadas');
+    } catch (error) {
+      console.error('Error al eliminar las notificaciones leídas', error);
+      showError('Error', 'Error al eliminar las notificaciones')
+    }
+  };
 
   const handleNotificationClick = async (notification) => {
     if (!notification.read) {
@@ -167,10 +173,10 @@ export default function InstructorNotifications() {
           if (course) {
             navigate('/admin/course', { state: { course } });
           } else {
-            alert('No se pudo cargar el curso.');
+            showError('Error', 'No se pudo cargar el curso.');
           }
         } catch (err) {
-          alert('Error al cargar el curso.');
+          showError('Error', 'Error al cargar el curso.');
         }
         break;
 
@@ -210,16 +216,12 @@ export default function InstructorNotifications() {
             <div className="bg-white shadow-sm mb-4">
               <div className="container-fluid px-4 py-2">
                 <div className="row gx-3 align-items-center">
-                <div className="col-12 col-sm d-flex justify-content-center justify-content-sm-start">
+                  <div className="col-12 col-sm d-flex justify-content-center justify-content-sm-start">
                     {/* ToggleTabs + badge en 'pending' si unreadCount > 0 */}
                     <ToggleTabs activeTab={activeTab} setActiveTab={setActiveTab} unreadCount={unreadCount} onDeleteReadNotifications={handleDeleteReadNotifications} />
 
                     {activeTab === 'allNotifications' && (
-                      <button
-                        className="btn btn-sm btn-outline-danger ms-auto" // ms-auto empuja el botón hacia la derecha
-                        onClick={handleDeleteReadNotifications}
-                        title="Eliminar notificaciones leídas"
-                      >
+                      <button className="btn btn-outline-danger ms-auto" onClick={handleDeleteReadNotifications} title="Eliminar notificaciones leídas">
                         <i className="bi bi-trash"></i>
                       </button>
                     )}

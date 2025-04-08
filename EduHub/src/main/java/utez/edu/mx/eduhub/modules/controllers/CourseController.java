@@ -3,15 +3,13 @@ package utez.edu.mx.eduhub.modules.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import utez.edu.mx.eduhub.modules.entities.UserEntity;
 import utez.edu.mx.eduhub.modules.entities.course.Course;
-import utez.edu.mx.eduhub.modules.entities.course.MultimediaFile;
 import utez.edu.mx.eduhub.modules.entities.course.Rating;
+import utez.edu.mx.eduhub.modules.entities.dto.ApproveRequest;
 import utez.edu.mx.eduhub.modules.entities.dto.CertificateData;
-import utez.edu.mx.eduhub.modules.repositories.CourseRepository;
 import utez.edu.mx.eduhub.modules.repositories.UserRepository;
 import utez.edu.mx.eduhub.modules.services.CourseService;
 import utez.edu.mx.eduhub.modules.services.MultimediaService;
@@ -91,9 +89,11 @@ public class CourseController {
     }
 
     @PutMapping("/{courseId}/approve")
-    public ResponseEntity<?> approveCourse(@PathVariable String courseId, @RequestParam boolean approve, @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return courseService.approveCourse(courseId, approve, userDetails.getId());
+    public ResponseEntity<?> approveCourse(@PathVariable String courseId, @RequestParam boolean approve, @RequestBody ApproveRequest rejectReasonDTO, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        String rejectReason = rejectReasonDTO.getRejectReason();
+        return courseService.approveCourse(courseId, approve, rejectReason, userDetails.getId());
     }
+
 
     @PutMapping("/{courseId}/modify")
     public ResponseEntity<?> requestModification(@PathVariable String courseId, @AuthenticationPrincipal UserDetailsImpl userDetails) {

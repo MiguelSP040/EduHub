@@ -2,6 +2,7 @@ import { useState, useRef, useContext, useEffect } from 'react';
 import { AuthContext } from '../../../context/AuthContext';
 import { updateProfile, findUserById } from '../../../services/userService';
 import { verifyPassword } from '../../../services/authService';
+import { useToast } from '../../utilities/ToastProvider';
 import PasswordInput from '../../PasswordInputRegister';
 import Sidebar from './Sidebar';
 import Navbar from '../Navbar';
@@ -9,21 +10,35 @@ import profilePlaceholder from '../../../assets/img/profileImage.png';
 import { Modal } from 'bootstrap';
 
 const InstructorProfile = () => {
+  const { showSuccess, showError, showWarn } = useToast();
+
   const { user, updateUser } = useContext(AuthContext);
+  const token = localStorage.getItem('token');
+
   const [loading, setLoading] = useState(false);
   const [userLogged, setUserLogger] = useState(null);
-  const navbarRef = useRef(null);
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
-  const updateUserModalRef = useRef(null);
-  const updatePasswordModalRef = useRef(null);
-  const token = localStorage.getItem('token');
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({
+    id: '',
+    name: '',
+    surname: '',
+    lastname: '',
+    username: '',
+    description: '',
+  });
+  const [errors, setErrors] = useState({ name: false, surname: false, lastname: false, username: false, description: false });
+  const [touched, setTouched] = useState({ name: false, surname: false, lastname: false, username: false, description: false });
   const cameraModalRef = useRef(null);
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [newProfileFile, setNewProfileFile] = useState(null);
+
+  const updatePasswordModalRef = useRef(null);
+  const updateUserModalRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const navbarRef = useRef(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -48,7 +63,6 @@ const InstructorProfile = () => {
         surname: userLogged.surname || '',
         lastname: userLogged.lastname || '',
         username: userLogged.username || '',
-        active: userLogged.active || '',
         description: userLogged.description || '',
       });
     }
@@ -73,7 +87,38 @@ const InstructorProfile = () => {
     }
   };
 
+  const validateInput = (field, value) => {
+    let isValid = true;
+
+    switch (field) {
+      case 'name':
+      case 'surname':
+      case 'lastname':
+        isValid = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ]+$/.test(value); // Solo letras
+        break;
+      case 'username':
+        isValid = /^[a-zA-Z0-9]+$/.test(value); // Letras y números
+        break;
+      case 'description':
+        isValid = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/.test(value); // Letras y espacios
+        break;
+      default:
+        break;
+    }
+
+    setErrors((prevErrors) => ({ ...prevErrors, [field]: !isValid }));
+  };
+
+  const handleBlur = (field) => {
+    setTouched((prevTouched) => ({ ...prevTouched, [field]: true }));
+  };
+
   const handleUpdate = async () => {
+    if (Object.values(errors).some((error) => error)) {
+      showWarn('Campos inválidos', 'Por favor, corrige los errores antes de continuar');
+      return;
+    }
+
     const usernameChanged = userLogged?.username && formData.username !== userLogged.username;
     if (usernameChanged) {
       const confirmed = window.confirm('Has cambiado tu nombre de usuario. Si continúas, se cerrará la sesión actual. ¿Deseas continuar?');
@@ -82,14 +127,13 @@ const InstructorProfile = () => {
 
     setLoading(true);
     try {
-      const response = await updateProfile(formData, token);
+      const response = await updateProfile(formData);
       if (!response.ok) {
-        alert('Error de conexión con el servidor');
+        showError('Error', 'Error de conexión con el servidor');
         return;
       }
-      alert('Actualización completada con éxito');
+      showSuccess('Actualización exitosa', 'Actualización completada con éxito');
 
-      // Actualizamos el usuario en el contexto
       updateUser(formData);
 
       if (usernameChanged) {
@@ -104,33 +148,33 @@ const InstructorProfile = () => {
       if (modal) modal.hide();
     } catch (error) {
       console.error(`Error al actualizar el perfil ${error}`);
-      alert('No se pudo actualizar el perfil de usuario');
+      showError('Error', 'No se pudo actualizar el perfil de usuario');
     }
     setLoading(false);
   };
 
   const handlePasswordUpdate = async () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
-      alert('Todos los campos son obligatorios');
+      showWarn('Campos obligatorios', 'Todos los campos son obligatorios');
       return;
     }
     if (newPassword !== confirmPassword) {
-      alert('Las contraseñas no coinciden');
+      showWarn('Contraseñas no coinciden', 'Las contraseñas no son iguales');
       return;
     }
     setLoading(true);
     try {
       const verifyResponse = await verifyPassword({ user: user.username, password: currentPassword });
       if (!verifyResponse.ok) {
-        alert('Contraseña actual incorrecta');
+        showError('Error', 'Contraseña actual incorrecta');
         return;
       }
-      const updateResponse = await updateProfile({ id: user.id, password: newPassword }, token);
+      const updateResponse = await updateProfile({ id: user.id, password: newPassword });
       if (!updateResponse.ok) {
-        alert('No se pudo actualizar la contraseña');
+        showError('Error', 'No se pudo actualizar la contraseña');
         return;
       }
-      alert('Contraseña actualizada con éxito');
+      showSuccess('Contraseña actualizada', 'Tu contraseña ha sido cambiada exitosamente');
       const modal = Modal.getInstance(updatePasswordModalRef.current);
       if (modal) modal.hide();
       setCurrentPassword('');
@@ -138,7 +182,7 @@ const InstructorProfile = () => {
       setConfirmPassword('');
     } catch (error) {
       console.error('Error al actualizar la contraseña:', error);
-      alert('Error al actualizar la contraseña');
+      showError('Error', 'Error al actualizar la contraseña');
     } finally {
       setLoading(false);
     }
@@ -153,7 +197,7 @@ const InstructorProfile = () => {
 
   const handleSaveProfileImage = async () => {
     if (!newProfileFile) {
-      alert('Primero selecciona un archivo');
+      showWarn('No hay archivo', 'Primero selecciona un archivo');
       return;
     }
     setLoading(true);
@@ -163,12 +207,12 @@ const InstructorProfile = () => {
         id: userLogged.id,
         profileImage: base64Image,
       };
-      const response = await updateProfile(updatedUser, token);
+      const response = await updateProfile(updatedUser);
       if (!response.ok) {
-        alert('No se pudo actualizar la foto de perfil');
+        showError('Error', 'No se pudo actualizar la foto de perfil');
         return;
       }
-      alert('Foto de perfil actualizada');
+      showSuccess('Foto actualizada', 'Se ha cambiado tu foto de perfil exitosamente');
       updateUser({ profileImage: base64Image });
       localStorage.setItem('profileImage', base64Image);
       setUserLogger((prev) => ({
@@ -179,10 +223,13 @@ const InstructorProfile = () => {
       if (modal) modal.hide();
     } catch (error) {
       console.error('Error al actualizar foto de perfil:', error);
-      alert('Error al actualizar la foto de perfil');
+      showError('Error', 'Error al actualizar la foto de perfil');
     } finally {
       setLoading(false);
       setNewProfileFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
@@ -360,48 +407,103 @@ const InstructorProfile = () => {
                 <div className="row">
                   <div className="col-12 col-sm-6">
                     <div className="form-floating mb-3">
-                      <input type="text" className="form-control" value={formData.name ?? ''} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
+                      <input
+                        type="text"
+                        className={`form-control ${touched.name && errors.name ? 'is-invalid' : ''}`}
+                        value={formData.name}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setFormData({ ...formData, name: value });
+                          validateInput('name', value);
+                        }}
+                        onBlur={() => handleBlur('name')}
+                      />
                       <label>Nombre(s)</label>
+                      {touched.name && errors.name && <div className="invalid-feedback">Solo se permiten letras.</div>}
                     </div>
                   </div>
                   <div className="col-12 col-sm-6">
                     <div className="form-floating mb-3">
-                      <input type="text" className="form-control" value={formData.surname ?? ''} onChange={(e) => setFormData({ ...formData, surname: e.target.value })} />
+                      <input
+                        type="text"
+                        className={`form-control ${touched.surname && errors.surname ? 'is-invalid' : ''}`}
+                        value={formData.surname}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setFormData({ ...formData, surname: value });
+                          validateInput('surname', value);
+                        }}
+                        onBlur={() => handleBlur('surname')}
+                      />
                       <label>Apellido paterno</label>
+                      {touched.surname && errors.surname && <div className="invalid-feedback">Solo se permiten letras.</div>}
                     </div>
                   </div>
                 </div>
                 <div className="row">
                   <div className="col-6">
                     <div className="form-floating mb-3">
-                      <input type="text" className="form-control" value={formData.lastname ?? ''} onChange={(e) => setFormData({ ...formData, lastname: e.target.value })} />
+                      <input
+                        type="text"
+                        className={`form-control ${touched.lastname && errors.lastname ? 'is-invalid' : ''}`}
+                        value={formData.lastname}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setFormData({ ...formData, lastname: value });
+                          validateInput('lastname', value);
+                        }}
+                        onBlur={() => handleBlur('lastname')}
+                      />
                       <label>Apellido materno</label>
+                      {touched.lastname && errors.lastname && <div className="invalid-feedback">Solo se permiten letras.</div>}
                     </div>
                   </div>
                   <div className="col-6">
                     <div className="form-floating mb-3">
-                      <input type="text" className="form-control" value={formData.username ?? ''} onChange={(e) => setFormData({ ...formData, username: e.target.value })} />
+                      <input
+                        type="text"
+                        className={`form-control ${touched.username && errors.username ? 'is-invalid' : ''}`}
+                        value={formData.username}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setFormData({ ...formData, username: value });
+                          validateInput('username', value);
+                        }}
+                        onBlur={() => handleBlur('username')}
+                      />
                       <label>Usuario</label>
+                      {touched.username && errors.username && <div className="invalid-feedback">Solo se permiten letras y números.</div>}
                     </div>
                   </div>
                 </div>
                 <div className="row">
                   <div className="col-12">
                     <div className="form-floating mb-3">
-                      <input type="text" className="form-control" value={formData.description ?? ''} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
+                      <input
+                        type="text"
+                        className={`form-control ${touched.description && errors.description ? 'is-invalid' : ''}`}
+                        value={formData.description}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setFormData({ ...formData, description: value });
+                          validateInput('description', value);
+                        }}
+                        onBlur={() => handleBlur('description')}
+                      />
                       <label>Descripción</label>
+                      {touched.description && errors.description && <div className="invalid-feedback">Solo se permiten letras y espacios.</div>}
                     </div>
                   </div>
                 </div>
                 <hr />
                 <div className="col-12 text-end">
-                  <button type="button" className="btn btn-purple-900 w-25" onClick={handleUpdate}>
+                  <button type="button" className="btn btn-purple-900 w-25" onClick={handleUpdate} disabled={loading}>
                     {loading ? (
                       <div className="spinner-border text-light" role="status">
                         <span className="visually-hidden"></span>
                       </div>
                     ) : (
-                      <span>Actualizar</span>
+                      'Actualizar'
                     )}
                   </button>
                   <button type="button" className="btn ms-2 btn-outline-secondary w-25" data-bs-dismiss="modal">
@@ -467,7 +569,7 @@ const InstructorProfile = () => {
                 <label htmlFor="newProfileImage" className="form-label fw-bold">
                   Seleccionar imagen
                 </label>
-                <input type="file" id="newProfileImage" className="form-control" accept="image/*" onChange={handleFileChange} />
+                <input type="file" id="newProfileImage" className="form-control" accept="image/*" onChange={handleFileChange} ref={fileInputRef} />
               </div>
               <div className="text-end">
                 <button type="button" className="btn btn-purple-900" onClick={handleSaveProfileImage} disabled={loading}>

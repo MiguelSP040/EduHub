@@ -4,6 +4,7 @@ import { BookOpen, Settings, ArrowLeft } from 'react-feather';
 import { motion } from 'framer-motion';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
+import { useToast } from '../../utilities/ToastProvider';
 import { getSessionsByCourse } from '../../../services/sessionService';
 import { getCourseById, approveCourse } from '../../../services/courseService';
 import AdminSessionCard from './AdminSessionCard';
@@ -14,6 +15,7 @@ import CourseStepProgress from './CourseStepProgress';
 import SessionIndexAccordion from './SessionIndexAccordion';
 import CourseBanner from '../../../assets/img/CourseBanner.jpg';
 import Loading from '../../utilities/Loading';
+import { Modal } from 'bootstrap';
 
 const ToggleTabs = ({ activeTab, setActiveTab }) => {
   const tabs = useMemo(
@@ -93,6 +95,8 @@ const ToggleTabs = ({ activeTab, setActiveTab }) => {
 };
 
 const AdminCourseSessions = () => {
+  const { showSuccess, showError, showWarn } = useToast();
+
   const navigate = useNavigate();
   const location = useLocation();
   const navbarRef = useRef(null);
@@ -106,6 +110,9 @@ const AdminCourseSessions = () => {
 
   const [isCourseLoading, setCourseLoading] = useState(true);
   const [isSessionLoading, setSessionLoading] = useState(true);
+
+  const rejectModalRef = useRef(null);
+  const [rejectReason, setRejectReason] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -145,13 +152,40 @@ const AdminCourseSessions = () => {
     }
   };
 
+  const openModal = (modalRef) => {
+    if (modalRef.current) {
+      const modal = new Modal(modalRef.current);
+      modal.show();
+    }
+  };
+
   const handleApproveCourse = async (approve) => {
     const response = await approveCourse(course.id, approve);
-    alert(response.message);
-    if (response.status === 200) {
+    if (response.status !== 200) {
+      showError('Error', response.message);
+    } else {
+      showSuccess('Curso aprobado', response.message);
       const updatedCourse = await getCourseById(course.id);
       setCourse(updatedCourse);
     }
+  };
+
+  const handleRejectCourse = async () => {
+    if (!rejectReason.trim()) {
+      showWarn('Motivo requerido', 'Debe ingresar un motivo para rechazar el curso.');
+      return;
+    }
+    const response = await approveCourse(course.id, false, rejectReason);
+    if (response.status !== 200) {
+      showError('Error', response.message);
+    } else {
+      showSuccess('Curso rechazado', rejectReason);
+      const updatedCourse = await getCourseById(course.id);
+      setCourse(updatedCourse);
+    }
+    const modal = Modal.getInstance(rejectModalRef.current);
+    if (modal) modal.hide();
+    setRejectReason('');
   };
 
   return (
@@ -191,7 +225,7 @@ const AdminCourseSessions = () => {
                           <button className="btn btn-purple-900 me-2" onClick={() => handleApproveCourse(true)}>
                             <i className="bi bi-journal-check"></i> Aprobar Curso
                           </button>
-                          <button className="btn btn-purple-400" onClick={() => handleApproveCourse(false)}>
+                          <button className="btn btn-purple-400" onClick={() => openModal(rejectModalRef)}>
                             <i className="bi bi-journal-x"></i> Rechazar Curso
                           </button>
                         </div>
@@ -273,6 +307,46 @@ const AdminCourseSessions = () => {
               )}
             </div>
           </main>
+        </div>
+      </div>
+
+      <div className="modal fade" ref={rejectModalRef} tabIndex="-1">
+        <div className="modal-dialog modal-dialog-centered" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">Motivo de rechazo</h5>
+              <button
+                type="button"
+                className="btn-close"
+                aria-label="Close"
+                onClick={() => {
+                  // Ocultar el modal
+                  const modal = Modal.getInstance(rejectModalRef.current);
+                  if (modal) modal.hide();
+                  setRejectReason('');
+                }}
+              ></button>
+            </div>
+            <div className="modal-body">
+              <textarea className="form-control" value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} placeholder="Ingrese el motivo del rechazo"></textarea>
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => {
+                  const modal = Modal.getInstance(rejectModalRef.current);
+                  if (modal) modal.hide();
+                  setRejectReason('');
+                }}
+              >
+                Cancelar
+              </button>
+              <button type="button" className="btn btn-danger" onClick={handleRejectCourse}>
+                Confirmar rechazo
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

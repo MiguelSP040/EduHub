@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Edit, Paperclip } from 'react-feather';
 import { Editor } from 'primereact/editor';
+import { useToast } from '../../utilities/ToastProvider';
 import { updateSession, handleViewFile } from '../../../services/sessionService';
 import 'quill/dist/quill.snow.css';
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
@@ -8,6 +9,8 @@ import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 
 const SessionView = ({ session, setSelectedSession, fetchSessions, courseStatus }) => {
+  const { showSuccess, showError, showWarn } = useToast();
+
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingFileId, setLoadingFileId] = useState(null);
@@ -49,7 +52,7 @@ const SessionView = ({ session, setSelectedSession, fetchSessions, courseStatus 
 
   const handleSave = async () => {
     if (!editedSession.nameSession.trim()) {
-      alert('El título de la sesión es obligatorio.');
+      showWarn('Campos obligatorios', 'El título de la sesión es obligatorio.');
       return;
     }
     const confirmed = window.confirm('¿Estás seguro de que deseas guardar los cambios?');
@@ -68,15 +71,15 @@ const SessionView = ({ session, setSelectedSession, fetchSessions, courseStatus 
       const response = await updateSession(formData);
 
       if (response.status === 200) {
-        alert('Sesión actualizada correctamente');
+        showSuccess('Sesión actualizada correctamente', 'La sesión fue actualizada exitosamente');
         fetchSessions();
         setIsEditing(false);
       } else {
-        alert(response.message || 'Error al actualizar sesión');
+        showError('Error', response.message || 'Error al actualizar sesión');
       }
     } catch (error) {
       console.error(error);
-      alert('Ocurrió un error al guardar los cambios');
+      showError('Error', 'Ocurrió un error al guardar los cambios');
     } finally {
       setLoading(false);
     }

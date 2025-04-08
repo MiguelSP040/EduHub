@@ -59,7 +59,7 @@ public class UserService {
                             "Nuevo instructor registrado",
                             "El instructor \"" + user.getName() + " " + user.getSurname()
                                     + "\" se ha registrado en la plataforma. Revisa su postulación.",
-                            "Info",
+                            "Alert",
                             "User",
                             user.getId());
                 }

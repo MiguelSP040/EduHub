@@ -120,8 +120,13 @@ export const publishCourse = async (courseId) => {
   }
 };
 
-export const approveCourse = async (courseId, approve) => {
+export const approveCourse = async (courseId, approve, rejectReason = '') => {
   const token = localStorage.getItem('token');
+  const payload = { approve };
+  if (!approve) {
+    payload.rejectReason = rejectReason;
+  }
+
   try {
     const response = await fetch(`${API_URL}/${courseId}/approve?approve=${approve}`, {
       method: 'PUT',
@@ -129,13 +134,14 @@ export const approveCourse = async (courseId, approve) => {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
+      body: JSON.stringify({ rejectReason }),
     });
 
     const text = await response.text();
     if (!response.ok) {
       return { status: response.status, message: text };
     }
-    return { status: 200, message: `Curso ${approve ? 'aprobado' : 'rechazado'} correctamente.` };
+    return { status: 200, message: approve ? 'Curso aprobado correctamente.' : rejectReason };
   } catch (error) {
     console.error('Error al aprobar curso:', error);
     return { status: 500, message: 'Error de conexión con el servidor' };
@@ -244,13 +250,13 @@ export const manageEnrollment = async (courseId, studentId, accept) => {
 };
 
 export const deliverCertificates = async (courseId, certificates) => {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem('token');
 
   try {
     const response = await fetch(`${API_URL}/${courseId}/deliver-certificates`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(certificates),
@@ -260,17 +266,17 @@ export const deliverCertificates = async (courseId, certificates) => {
     if (!response.ok) {
       return { status: response.status, message: text };
     }
-    return { status: 200, message: "Certificados entregados exitosamente." };
+    return { status: 200, message: 'Certificados entregados exitosamente.' };
   } catch (error) {
-    console.error("Error en deliverCertificates:", error);
-    return { status: 500, message: "Error de conexión con el servidor." };
+    console.error('Error en deliverCertificates:', error);
+    return { status: 500, message: 'Error de conexión con el servidor.' };
   }
 };
 
 export const viewVoucherFile = async (gridFsId, setLoadingId) => {
   try {
     if (setLoadingId) setLoadingId(gridFsId);
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem('token');
     const response = await fetch(`http://localhost:8080/eduhub/api/courses/view-file/${gridFsId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -279,10 +285,10 @@ export const viewVoucherFile = async (gridFsId, setLoadingId) => {
 
     const blob = await response.blob();
     const tempUrl = URL.createObjectURL(blob);
-    window.open(tempUrl, "_blank");
+    window.open(tempUrl, '_blank');
   } catch (error) {
     console.error(error);
-    alert("No se pudo mostrar el archivo.");
+    alert('No se pudo mostrar el archivo.');
   } finally {
     if (setLoadingId) setLoadingId(null);
   }

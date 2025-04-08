@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
 import FinancePieChart from './FinancePieChart';
+import { useToast } from '../../utilities/ToastProvider';
 import { getAllFinances, payInstructorForCourse } from '../../../services/financeService';
 import FinanceListTransactions from './FinanceListTransactions';
 import { getCourses } from '../../../services/courseService';
@@ -10,6 +11,8 @@ import html2canvas from 'html2canvas';
 import logo from '../../../assets/img/eduhub-icon.png';
 
 const AdminFinance = () => {
+  const { showSuccess, showError, showWarn } = useToast();
+
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const navbarRef = useRef(null);
   const [chartData, setChartData] = useState([]);
@@ -101,9 +104,14 @@ const AdminFinance = () => {
     if (!confirm) return;
 
     const res = await payInstructorForCourse(courseId);
-    alert(res.message);
+    if (res.status !== 200) {
+      showError('Error', res.message);
+      fetchUnpaidCourses();
+      fetchFinances();
+    }
 
     if (res.status === 200) {
+      showSuccess('Pagado', res.message);
       fetchUnpaidCourses();
       fetchFinances();
     }
