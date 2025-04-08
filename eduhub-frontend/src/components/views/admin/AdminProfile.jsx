@@ -17,7 +17,16 @@ const AdminProfile = () => {
   const updateUserModalRef = useRef(null);
   const updatePasswordModalRef = useRef(null);
   const token = localStorage.getItem('token');
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({
+    id: '',
+    name: '',
+    surname: '',
+    lastname: '',
+    username: '',
+    description: '',
+  }); 
+  const [errors, setErrors] = useState({ name: false, surname: false, lastname: false, username: false, description: false });
+  const [touched, setTouched] = useState({ name: false, surname: false, lastname: false, username: false, description: false });
   const cameraModalRef = useRef(null);
 
   const [currentPassword, setCurrentPassword] = useState('');
@@ -31,6 +40,14 @@ const AdminProfile = () => {
         try {
           const data = await findUserById(user.id);
           setUserLogger(data);
+          setFormData({
+            id: data.id || '',
+            name: data.name || '',
+            surname: data.surname || '',
+            lastname: data.lastname || '',
+            username: data.username || '',
+            description: data.description || '',
+          });
         } catch (error) {
           console.error('Error al obtener usuario:', error);
         }
@@ -74,6 +91,11 @@ const AdminProfile = () => {
   };
 
   const handleUpdate = async () => {
+    if (Object.values(errors).some((error) => error)) {
+      alert('Por favor, corrige los errores antes de continuar.');
+      return;
+    }
+
     const usernameChanged = userLogged?.username && formData.username !== userLogged.username;
 
     if (usernameChanged) {
@@ -210,6 +232,32 @@ const AdminProfile = () => {
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
+  };
+
+  const validateInput = (field, value) => {
+    let isValid = true;
+
+    switch (field) {
+      case 'name':
+      case 'surname':
+      case 'lastname':
+        isValid = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ]+$/.test(value); // Solo letras
+        break;
+      case 'username':
+        isValid = /^[a-zA-Z0-9]+$/.test(value); // Letras y números
+        break;
+      case 'description':
+        isValid = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/.test(value); // Letras y espacios
+        break;
+      default:
+        break;
+    }
+
+    setErrors((prevErrors) => ({ ...prevErrors, [field]: !isValid }));
+  };
+
+  const handleBlur = (field) => {
+    setTouched((prevTouched) => ({ ...prevTouched, [field]: true }));
   };
 
   return (
@@ -377,36 +425,91 @@ const AdminProfile = () => {
                 <div className="row">
                   <div className="col-12 col-sm-6">
                     <div className="form-floating mb-3">
-                      <input type="text" className="form-control" value={formData.name ?? ''} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
+                      <input
+                        type="text"
+                        className={`form-control ${touched.name && errors.name ? 'is-invalid' : ''}`}
+                        value={formData.name}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setFormData({ ...formData, name: value });
+                          validateInput('name', value);
+                        }}
+                        onBlur={() => handleBlur('name')}
+                      />
                       <label>Nombre(s)</label>
+                      {touched.name && errors.name && <div className="invalid-feedback">Solo se permiten letras.</div>}
                     </div>
                   </div>
                   <div className="col-12 col-sm-6">
                     <div className="form-floating mb-3">
-                      <input type="text" className="form-control" value={formData.surname ?? ''} onChange={(e) => setFormData({ ...formData, surname: e.target.value })} />
+                      <input
+                        type="text"
+                        className={`form-control ${touched.surname && errors.surname ? 'is-invalid' : ''}`}
+                        value={formData.surname}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setFormData({ ...formData, surname: value });
+                          validateInput('surname', value);
+                        }}
+                        onBlur={() => handleBlur('surname')}
+                      />
                       <label>Apellido paterno</label>
+                      {touched.surname && errors.surname && <div className="invalid-feedback">Solo se permiten letras.</div>}
                     </div>
                   </div>
                 </div>
                 <div className="row">
                   <div className="col-6">
                     <div className="form-floating mb-3">
-                      <input type="text" className="form-control" value={formData.lastname ?? ''} onChange={(e) => setFormData({ ...formData, lastname: e.target.value })} />
+                      <input
+                        type="text"
+                        className={`form-control ${touched.lastname && errors.lastname ? 'is-invalid' : ''}`}
+                        value={formData.lastname}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setFormData({ ...formData, lastname: value });
+                          validateInput('lastname', value);
+                        }}
+                        onBlur={() => handleBlur('lastname')}
+                      />
                       <label>Apellido materno</label>
+                      {touched.lastname && errors.lastname && <div className="invalid-feedback">Solo se permiten letras.</div>}
                     </div>
                   </div>
                   <div className="col-6">
                     <div className="form-floating mb-3">
-                      <input type="text" className="form-control" value={formData.username ?? ''} onChange={(e) => setFormData({ ...formData, username: e.target.value })} />
+                      <input
+                        type="text"
+                        className={`form-control ${touched.username && errors.username ? 'is-invalid' : ''}`}
+                        value={formData.username}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setFormData({ ...formData, username: value });
+                          validateInput('username', value);
+                        }}
+                        onBlur={() => handleBlur('username')}
+                      />
                       <label>Usuario</label>
+                      {touched.username && errors.username && <div className="invalid-feedback">Solo se permiten letras y números.</div>}
                     </div>
                   </div>
                 </div>
                 <div className="row">
                   <div className="col-12">
                     <div className="form-floating mb-3">
-                      <input type="text" className="form-control" value={formData.description ?? ''} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
+                      <input
+                        type="text"
+                        className={`form-control ${touched.description && errors.description ? 'is-invalid' : ''}`}
+                        value={formData.description}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setFormData({ ...formData, description: value });
+                          validateInput('description', value);
+                        }}
+                        onBlur={() => handleBlur('description')}
+                      />
                       <label>Descripción</label>
+                      {touched.description && errors.description && <div className="invalid-feedback">Solo se permiten letras y espacios.</div>}
                     </div>
                   </div>
                 </div>
