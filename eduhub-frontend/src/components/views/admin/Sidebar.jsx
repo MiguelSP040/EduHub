@@ -1,21 +1,56 @@
-import { useContext, useRef, useEffect, useState } from 'react';
+import { useContext, useRef, useEffect, useState, useCallback } from 'react';
 import { AuthContext } from '../../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Home, User, DollarSign, Bell, Users, LogOut } from 'react-feather';
 import { SlGraduation } from 'react-icons/sl';
+import { motion, AnimatePresence } from 'framer-motion';
+import { getNotifications } from '../../../services/notificationService';
 
 const Sidebar = ({ isExpanded, setIsExpanded, navbarRef }) => {
   const { logoutUser } = useContext(AuthContext);
   const navigate = useNavigate();
   const sidebarRef = useRef(null);
   const [hoveredButton, setHoveredButton] = useState(null);
+  const [notificationCount, setNotificationCount] = useState(0);
+  const [initialRender, setInitialRender] = useState(true);
+  const [textKey, setTextKey] = useState(0);
+  const prevCountRef = useRef(notificationCount);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 426);
 
-  const handleLogout = () => {
-    logoutUser();
-    navigate('/');
-  };
+  useEffect(() => {
+    setInitialRender(false);
+  }, []);
 
-  // Cerrar el sidebar al hacer clic fuera (si está expandido)
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 426);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const loadNotificationCount = useCallback(async () => {
+    try {
+      const data = await getNotifications();
+      const unread = data.filter((n) => !n.read).length;
+      if (unread !== prevCountRef.current) {
+        setNotificationCount(unread);
+        prevCountRef.current = unread;
+      }
+    } catch (error) {
+      console.error('Error al obtener notificaciones:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    let intervalId;
+    loadNotificationCount();
+    intervalId = setInterval(loadNotificationCount, 30000);
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [isExpanded, loadNotificationCount]);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (sidebarRef.current && !sidebarRef.current.contains(event.target) && navbarRef.current && !navbarRef.current.contains(event.target)) {
@@ -31,158 +66,117 @@ const Sidebar = ({ isExpanded, setIsExpanded, navbarRef }) => {
     };
   }, [isExpanded, setIsExpanded, navbarRef]);
 
-  // Función auxiliar para obtener el estilo en hover (solo si está expandido)
-  const getHoverStyle = (btnName) => (isExpanded && hoveredButton === btnName ? { backgroundColor: '#e9ecef', borderRight: '4px solid #AA39AD' } : {});
+  const handleLogout = () => {
+    logoutUser();
+    navigate('/');
+  };
+
+  const handleToggleSidebar = () => {
+    setIsExpanded((prev) => {
+      if (!prev) {
+        setTextKey((k) => k + 1);
+      }
+      return !prev;
+    });
+  };
+
+  const sidebarVariants = {
+    expanded: {
+      width: isMobile ? '100vw' : '15.5rem',
+      transition: {
+        type: 'tween',
+        duration: initialRender ? 0 : 0.25,
+        ease: 'easeInOut',
+      },
+    },
+    collapsed: {
+      width: isMobile ? '0px' : '4.3rem',
+      left: isMobile ? '-15px' : 0,
+      transition: {
+        type: 'tween',
+        duration: initialRender ? 0 : 0.25,
+        ease: 'easeInOut',
+      },
+    },
+  };
 
   return (
-    <div
+    <motion.div
       ref={sidebarRef}
-      className={`sidebar bg-light shadow p-2 flex-column ${isExpanded ? 'sidebar-expanded' : 'sidebar-collapsed d-none d-md-flex'}`}
-      onClick={!isExpanded ? () => setIsExpanded(true) : null}
+      className="bg-light shadow p-2 d-flex flex-column"
       style={{
         position: 'fixed',
         top: '54px',
         left: 0,
         bottom: 0,
-        width: isExpanded ? '15.5rem' : '4.3rem',
-        transition: 'width 0.3s ease',
         overflow: 'hidden',
         zIndex: 1029,
       }}
+      animate={isExpanded ? 'expanded' : 'collapsed'}
+      variants={sidebarVariants}
+      onClick={!isExpanded ? handleToggleSidebar : null}
     >
       <div className="d-flex flex-column h-100 w-100 pt-1">
-        {/* Botones del Sidebar */}
-        <button
-          className="btn my-1 d-flex align-items-center col-12 mt-3"
-          onMouseEnter={() => setHoveredButton('Inicio')}
-          onMouseLeave={() => setHoveredButton(null)}
-          onClick={
-            isExpanded
-              ? (e) => {
-                  e.stopPropagation();
-                  navigate('/admin');
-                }
-              : null
-          }
-          style={getHoverStyle('Inicio')}
-        >
-          <Home size={24} className="flex-shrink-0" />
-          <div className="ms-2">{isExpanded && 'Inicio'}</div>
-        </button>
+        <SidebarButton icon={<Home size={24} />} text="Inicio" hoveredButton={hoveredButton} setHoveredButton={setHoveredButton} isExpanded={isExpanded} textKey={textKey} onClick={() => navigate('/admin')} />
 
-        <button
-          className="btn my-1 d-flex align-items-center col-12"
-          onMouseEnter={() => setHoveredButton('Perfil')}
-          onMouseLeave={() => setHoveredButton(null)}
-          onClick={
-            isExpanded
-              ? (e) => {
-                  e.stopPropagation();
-                  navigate('/profileAdmin');
-                }
-              : null
-          }
-          style={getHoverStyle('Perfil')}
-        >
-          <User size={24} className="flex-shrink-0" />
-          <div className="ms-2">{isExpanded && 'Perfil'}</div>
-        </button>
+        <SidebarButton icon={<User size={24} />} text="Perfil" hoveredButton={hoveredButton} setHoveredButton={setHoveredButton} isExpanded={isExpanded} textKey={textKey} onClick={() => navigate('/profileAdmin')} />
 
-        <button
-          className="btn my-1 d-flex align-items-center col-12"
-          onMouseEnter={() => setHoveredButton('Estudiantes')}
-          onMouseLeave={() => setHoveredButton(null)}
-          onClick={
-            isExpanded
-              ? (e) => {
-                  e.stopPropagation();
-                  navigate('/students');
-                }
-              : null
-          }
-          style={getHoverStyle('Estudiantes')}
-        >
-          <SlGraduation size={24} className="flex-shrink-0" />
-          <div className="ms-2">{isExpanded && 'Estudiantes'}</div>
-        </button>
+        <SidebarButton icon={<SlGraduation size={24} />} text="Estudiantes" hoveredButton={hoveredButton} setHoveredButton={setHoveredButton} isExpanded={isExpanded} textKey={textKey} onClick={() => navigate('/students')} />
 
-        <button
-          className="btn my-1 d-flex align-items-center col-12"
-          onMouseEnter={() => setHoveredButton('Instructores')}
-          onMouseLeave={() => setHoveredButton(null)}
-          onClick={
-            isExpanded
-              ? (e) => {
-                  e.stopPropagation();
-                  navigate('/instructors');
-                }
-              : null
-          }
-          style={getHoverStyle('Instructores')}
-        >
-          <Users size={24} className="flex-shrink-0" />
-          <div className="ms-2">{isExpanded && 'Instructores'}</div>
-        </button>
+        <SidebarButton icon={<Users size={24} />} text="Instructores" hoveredButton={hoveredButton} setHoveredButton={setHoveredButton} isExpanded={isExpanded} textKey={textKey} onClick={() => navigate('/instructors')} />
 
-        <button
-          className="btn my-1 d-flex align-items-center col-12"
-          onMouseEnter={() => setHoveredButton('Finanzas')}
-          onMouseLeave={() => setHoveredButton(null)}
-          onClick={
-            isExpanded
-              ? (e) => {
-                  e.stopPropagation();
-                  navigate('/finance');
-                }
-              : null
-          }
-          style={getHoverStyle('Finanzas')}
-        >
-          <DollarSign size={24} className="flex-shrink-0" />
-          <div className="ms-2">{isExpanded && 'Finanzas'}</div>
-        </button>
+        <SidebarButton icon={<DollarSign size={24} />} text="Finanzas" hoveredButton={hoveredButton} setHoveredButton={setHoveredButton} isExpanded={isExpanded} textKey={textKey} onClick={() => navigate('/finance')} />
 
-        <button
-          className="btn my-1 d-flex align-items-center col-12"
-          onMouseEnter={() => setHoveredButton('Notificaciones')}
-          onMouseLeave={() => setHoveredButton(null)}
-          onClick={
-            isExpanded
-              ? (e) => {
-                  e.stopPropagation();
-                  navigate('/admin/notifications');
-                }
-              : null
-          }
-          style={getHoverStyle('Notificaciones')}
-        >
-          <Bell size={24} className="flex-shrink-0" />
-          <div className="ms-2">{isExpanded && 'Notificaciones'}</div>
-        </button>
+        <SidebarButton icon={<Bell size={24} />} text="Notificaciones" hoveredButton={hoveredButton} setHoveredButton={setHoveredButton} isExpanded={isExpanded} textKey={textKey} notificationCount={notificationCount} onClick={() => navigate('/admin/notifications')} />
 
         <div className="mt-auto">
-          <hr />
-          <button
-            className="btn my-1 d-flex align-items-center col-12"
-            onMouseEnter={() => setHoveredButton('Cerrar sesión')}
-            onMouseLeave={() => setHoveredButton(null)}
-            onClick={
-              isExpanded
-                ? (e) => {
-                    e.stopPropagation();
-                    handleLogout();
-                  }
-                : null
-            }
-            style={getHoverStyle('Cerrar sesión')}
-          >
-            <LogOut size={24} className="flex-shrink-0" />
-            <div className="ms-2 text-truncate">{isExpanded && 'Cerrar sesión'}</div>
-          </button>
+          <hr className="mb-2" />
+          <SidebarButton icon={<LogOut size={24} />} text="Cerrar sesión" hoveredButton={hoveredButton} setHoveredButton={setHoveredButton} isExpanded={isExpanded} textKey={textKey} onClick={handleLogout} />
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
+
+function SidebarButton({ icon, text, onClick, hoveredButton, setHoveredButton, isExpanded, textKey, notificationCount }) {
+  const isHovered = isExpanded && hoveredButton === text;
+
+  const baseClass = 'btn my-1 d-flex align-items-center col-12';
+  const stateClass = isHovered ? 'sidebar-btn-hover' : 'sidebar-btn-default';
+
+  return (
+    <motion.button
+      layout
+      className={`${baseClass} ${stateClass}`}
+      onMouseEnter={() => setHoveredButton(text)}
+      onMouseLeave={() => setHoveredButton(null)}
+      onClick={
+        isExpanded
+          ? (e) => {
+              e.stopPropagation();
+              onClick?.();
+            }
+          : null
+      }
+    >
+      <div style={{ position: 'relative' }}>
+        {icon}
+        {text === 'Notificaciones' && notificationCount > 0 && (
+          <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style={{ fontSize: '0.65rem' }}>
+            {notificationCount}
+          </span>
+        )}
+      </div>
+
+      <AnimatePresence mode="sync">
+        {isExpanded && (
+          <motion.div key={`${textKey}-${text}`} className="ms-2" style={{ whiteSpace: 'nowrap' }} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ type: 'tween', duration: 0.2 }}>
+            {text}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.button>
+  );
+}
 
 export default Sidebar;

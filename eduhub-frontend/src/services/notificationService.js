@@ -33,3 +33,19 @@ export const markAsRead = async (notificationId, read = true) => {
     console.error('Error en markAsRead:', error);
   }
 };
+
+export const deleteReadNotifications = async () => {
+  const token = localStorage.getItem('token');
+  try {
+    const response = await fetch(`${API_URL}/delete-read`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) throw new Error('Error al eliminar notificaciones leídas');
+  } catch (error) {
+    console.error('Error en deleteReadNotifications:', error);
+  }
+};

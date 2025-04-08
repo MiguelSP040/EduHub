@@ -25,4 +25,9 @@ public class NotificationController {
     public void markAsRead(@PathVariable String id, @RequestParam boolean read) {
         service.markAsRead(id, read);
     }
+
+    @DeleteMapping("/delete-read")
+    public void deleteReadNotifications(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        service.deleteReadNotifications(userDetails.getId());
+    }
 }

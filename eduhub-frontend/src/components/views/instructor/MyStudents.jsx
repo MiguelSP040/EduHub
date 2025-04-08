@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { getStudentsByCourse, deliverCertificates } from '../../../services/courseService';
 import { CheckCircle, AlertCircle, FileText } from 'react-feather';
 import jsPDF from 'jspdf';
@@ -8,6 +8,8 @@ const MyStudents = ({ courseId, courseLenght, deliverCertificatesTrigger, course
   const [students, setStudents] = useState([]);
   const [certificateStatus, setCertificateStatus] = useState({});
   const [isStudentsLoading, setIsStudentsLoading] = useState(true);
+  const [sortColumn, setSortColumn] = useState(null);
+  const [sortDirection, setSortDirection] = useState('asc');
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -18,24 +20,13 @@ const MyStudents = ({ courseId, courseLenght, deliverCertificatesTrigger, course
         const newStatus = {};
 
         data.forEach((s) => {
-          if (s.certificateDelivered === true) {
-            newStatus[s.id] = 'Entregado';
-          } else if (s.progress >= 80 && course.hasCertificate) {
-            newStatus[s.id] = 'Con derecho';
-          } else {
-            newStatus[s.id] = 'Sin derecho';
-          }
+          newStatus[s.id] = s.certificateDelivered ? 'Entregado' : s.progress >= 80 && course.hasCertificate ? 'Con derecho' : 'Sin derecho';
         });
 
         setCertificateStatus(newStatus);
 
         const eligibleCount = data.filter((s) => s.progress >= 80 && course.hasCertificate && !s.certificateDelivered).length;
-
-        setCanDeliverCertificates(eligibleCount > 0);
-
-        if (typeof setCanDeliverCertificates === 'function') {
-          setCanDeliverCertificates(eligibleCount > 0);
-        }
+        setCanDeliverCertificates?.(eligibleCount > 0);
       } catch (error) {
         console.error('Error al obtener estudiantes:', error);
       } finally {
@@ -51,6 +42,50 @@ const MyStudents = ({ courseId, courseLenght, deliverCertificatesTrigger, course
       handleDeliverCertificates();
     }
   }, [deliverCertificatesTrigger]);
+
+  const handleSort = (column) => {
+    if (sortColumn === column) {
+      setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
+
+  const sortedStudents = useMemo(() => {
+    if (!sortColumn) return students;
+
+    return [...students].sort((a, b) => {
+      let valA, valB;
+
+      switch (sortColumn) {
+        case 'Nombre':
+          valA = `${a.name} ${a.surname}`.toLowerCase();
+          valB = `${b.name} ${b.surname}`.toLowerCase();
+          break;
+        case 'Fecha':
+          valA = new Date(a.enrolledDate || 0);
+          valB = new Date(b.enrolledDate || 0);
+          break;
+        case 'Asistencias':
+          valA = a.progress;
+          valB = b.progress;
+          break;
+        case 'Estado':
+          valA = a.status.toLowerCase();
+          valB = b.status.toLowerCase();
+          break;
+        default:
+          return 0;
+      }
+
+      if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+      if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [students, sortColumn, sortDirection]);
+
+  const caretIcon = (column) => <span className="ms-1">{sortColumn === column ? sortDirection === 'asc' ? <i className="bi bi-caret-up-fill" /> : <i className="bi bi-caret-down-fill" /> : <i className="bi bi-caret-down-fill text-muted" />}</span>;
 
   const handleDeliverCertificates = async () => {
     const eligibleStudents = students.filter((s) => certificateStatus[s.id] === 'Con derecho');
@@ -158,15 +193,23 @@ const MyStudents = ({ courseId, courseLenght, deliverCertificatesTrigger, course
           <tr>
             <th colSpan="5" className="text-center">
               <h4 className="mb-0">
-                Estudiantes Inscritos - {isStudentsLoading ? '--' :students.length}/{courseLenght}
+                Estudiantes Inscritos - {isStudentsLoading ? '--' : students.length}/{courseLenght}
               </h4>
             </th>
           </tr>
           <tr>
-            <th>Nombre</th>
-            <th>Fecha de Inscripción</th>
-            <th>Asistencias</th>
-            <th>Estado</th>
+            <th style={{ cursor: 'pointer' }} onClick={() => handleSort('Nombre')}>
+              Nombre {caretIcon('Nombre')}
+            </th>
+            <th style={{ cursor: 'pointer' }} onClick={() => handleSort('Fecha')}>
+              Fecha de Inscripción Nombre {caretIcon('Fecha')}
+            </th>
+            <th style={{ cursor: 'pointer' }} onClick={() => handleSort('Asistencias')}>
+              Asistencias {caretIcon('Asistencias')}
+            </th>
+            <th style={{ cursor: 'pointer' }} onClick={() => handleSort('Estado')}>
+              Estado {caretIcon('Estado')}
+            </th>
             <th>Certificado</th>
           </tr>
         </thead>
@@ -177,8 +220,8 @@ const MyStudents = ({ courseId, courseLenght, deliverCertificatesTrigger, course
                 <Loading />
               </td>
             </tr>
-          ) : students.length > 0 ? (
-            students.map((student) => (
+          ) : sortedStudents.length > 0 ? (
+            sortedStudents.map((student) => (
               <tr key={student.id}>
                 <td>
                   {student.name} {student.surname}

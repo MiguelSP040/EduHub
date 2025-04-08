@@ -8,10 +8,13 @@ import org.springframework.stereotype.Service;
 import utez.edu.mx.eduhub.modules.entities.UserEntity;
 import utez.edu.mx.eduhub.modules.repositories.UserRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class UserService {
+    @Autowired
+    private NotificationService notificationService;
 
     @Autowired
     private UserRepository repository;
@@ -46,6 +49,22 @@ public class UserService {
 
         try {
             repository.save(user);
+
+            // Notificar a los administradores si el usuario registrado es un instructor
+            if ("ROLE_INSTRUCTOR".equals(user.getRole())) {
+                List<UserEntity> admins = repository.findAllByRole("ROLE_ADMIN");
+                for (UserEntity admin : admins) {
+                    notificationService.sendNotification(
+                            admin.getId(),
+                            "Nuevo instructor registrado",
+                            "El instructor \"" + user.getName() + " " + user.getSurname()
+                                    + "\" se ha registrado en la plataforma. Revisa su postulación.",
+                            "Info",
+                            "User",
+                            user.getId());
+                }
+            }
+
             return ResponseEntity.ok("Usuario guardado exitosamente");
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -76,7 +95,6 @@ public class UserService {
         return ResponseEntity.ok("Instructor activado correctamente.");
     }
 
-
     public ResponseEntity<?> update(UserEntity user) {
         Optional<UserEntity> existingUserOptional = repository.findById(user.getId());
         if (existingUserOptional.isPresent()) {
@@ -87,9 +105,11 @@ public class UserService {
             existingUser.setLastname(user.getLastname() != null ? user.getLastname() : existingUser.getLastname());
             existingUser.setUsername(user.getUsername() != null ? user.getUsername() : existingUser.getUsername());
             existingUser.setEmail(user.getEmail() != null ? user.getEmail() : existingUser.getEmail());
-            existingUser.setDescription(user.getDescription() != null ? user.getDescription() : existingUser.getDescription());
+            existingUser.setDescription(
+                    user.getDescription() != null ? user.getDescription() : existingUser.getDescription());
             existingUser.setActive(existingUser.isActive());
-            existingUser.setProfileImage(user.getProfileImage() != null ? user.getProfileImage() : existingUser.getProfileImage());
+            existingUser.setProfileImage(
+                    user.getProfileImage() != null ? user.getProfileImage() : existingUser.getProfileImage());
 
             if (user.getPassword() != null && !user.getPassword().isEmpty()) {
                 existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -122,8 +142,5 @@ public class UserService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
         }
     }
-
-
-
 
 }
