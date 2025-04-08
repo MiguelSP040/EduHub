@@ -44,10 +44,10 @@ const RegisterStep1 = ({ setView, formData, setFormData }) => {
 
         switch (field) {
             case "name":
-                isValid = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ]+$/.test(value); // Solo letras
+                isValid = /^([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)(\s[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)*$/.test(value);
                 break;
             case "surname":
-                isValid = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(value); // Letras y espacios
+                isValid = /^([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)(\s[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)*$/.test(value);
                 break;
             case "email":
                 isValid = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value); // Email válido
@@ -87,7 +87,7 @@ const RegisterStep1 = ({ setView, formData, setFormData }) => {
                 onBlur={() => handleBlur("name")}
                 required
             />
-            {touched.name && errors.name && <div className="invalid-feedback">El nombre solo puede contener letras.</div>}
+            {touched.name && errors.name && <div className="invalid-feedback">El nombre solo puede contener letras y debe empezar con mayúscula.</div>}
 
             <input
                 type="text"
@@ -110,7 +110,7 @@ const RegisterStep1 = ({ setView, formData, setFormData }) => {
                 onBlur={() => handleBlur("surname")}
                 required
             />
-            {touched.surname && errors.surname && <div className="invalid-feedback">Los apellidos solo pueden contener letras y espacios.</div>}
+            {touched.surname && errors.surname && <div className="invalid-feedback">El apellido solo puede contener letras y debe empezar con mayúscula.</div>}
 
             <input
                 type="email"
