@@ -9,7 +9,6 @@ import Sidebar from './Sidebar';
 import Navbar from '../Navbar';
 import profilePlaceholder from '../../../assets/img/profileImage.png';
 import { Modal } from 'bootstrap';
-import { useConfirmDialog } from '../../utilities/ConfirmDialogsProvider';
 
 const InstructorProfile = () => {
   const { showSuccess, showError, showWarn } = useToast();

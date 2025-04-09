@@ -11,7 +11,6 @@ import FinanceListTransactions from './FinanceListTransactions';
 import FinancePieChart from './FinancePieChart';
 import logo from '../../../assets/img/eduhub-icon.png';
 import Loading from '../../utilities/Loading';
-import { useConfirmDialog } from '../../utilities/ConfirmDialogsProvider';
 
 const AdminFinance = () => {
   const { showSuccess, showError } = useToast();
@@ -104,28 +103,6 @@ const AdminFinance = () => {
     };
   };
 
-  const handlePay = (courseId) => {
-    confirmAction({
-      message: '¿Deseas pagarle al instructor por este curso?',
-      header: 'Confirmación de pago',
-      icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Sí, pagar',
-      rejectLabel: 'Cancelar',
-      acceptClassName: 'p-confirm-dialog-accept',
-      rejectClassName: 'p-confirm-dialog-reject',
-      onAccept: async () => {
-        const res = await payInstructorForCourse(courseId);
-        if (res.status !== 200) {
-          showError('Error', 'Error al realizar el pago al instructor');
-          fetchUnpaidCourses();
-          fetchFinances();
-        } else {
-          showSuccess('Pagado', 'Se ha entregado el pago total al instructor');
-          fetchUnpaidCourses();
-          fetchFinances();
-        }
-      },
-    });
   const handlePay = async (courseId) => {
     confirmAction({
       message: '¿Deseas pagarle al instructor por este curso?',
