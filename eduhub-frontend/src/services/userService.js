@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8080/eduhub/api/user";
+const API_URL = "http://44.208.29.225:8080/eduhub/api/user";
 
 export const findAllUsers = async () => {
     const token = localStorage.getItem("token");

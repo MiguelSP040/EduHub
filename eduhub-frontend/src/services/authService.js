@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:8080/eduhub';
+const API_URL = 'http://44.208.29.225:8080/eduhub';
 
 export const login = async (user, password) => {
   try {

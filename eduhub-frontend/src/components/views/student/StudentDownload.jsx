@@ -55,7 +55,7 @@ export default function StudentDownload() {
             <div className='row'>
               <div className="col-12 d-flex justify-content-center">
                 <div className="card" style={{ width: '25rem' }}>
-                  <img src={ImageQR} height={120} className="card-img-top" alt={'Hola'} />
+                  <img src={ImageQR} height={240} className="card-img-top" alt={'Hola'} />
                   <div className="card-body">
                     <h5 className="card-title">Descarga la aplicación</h5>
                     <p className="card-text">Escanea este código QR para descargar la aplicación en tu dispositivo móvil y poder unirte a los cursos.</p>

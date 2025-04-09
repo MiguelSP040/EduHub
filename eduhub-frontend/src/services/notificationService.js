@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:8080/eduhub/api/notifications';
+const API_URL = 'http://44.208.29.225:8080/eduhub/api/notifications';
 
 export const getNotifications = async () => {
   const token = localStorage.getItem('token');

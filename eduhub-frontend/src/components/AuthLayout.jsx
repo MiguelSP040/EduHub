@@ -1,3 +1,5 @@
+import qr_eduhub from "../assets/img/eduhub-icon.png";
+
 const AuthLayout = ({ children }) => {
     return (
         <main className="container">
@@ -5,10 +7,10 @@ const AuthLayout = ({ children }) => {
                 <div className="col-12 col-xl-9 p-md-0 p-3">
                     <div className="card bg-white-200 border-0 shadow rounded-4 p-2">
                         <div className="row g-0">
-                        {/* Sección Izquierda */}
+                            {/* Sección Izquierda */}
                             <div className="col-md-6 bg-purple-800 rounded-3 text-white d-flex flex-column text-center p-5 d-none d-md-block">
                                 <div className="d-flex align-items-center justify-content-center">
-                                <img src="./src/assets/img/eduhub-icon.png" alt="EduHub" className="m-5" height="250" />
+                                    <img src={qr_eduhub} className="img-fluid" alt="EduHubPro Logo" />
                                 </div>
                                 <p>EduHubPro 2025 - Copyright</p>
                             </div>
