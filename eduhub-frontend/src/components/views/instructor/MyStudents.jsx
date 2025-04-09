@@ -205,7 +205,7 @@ const MyStudents = ({ courseId, courseLenght, deliverCertificatesTrigger, course
               Nombre {caretIcon('Nombre')}
             </th>
             <th style={{ cursor: 'pointer' }} onClick={() => handleSort('Fecha')}>
-              Fecha de Inscripción Nombre {caretIcon('Fecha')}
+              Fecha de Inscripción {caretIcon('Fecha')}
             </th>
             <th style={{ cursor: 'pointer' }} onClick={() => handleSort('Asistencias')}>
               Asistencias {caretIcon('Asistencias')}
@@ -232,15 +232,22 @@ const MyStudents = ({ courseId, courseLenght, deliverCertificatesTrigger, course
                 <td>{student.enrolledDate ? new Date(student.enrolledDate).toLocaleDateString() : 'No disponible'}</td>
                 <td>{student.status === 'Aceptado' || student.status === 'En progreso' || student.status === 'Completado' ? `${student.progress || 0}%` : 'N/A'}</td>
                 <td>
-                  {student.status === 'Aceptado' || student.status === 'Completado' ? (
-                    <span className="fw-semibold text-success">
-                      {student.status} <CheckCircle color="green" />
-                    </span>
-                  ) : (
-                    <span className="text-warning">
-                      {student.status} <AlertCircle color="orange" />
-                    </span>
-                  )}
+                <span className={`badge d-inline-flex align-items-center ${student.status === 'Aceptado' || student.status === 'Completado' ? 'bg-success' : student.status === 'Rechazado' ? 'bg-danger' : 'bg-warning'}`}>
+                              <span className="fs-6 fw-normal">{student.status}</span>
+                              {student.status === 'Aceptado' || student.status === 'Completado' ? (
+                                <span className="fs-6">
+                                  <i className="bi bi-check-circle ms-2"></i>
+                                </span>
+                              ) : student.status === 'Rechazado' ? (
+                                <span className="fs-6">
+                                  <i className="bi bi-x-circle ms-2"></i>
+                                </span>
+                              ) : (
+                                <span className="fs-6">
+                                  <i className="bi bi-hourglass-split ms-2"></i>
+                                </span>
+                              )}
+                            </span>
                 </td>
                 <td>
                   {certificateStatus[student.id] === 'Entregado' ? (

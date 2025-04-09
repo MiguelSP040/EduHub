@@ -3,6 +3,7 @@ import { AuthContext } from '../../../context/AuthContext';
 import { updateProfile, findUserById } from '../../../services/userService';
 import { verifyPassword } from '../../../services/authService';
 import { useToast } from '../../utilities/ToastProvider';
+import { useConfirmDialog } from '../../utilities/ConfirmDialogsProvider';
 import PasswordInput from '../../PasswordInputRegister';
 import Sidebar from './Sidebar';
 import Navbar from '../Navbar';
@@ -11,6 +12,7 @@ import { Modal } from 'bootstrap';
 
 const InstructorProfile = () => {
   const { showSuccess, showError, showWarn } = useToast();
+  const { confirmAction } = useConfirmDialog();
 
   const { user, updateUser } = useContext(AuthContext);
   const token = localStorage.getItem('token');
@@ -120,40 +122,72 @@ const InstructorProfile = () => {
     }
 
     const usernameChanged = userLogged?.username && formData.username !== userLogged.username;
+
     if (usernameChanged) {
-      const confirmed = window.confirm('Has cambiado tu nombre de usuario. Si continúas, se cerrará la sesión actual. ¿Deseas continuar?');
-      if (!confirmed) return;
+      confirmAction({
+        message: 'Has cambiado tu nombre de usuario. Si continúas, se cerrará la sesión actual. ¿Deseas continuar?',
+        header: 'Confirmación',
+        icon: 'pi pi-exclamation-triangle',
+        acceptLabel: 'Sí, continuar',
+        rejectLabel: 'Cancelar',
+        acceptClassName: 'p-confirm-dialog-accept',
+        rejectClassName: 'p-confirm-dialog-reject',
+        onAccept: async () => {
+          setLoading(true);
+
+          try {
+            const response = await updateProfile(formData);
+
+            if (!response.ok) {
+              showError('Error', 'Error de conexión con el servidor');
+              return;
+            }
+
+            showSuccess('Actualización exitosa', 'Actualización completada con éxito');
+
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/';
+          } catch (error) {
+            console.error(`Error al actualizar el perfil ${error}`);
+            showError('Error', 'No se pudo actualizar el perfil de usuario');
+          } finally {
+            setLoading(false);
+          }
+        },
+      });
+      return; 
     }
 
     setLoading(true);
+
     try {
       const response = await updateProfile(formData);
+
       if (!response.ok) {
         showError('Error', 'Error de conexión con el servidor');
         return;
       }
+
       showSuccess('Actualización exitosa', 'Actualización completada con éxito');
 
-      updateUser(formData);
+      setUserLogger((prevState) => ({
+        ...prevState,
+        ...formData,
+      }));
 
-      if (usernameChanged) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = '/';
-        return;
-      }
-
-      setUserLogger((prevState) => ({ ...prevState, ...formData }));
       const modal = Modal.getInstance(updateUserModalRef.current);
       if (modal) modal.hide();
     } catch (error) {
       console.error(`Error al actualizar el perfil ${error}`);
       showError('Error', 'No se pudo actualizar el perfil de usuario');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  const handlePasswordUpdate = async () => {
+  const handlePasswordUpdate = () => {
+    
     if (!currentPassword || !newPassword || !confirmPassword) {
       showWarn('Campos obligatorios', 'Todos los campos son obligatorios');
       return;
@@ -162,32 +196,54 @@ const InstructorProfile = () => {
       showWarn('Contraseñas no coinciden', 'Las contraseñas no son iguales');
       return;
     }
-    setLoading(true);
-    try {
-      const verifyResponse = await verifyPassword({ user: user.username, password: currentPassword });
-      if (!verifyResponse.ok) {
-        showError('Error', 'Contraseña actual incorrecta');
-        return;
+  
+    
+    confirmAction({
+      message: '¿Estás seguro que deseas actualizar tu contraseña?',
+      header: 'Confirmación',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Sí, actualizar',
+      rejectLabel: 'Cancelar',
+      acceptClassName: 'p-confirm-dialog-accept', 
+      rejectClassName: 'p-confirm-dialog-reject', 
+      onAccept: async () => {
+        setLoading(true);
+        try {
+          const verifyResponse = await verifyPassword({
+            user: user.username,
+            password: currentPassword
+          });
+          if (!verifyResponse.ok) {
+            showError('Error', 'Contraseña actual incorrecta');
+            return;
+          }
+  
+          
+          const updateResponse = await updateProfile(
+            { id: user.id, password: newPassword }
+          );
+          if (!updateResponse.ok) {
+            showError('Error', 'No se pudo actualizar la contraseña');
+            return;
+          }
+          showSuccess('Contraseña actualizada', 'Tu contraseña ha sido cambiada exitosamente');
+          
+        
+          const modal = Modal.getInstance(updatePasswordModalRef.current);
+          if (modal) modal.hide();
+          setCurrentPassword('');
+          setNewPassword('');
+          setConfirmPassword('');
+        } catch (error) {
+          console.error('Error al actualizar la contraseña:', error);
+          showError('Error', 'Error al actualizar la contraseña');
+        } finally {
+          setLoading(false);
+        }
       }
-      const updateResponse = await updateProfile({ id: user.id, password: newPassword });
-      if (!updateResponse.ok) {
-        showError('Error', 'No se pudo actualizar la contraseña');
-        return;
-      }
-      showSuccess('Contraseña actualizada', 'Tu contraseña ha sido cambiada exitosamente');
-      const modal = Modal.getInstance(updatePasswordModalRef.current);
-      if (modal) modal.hide();
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-    } catch (error) {
-      console.error('Error al actualizar la contraseña:', error);
-      showError('Error', 'Error al actualizar la contraseña');
-    } finally {
-      setLoading(false);
-    }
+    });
   };
-
+  
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -241,6 +297,7 @@ const InstructorProfile = () => {
       reader.readAsDataURL(file);
     });
   };
+
 
   return (
     <div className="bg-main">

@@ -18,6 +18,7 @@ import CourseStepProgress from './CourseStepProgress';
 import SessionIndexAccordion from './SessionIndexAccordion';
 import CourseBanner from '../../../assets/img/CourseBanner.jpg';
 import Loading from '../../utilities/Loading';
+import { useConfirmDialog } from '../../utilities/ConfirmDialogsProvider';
 
 const ToggleTabs = ({ activeTab, setActiveTab }) => {
   const tabs = useMemo(
@@ -99,6 +100,7 @@ const ToggleTabs = ({ activeTab, setActiveTab }) => {
 
 const MyCourse = () => {
   const { showSuccess, showError, showWarn } = useToast();
+  const { confirmAction } = useConfirmDialog(); 
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -183,6 +185,62 @@ const MyCourse = () => {
     }
   };
 
+  const handleArchiveCourse = async () => {
+    confirmAction({
+      message: '¿Estás seguro de archivar este curso?',
+      header: 'Confirmación de archivo',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Sí, archivar',
+      rejectLabel: 'Cancelar',
+      acceptClassName: 'p-confirm-dialog-accept',
+      rejectClassName: 'p-confirm-dialog-reject',
+      onAccept: async () => {
+        setLoading(true);
+        try {
+          const response = await archiveCourse(course.id);
+          if (response.status !== 200) {
+            showError('Error', response.message);
+            return;
+          }
+          if (response.status === 200) {
+            showSuccess('Curso archivado', response.message);
+            const updated = await getCourseById(course.id);
+            setCourse(updated);
+          }
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setLoading(false);
+        }
+      },
+    });
+  };
+
+  const handleDuplicateCourse = async () => {
+    confirmAction({
+      message: '¿Deseas crear una copia de este curso?',
+      header: 'Confirmación de duplicación',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Sí, duplicar',
+      rejectLabel: 'Cancelar',
+      acceptClassName: 'p-confirm-dialog-accept',
+      rejectClassName: 'p-confirm-dialog-reject',
+      onAccept: async () => {
+        try {
+          const response = await duplicateCourse(course.id);
+          if (response.status === 200) {
+            showSuccess('Copia creada', 'Curso duplicado correctamente.');
+            navigate('/instructor');
+          } else {
+            showError('Error', response.message || 'Error al duplicar el curso.');
+          }
+        } catch (error) {
+          console.error('Error al duplicar el curso:', error);
+        }
+      },
+    });
+  };
+
   const today = new Date();
   const courseStartDate = new Date(course?.dateStart);
   const canModify = course?.status === 'Creado' || (course?.status === 'Aprobado' && today < courseStartDate);
@@ -221,21 +279,41 @@ const MyCourse = () => {
                             setCourse(updated);
                           }}
                         >
-                          <i className="bi bi-caret-right"></i> Empezar (Prueba)
+                          <i className="bi bi-caret-right"></i> Empezar
                         </button>
                       )}
 
                       {course?.status === 'Empezado' && (
                         <button
                           className="btn btn-danger me-2"
-                          onClick={async () => {
-                            const response = await finishCourse(course.id);
-                            showSuccess('Curso finalizado', response.message);
-                            const updated = await getCourseById(course.id);
-                            setCourse(updated);
+                          onClick={() => {
+                            confirmAction({
+                              message: '¿Estás seguro de que deseas finalizar este curso? Esta acción no se puede deshacer.',
+                              header: 'Confirmación de finalización',
+                              icon: 'pi pi-exclamation-triangle',
+                              acceptLabel: 'Sí, finalizar',
+                              rejectLabel: 'Cancelar',
+                              acceptClassName: 'p-confirm-dialog-accept',
+                              rejectClassName: 'p-confirm-dialog-reject',
+                              onAccept: async () => {
+                                try {
+                                  const response = await finishCourse(course.id);
+                                  if (response.status === 200) {
+                                    showSuccess('Curso finalizado', response.message);
+                                    const updated = await getCourseById(course.id);
+                                    setCourse(updated);
+                                  } else {
+                                    showError('Error', response.message || 'No se pudo finalizar el curso.');
+                                  }
+                                } catch (error) {
+                                  console.error('Error al finalizar el curso:', error);
+                                  showError('Error', 'Ocurrió un error al intentar finalizar el curso.');
+                                }
+                              },
+                            });
                           }}
                         >
-                          <i className="bi bi-stop-circle"></i> Finalizar (Prueba)
+                          <i className="bi bi-stop-circle"></i> Finalizar
                         </button>
                       )}
 
@@ -249,7 +327,7 @@ const MyCourse = () => {
                             setCourse(updated);
                           }}
                         >
-                          <i className="bi bi-arrow-clockwise"></i> Reiniciar (Prueba)
+                          <i className="bi bi-arrow-clockwise"></i> Reiniciar
                         </button>
                       )}
 
@@ -278,27 +356,7 @@ const MyCourse = () => {
                           {course?.status === 'Finalizado' && !course?.archived && (
                             <button
                               className="btn btn-outline-secondary me-2"
-                              onClick={async () => {
-                                setLoading(true);
-                                const confirmed = window.confirm('¿Estás seguro de archivar este curso?');
-                                if (!confirmed) return;
-                                try {
-                                  const response = await archiveCourse(course.id);
-                                  if (response.status !== 200) {
-                                    showError('Error', response.message);
-                                    return;
-                                  }
-                                  if (response.status === 200) {
-                                    showSuccess('Curso archivado', response.message);
-                                    const updated = await getCourseById(course.id);
-                                    setCourse(updated);
-                                  }
-                                } catch (error) {
-                                  console.error(error);
-                                } finally {
-                                  setLoading(false);
-                                }
-                              }}
+                              onClick={handleArchiveCourse}
                               disabled={isLoading}
                             >
                               {isLoading ? (
@@ -316,17 +374,7 @@ const MyCourse = () => {
                           {course?.status === 'Finalizado' && course?.archived && (
                             <button
                               className="btn btn-outline-dark me-2"
-                              onClick={async () => {
-                                const confirmed = window.confirm('¿Deseas crear una copia de este curso?');
-                                if (!confirmed) return;
-                                const response = await duplicateCourse(course.id);
-                                if (response.status === 200) {
-                                  showSuccess('Copia creada', 'Curso duplicado correctamente.');
-                                  navigate('/instructor');
-                                } else {
-                                  showError('Error', response.message || 'Error al duplicar el curso.');
-                                }
-                              }}
+                              onClick={handleDuplicateCourse}
                             >
                               <i className="bi bi-copy"></i> Crear copia de este curso
                             </button>

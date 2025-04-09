@@ -120,8 +120,8 @@ const FinanceListTransactions = () => {
 
   return (
     <div className="mt-4">
-      <div className="table-responsive" style={{ maxHeight: '400px', overflowY: 'auto' }}>
-        <table className="table table-bordered align-middle">
+      <div className="table-responsive" style={{ maxHeight: '18rem' }}>
+        <table className="table table-striped text-nowrap">
           <thead className="table-light">
             <tr>
               <th colSpan="6" className="text-center">
@@ -146,7 +146,7 @@ const FinanceListTransactions = () => {
               <th>Monto</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="align-middle">
             {isLoading ? (
               <tr>
                 <td colSpan="6" className="text-center">

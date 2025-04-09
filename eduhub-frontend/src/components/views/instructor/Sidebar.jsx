@@ -4,9 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { Home, User, Star, Bell, LogOut } from 'react-feather';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getNotifications } from '../../../services/notificationService';
+import { useConfirmDialog } from '../../utilities/ConfirmDialogsProvider';
 
 const Sidebar = ({ isExpanded, setIsExpanded, navbarRef }) => {
   const { logoutUser } = useContext(AuthContext);
+  const { confirmAction } = useConfirmDialog();
   const navigate = useNavigate();
   const sidebarRef = useRef(null);
   const [hoveredButton, setHoveredButton] = useState(null);
@@ -62,8 +64,19 @@ const Sidebar = ({ isExpanded, setIsExpanded, navbarRef }) => {
   }, [isExpanded, setIsExpanded, navbarRef]);
 
   const handleLogout = () => {
-    logoutUser();
-    navigate('/');
+    confirmAction({
+      message: '¿Estás seguro de que deseas cerrar sesión?',
+      header: 'Confirmación de cierre de sesión',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Sí, cerrar sesión',
+      rejectLabel: 'Cancelar',
+      acceptClassName: 'p-confirm-dialog-accept',
+      rejectClassName: 'p-confirm-dialog-reject',
+      onAccept: () => {
+        logoutUser(); 
+        navigate('/'); 
+      },
+    });
   };
 
   const handleToggleSidebar = () => {

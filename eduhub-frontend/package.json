@@ -21,7 +21,7 @@
     "jspdf": "^3.0.1",
     "jwt-decode": "^4.0.0",
     "primeicons": "^7.0.0",
-    "primereact": "^10.9.3",
+    "primereact": "^10.9.4",
     "quill": "^2.0.3",
     "react": "^19.0.0",
     "react-bootstrap-icons": "^1.11.5",
