@@ -19,7 +19,7 @@ const RegisterStep2 = ({ setView, formData, setFormData }) => {
 
     switch (field) {
       case 'username':
-        const isValid = /^[\p{L}0-9_\-]+$/u.test(value); // Solo letras y números
+        isValid = /^[\p{L}0-9_\-]+$/u.test(value); // Solo letras y números
         break;
       case 'password':
         isValid = /^[^\s]+$/.test(value); // No permite espacios

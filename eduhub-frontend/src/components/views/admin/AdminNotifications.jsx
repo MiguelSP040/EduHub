@@ -235,6 +235,33 @@ export default function AdminNotifications() {
                         <i className="bi bi-trash"></i>
                       </button>
                     )}
+                    {activeTab === 'pending' && (
+                      <button
+                        className="btn btn-outline-blue-600 ms-auto"
+                        onClick={async () => {
+                          try {
+                            const pendingNotificationIds = notifications.filter((n) => !n.read).map((n) => n.id);
+                            setFadingNotifications((prev) => [...prev, ...pendingNotificationIds]);
+
+                            // Marca todas las notificaciones pendientes como leídas
+                            for (const id of pendingNotificationIds) {
+                              await markAsRead(id, true);
+                            }
+
+                            await loadNotifications();
+                            showSuccess('Notificaciones actualizadas', 'Todas las notificaciones pendientes han sido marcadas como leídas.');
+                          } catch (error) {
+                            console.error('Error al marcar todas las notificaciones como leídas', error);
+                            showError('Error', 'No se pudieron marcar todas las notificaciones como leídas.');
+                          } finally {
+                            setFadingNotifications((prev) => prev.filter((id) => !notifications.some((n) => n.id === id && !n.read)));
+                          }
+                        }}
+                        title="Marcar todas como leídas"
+                      >
+                        <i className="bi bi-check2-all"></i> Marcar todas como leídas
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
