@@ -210,9 +210,9 @@ const AdminInstructors = () => {
 
             <div className="table-responsive rounded-3" style={{ maxHeight: '35rem' }}>
               <table className="table table-striped text-nowrap">
-                <thead className="position-sticky top-0">
+                <thead>
                   <tr>
-                    <th colSpan="5" className="text-center">
+                    <th colSpan="5" className="text-center ">
                       <h4 className="mb-0">
                         Instructores
                       </h4>

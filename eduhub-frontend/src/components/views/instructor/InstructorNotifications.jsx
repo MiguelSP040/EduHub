@@ -100,7 +100,7 @@ const ToggleTabs = ({ activeTab, setActiveTab, unreadCount }) => {
 
 export default function InstructorNotifications() {
   const { showSuccess, showError, showWarn } = useToast();
-  
+
   const navbarRef = useRef(null);
   const navigate = useNavigate();
 
@@ -148,14 +148,20 @@ export default function InstructorNotifications() {
   };
 
   const handleDeleteReadNotifications = async () => {
-    try {
-      await deleteReadNotifications();
-      await loadNotifications();
-      showSuccess('Notificaciones eliminadas', 'Todas las notificaciones leídas han sido eliminadas');
-    } catch (error) {
-      console.error('Error al eliminar las notificaciones leídas', error);
-      showError('Error', 'Error al eliminar las notificaciones')
-    }
+    const readNotificationIds = notifications.filter((n) => n.read).map((n) => n.id);
+    setFadingNotifications((prev) => [...prev, ...readNotificationIds]);
+    setTimeout(async () => {
+      try {
+        await deleteReadNotifications();
+        await loadNotifications();
+        showSuccess('Notificaciones eliminadas', 'Todas las notificaciones leídas han sido eliminadas');
+      } catch (error) {
+        console.error('Error al eliminar las notificaciones leídas', error);
+        showError('Error', 'Error al eliminar las notificaciones');
+      } finally {
+        setFadingNotifications((prev) => prev.filter((id) => !readNotificationIds.includes(id)));
+      }
+    }, 500);
   };
 
   const handleNotificationClick = async (notification) => {

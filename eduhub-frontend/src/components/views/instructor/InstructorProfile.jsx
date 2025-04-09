@@ -3,6 +3,7 @@ import { AuthContext } from '../../../context/AuthContext';
 import { updateProfile, findUserById } from '../../../services/userService';
 import { verifyPassword } from '../../../services/authService';
 import { useToast } from '../../utilities/ToastProvider';
+import { useConfirmDialog } from '../../utilities/ConfirmDialogsProvider';
 import PasswordInput from '../../PasswordInputRegister';
 import Sidebar from './Sidebar';
 import Navbar from '../Navbar';
