@@ -3,6 +3,7 @@ import { FileText, Edit, Paperclip } from 'react-feather';
 import { Editor } from 'primereact/editor';
 import { useToast } from '../../utilities/ToastProvider';
 import { updateSession, handleViewFile } from '../../../services/sessionService';
+import { useConfirmDialog } from '../../utilities/ConfirmDialogsProvider';
 import 'quill/dist/quill.snow.css';
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
 import 'primereact/resources/primereact.min.css';
@@ -10,7 +11,7 @@ import 'primeicons/primeicons.css';
 
 const SessionView = ({ session, setSelectedSession, fetchSessions, courseStatus }) => {
   const { showSuccess, showError, showWarn } = useToast();
-
+  const { confirmAction } = useConfirmDialog();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingFileId, setLoadingFileId] = useState(null);
@@ -55,34 +56,43 @@ const SessionView = ({ session, setSelectedSession, fetchSessions, courseStatus 
       showWarn('Campos obligatorios', 'El título de la sesión es obligatorio.');
       return;
     }
-    const confirmed = window.confirm('¿Estás seguro de que deseas guardar los cambios?');
-    if (!confirmed) return;
 
-    setLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append('session', new Blob([JSON.stringify(editedSession)], { type: 'application/json' }));
-      attachments.forEach((item) => {
-        if (item instanceof File) {
-          formData.append('files', item);
+    confirmAction({
+      message: '¿Estás seguro de que deseas guardar los cambios?',
+      header: 'Confirmación de guardado',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Sí, guardar',
+      rejectLabel: 'Cancelar',
+      acceptClassName: 'p-confirm-dialog-accept',
+      rejectClassName: 'p-confirm-dialog-reject',
+      onAccept: async () => {
+        setLoading(true);
+        try {
+          const formData = new FormData();
+          formData.append('session', new Blob([JSON.stringify(editedSession)], { type: 'application/json' }));
+          attachments.forEach((item) => {
+            if (item instanceof File) {
+              formData.append('files', item);
+            }
+          });
+
+          const response = await updateSession(formData);
+
+          if (response.status === 200) {
+            showSuccess('Sesión actualizada correctamente', 'La sesión fue actualizada exitosamente');
+            fetchSessions();
+            setIsEditing(false);
+          } else {
+            showError('Error', response.message || 'Error al actualizar sesión');
+          }
+        } catch (error) {
+          console.error(error);
+          showError('Error', 'Ocurrió un error al guardar los cambios');
+        } finally {
+          setLoading(false);
         }
-      });
-
-      const response = await updateSession(formData);
-
-      if (response.status === 200) {
-        showSuccess('Sesión actualizada correctamente', 'La sesión fue actualizada exitosamente');
-        fetchSessions();
-        setIsEditing(false);
-      } else {
-        showError('Error', response.message || 'Error al actualizar sesión');
-      }
-    } catch (error) {
-      console.error(error);
-      showError('Error', 'Ocurrió un error al guardar los cambios');
-    } finally {
-      setLoading(false);
-    }
+      },
+    });
   };
 
   const handleFileChange = (e) => {
@@ -91,9 +101,18 @@ const SessionView = ({ session, setSelectedSession, fetchSessions, courseStatus 
   };
 
   const removeAttachment = (index) => {
-    const confirmed = window.confirm('¿Estás seguro de eliminar este archivo?');
-    if (!confirmed) return;
-    setAttachments((prev) => prev.filter((_, i) => i !== index));
+    confirmAction({
+      message: '¿Estás seguro de eliminar este archivo?',
+      header: 'Confirmación de eliminación',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Sí, eliminar',
+      rejectLabel: 'Cancelar',
+      acceptClassName: 'p-confirm-dialog-accept',
+      rejectClassName: 'p-confirm-dialog-reject',
+      onAccept: () => {
+        setAttachments((prev) => prev.filter((_, i) => i !== index));
+      },
+    });
   };
 
   const renderCourseStatusMessage = (status) => {

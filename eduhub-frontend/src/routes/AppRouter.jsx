@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useState } from 'react';
 import { ToastProvider } from '../components/utilities/ToastProvider';
+import { ConfirmDialogProvider } from '../components/utilities/ConfirmDialogsProvider';
 import AuthLayout from '../components/AuthLayout';
 import RegisterStep1 from '../components/RegisterStep1';
 import RegisterStep2 from '../components/RegisterStep2';
@@ -44,182 +45,184 @@ const AppRouter = () => {
   return (
     <Router>
       <ToastProvider>
-      <Routes>
-        {/* Rutas públicas: login, registro, recover y reset-password */}
-        <Route
-          path="/"
-          element={
-            <PublicRoute>
-              <AuthLayout>
-                {view === 'login' ? (
-                  <Login setView={setView} />
-                ) : view === 'registerStep1' ? (
-                  <RegisterStep1 setView={setView} formData={formData} setFormData={setFormData} />
-                ) : view === 'registerStep2' ? (
-                  <RegisterStep2 setView={setView} formData={formData} setFormData={setFormData} />
-                ) : view === 'recover' ? (
-                  <Recover setView={setView} />
-                ) : null}
-              </AuthLayout>
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/reset-password"
-          element={
-            <PublicRoute>
-              <AuthLayout>
-                <ResetPassword />
-              </AuthLayout>
-            </PublicRoute>
-          }
-        />
+        <ConfirmDialogProvider>
+          <Routes>
+            {/* Rutas públicas: login, registro, recover y reset-password */}
+            <Route
+              path="/"
+              element={
+                <PublicRoute>
+                  <AuthLayout>
+                    {view === 'login' ? (
+                      <Login setView={setView} />
+                    ) : view === 'registerStep1' ? (
+                      <RegisterStep1 setView={setView} formData={formData} setFormData={setFormData} />
+                    ) : view === 'registerStep2' ? (
+                      <RegisterStep2 setView={setView} formData={formData} setFormData={setFormData} />
+                    ) : view === 'recover' ? (
+                      <Recover setView={setView} />
+                    ) : null}
+                  </AuthLayout>
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/reset-password"
+              element={
+                <PublicRoute>
+                  <AuthLayout>
+                    <ResetPassword />
+                  </AuthLayout>
+                </PublicRoute>
+              }
+            />
 
-        {/* Rutas para ROLE_ADMIN */}
-        <Route
-          path="/admin"
-          element={
-            <PrivateRoute allowedRoles={['ROLE_ADMIN']}>
-              <AdminDashboard />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin/course"
-          element={
-            <PrivateRoute allowedRoles={['ROLE_ADMIN']}>
-              <AdminCourseSessions />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/profileAdmin"
-          element={
-            <PrivateRoute allowedRoles={['ROLE_ADMIN']}>
-              <AdminProfile />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/finance"
-          element={
-            <PrivateRoute allowedRoles={['ROLE_ADMIN']}>
-              <AdminFinance />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin/notifications"
-          element={
-            <PrivateRoute allowedRoles={['ROLE_ADMIN']}>
-              <AdminNotifications />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/students"
-          element={
-            <PrivateRoute allowedRoles={['ROLE_ADMIN']}>
-              <AdminEnrollments />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/instructors"
-          element={
-            <PrivateRoute allowedRoles={['ROLE_ADMIN']}>
-              <AdminInstructors />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/instructors/ratings"
-          element={
-            <PrivateRoute allowedRoles={['ROLE_ADMIN']}>
-              <AdminInstructorRatings />
-            </PrivateRoute>
-          }
-        />
+            {/* Rutas para ROLE_ADMIN */}
+            <Route
+              path="/admin"
+              element={
+                <PrivateRoute allowedRoles={['ROLE_ADMIN']}>
+                  <AdminDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin/course"
+              element={
+                <PrivateRoute allowedRoles={['ROLE_ADMIN']}>
+                  <AdminCourseSessions />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/profileAdmin"
+              element={
+                <PrivateRoute allowedRoles={['ROLE_ADMIN']}>
+                  <AdminProfile />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/finance"
+              element={
+                <PrivateRoute allowedRoles={['ROLE_ADMIN']}>
+                  <AdminFinance />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin/notifications"
+              element={
+                <PrivateRoute allowedRoles={['ROLE_ADMIN']}>
+                  <AdminNotifications />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/students"
+              element={
+                <PrivateRoute allowedRoles={['ROLE_ADMIN']}>
+                  <AdminEnrollments />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/instructors"
+              element={
+                <PrivateRoute allowedRoles={['ROLE_ADMIN']}>
+                  <AdminInstructors />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/instructors/ratings"
+              element={
+                <PrivateRoute allowedRoles={['ROLE_ADMIN']}>
+                  <AdminInstructorRatings />
+                </PrivateRoute>
+              }
+            />
 
-        {/* Rutas para ROLE_INSTRUCTOR */}
-        <Route
-          path="/instructor"
-          element={
-            <PrivateRoute allowedRoles={['ROLE_INSTRUCTOR']}>
-              <InstructorDashboard />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <PrivateRoute allowedRoles={['ROLE_INSTRUCTOR']}>
-              <InstructorProfile />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/notifications"
-          element={
-            <PrivateRoute allowedRoles={['ROLE_INSTRUCTOR']}>
-              <InstructorNotifications />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/instructor/new-course"
-          element={
-            <PrivateRoute allowedRoles={['ROLE_INSTRUCTOR']}>
-              <NewCourse />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/students"
-          element={
-            <PrivateRoute allowedRoles={['ROLE_INSTRUCTOR']}>
-              <MyStudents />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/instructor/course"
-          element={
-            <PrivateRoute allowedRoles={['ROLE_INSTRUCTOR']}>
-              <MyCourse />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/ratings"
-          element={
-            <PrivateRoute allowedRoles={['ROLE_INSTRUCTOR']}>
-              <InstructorRatings />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/instructor/ratings/course-ratings"
-          element={
-            <PrivateRoute allowedRoles={['ROLE_INSTRUCTOR']}>
-              <CourseRatings />
-            </PrivateRoute>
-          }
-        />
+            {/* Rutas para ROLE_INSTRUCTOR */}
+            <Route
+              path="/instructor"
+              element={
+                <PrivateRoute allowedRoles={['ROLE_INSTRUCTOR']}>
+                  <InstructorDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <PrivateRoute allowedRoles={['ROLE_INSTRUCTOR']}>
+                  <InstructorProfile />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/notifications"
+              element={
+                <PrivateRoute allowedRoles={['ROLE_INSTRUCTOR']}>
+                  <InstructorNotifications />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/instructor/new-course"
+              element={
+                <PrivateRoute allowedRoles={['ROLE_INSTRUCTOR']}>
+                  <NewCourse />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/students"
+              element={
+                <PrivateRoute allowedRoles={['ROLE_INSTRUCTOR']}>
+                  <MyStudents />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/instructor/course"
+              element={
+                <PrivateRoute allowedRoles={['ROLE_INSTRUCTOR']}>
+                  <MyCourse />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/ratings"
+              element={
+                <PrivateRoute allowedRoles={['ROLE_INSTRUCTOR']}>
+                  <InstructorRatings />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/instructor/ratings/course-ratings"
+              element={
+                <PrivateRoute allowedRoles={['ROLE_INSTRUCTOR']}>
+                  <CourseRatings />
+                </PrivateRoute>
+              }
+            />
 
-        {/* Ruta para ROLE_STUDENT */}
-        <Route
-          path="/student/download"
-          element={
-            <PrivateRoute allowedRoles={['ROLE_STUDENT']}>
-              <StudentDownload />
-            </PrivateRoute>
-          }
-        />
+            {/* Ruta para ROLE_STUDENT */}
+            <Route
+              path="/student/download"
+              element={
+                <PrivateRoute allowedRoles={['ROLE_STUDENT']}>
+                  <StudentDownload />
+                </PrivateRoute>
+              }
+            />
 
-        {/* Ruta 404 */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+            {/* Ruta 404 */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </ConfirmDialogProvider>
       </ToastProvider>
     </Router>
   );

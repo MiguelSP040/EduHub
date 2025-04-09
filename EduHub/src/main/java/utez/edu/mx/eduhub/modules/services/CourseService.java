@@ -629,7 +629,7 @@ public class CourseService {
         notificationService.sendNotification(
                 course.getDocenteId(),
                 "Nueva calificación recibida",
-                "El estudiante \"" + studentId + "\" ha calificado tu curso \"" + course.getTitle() + "\".",
+                "Un estudiante ha calificado tu curso \"" + course.getTitle() + "\".",
                 "Success",
                 "Course",
                 courseId);

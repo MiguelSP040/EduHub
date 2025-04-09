@@ -71,6 +71,10 @@ const Login = ({ setView }) => {
           showSuccess('Bienvenido', `¡Qué gusto verte, ${userData.name}!`)
           navigate('/instructor');
           break;
+        case 'ROLE_STUDENT':
+          showSuccess('Bienvenido', `¡Qué gusto verte, ${userData.name}!`)
+          navigate('/student/download');
+          break;
         default:
           showWarn('Rol desconocido', 'Contacta con el administrador.');
           navigate('/');

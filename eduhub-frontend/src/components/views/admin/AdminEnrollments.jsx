@@ -52,8 +52,8 @@ const AdminEnrollments = () => {
   const handleCourseChange = async (event) => {
     setStudentsLoading(true);
     const courseId = event.target.value;
-     setSelectedCourse(courseId);
-    await  fetchStudents(courseId);
+    setSelectedCourse(courseId);
+    await fetchStudents(courseId);
     setStudentsLoading(false);
   };
 
@@ -205,11 +205,15 @@ const AdminEnrollments = () => {
                           </td>
                           <td>{student.enrolledDate ? new Date(student.enrolledDate).toLocaleDateString() : 'No disponible'}</td>
                           <td>
-                            <span className={`badge d-inline-flex align-items-center text-${student.status === 'Aceptado' || student.status === 'Completado' ? 'bg-success' : 'bg-warning'}`}>
+                            <span className={`badge d-inline-flex align-items-center ${student.status === 'Aceptado' || student.status === 'Completado' ? 'bg-success' : student.status === 'Rechazado' ? 'bg-danger' : 'bg-warning'}`}>
                               <span className="fs-6 fw-normal">{student.status}</span>
                               {student.status === 'Aceptado' || student.status === 'Completado' ? (
                                 <span className="fs-6">
                                   <i className="bi bi-check-circle ms-2"></i>
+                                </span>
+                              ) : student.status === 'Rechazado' ? (
+                                <span className="fs-6">
+                                  <i className="bi bi-x-circle ms-2"></i>
                                 </span>
                               ) : (
                                 <span className="fs-6">

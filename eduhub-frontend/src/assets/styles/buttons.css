@@ -80,3 +80,30 @@
 .btn-blue-600:disabled {
   background-color: var(--btn-blue-600);
 }
+
+/* Botón Outline Blue */
+.btn-outline-blue-600 {
+  background-color: transparent;
+  color: var(--btn-blue-600);
+  border: 2px solid var(--btn-blue-600);
+  transition: all 0.3s ease; /* Transición suave */
+}
+
+.btn-outline-blue-600:hover {
+  background-color: var(--btn-blue-600); /* Fondo azul */
+  color: white; /* Texto blanco */
+  border-color: var(--btn-blue-600); /* Borde azul */
+}
+
+.btn-outline-blue-600:active {
+  background-color: var(--btn-blue-600-active); /* Fondo azul activo */
+  color: white; /* Texto blanco */
+  border-color: var(--btn-blue-600-active); /* Borde azul activo */
+}
+
+.btn-outline-blue-600:disabled {
+  background-color: transparent;
+  color: var(--btn-gray-800); /* Texto gris */
+  border-color: var(--btn-gray-800); /* Borde gris */
+  cursor: not-allowed; /* Cursor deshabilitado */
+}

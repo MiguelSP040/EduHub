@@ -100,7 +100,7 @@ const ToggleTabs = ({ activeTab, setActiveTab, unreadCount }) => {
 
 export default function AdminNotifications() {
   const { showSuccess, showError, showWarn } = useToast();
-  
+
   const navbarRef = useRef(null);
   const navigate = useNavigate();
 
@@ -148,14 +148,20 @@ export default function AdminNotifications() {
   };
 
   const handleDeleteReadNotifications = async () => {
-    try {
-      await deleteReadNotifications();
-      await loadNotifications();
-      showSuccess('Notificaciones eliminadas', 'Todas las notificaciones leídas han sido eliminadas');
-    } catch (error) {
-      console.error('Error al eliminar las notificaciones leídas', error);
-      showError('Error', 'Error al eliminar las notificaciones');
-    }
+    const readNotificationIds = notifications.filter((n) => n.read).map((n) => n.id);
+    setFadingNotifications((prev) => [...prev, ...readNotificationIds]);
+    setTimeout(async () => {
+      try {
+        await deleteReadNotifications();
+        await loadNotifications();
+        showSuccess('Notificaciones eliminadas', 'Todas las notificaciones leídas han sido eliminadas');
+      } catch (error) {
+        console.error('Error al eliminar las notificaciones leídas', error);
+        showError('Error', 'Error al eliminar las notificaciones');
+      } finally {
+        setFadingNotifications((prev) => prev.filter((id) => !readNotificationIds.includes(id)));
+      }
+    }, 500);
   };
 
   const handleNotificationClick = async (notification) => {
@@ -227,6 +233,33 @@ export default function AdminNotifications() {
                     {activeTab === 'allNotifications' && (
                       <button className="btn btn-outline-danger ms-auto" onClick={handleDeleteReadNotifications} title="Eliminar notificaciones leídas">
                         <i className="bi bi-trash"></i>
+                      </button>
+                    )}
+                    {activeTab === 'pending' && (
+                      <button
+                        className="btn btn-outline-blue-600 ms-auto"
+                        onClick={async () => {
+                          try {
+                            const pendingNotificationIds = notifications.filter((n) => !n.read).map((n) => n.id);
+                            setFadingNotifications((prev) => [...prev, ...pendingNotificationIds]);
+
+                            // Marca todas las notificaciones pendientes como leídas
+                            for (const id of pendingNotificationIds) {
+                              await markAsRead(id, true);
+                            }
+
+                            await loadNotifications();
+                            showSuccess('Notificaciones actualizadas', 'Todas las notificaciones pendientes han sido marcadas como leídas.');
+                          } catch (error) {
+                            console.error('Error al marcar todas las notificaciones como leídas', error);
+                            showError('Error', 'No se pudieron marcar todas las notificaciones como leídas.');
+                          } finally {
+                            setFadingNotifications((prev) => prev.filter((id) => !notifications.some((n) => n.id === id && !n.read)));
+                          }
+                        }}
+                        title="Marcar todas como leídas"
+                      >
+                        <i className="bi bi-check2-all"></i> Marcar todas como leídas
                       </button>
                     )}
                   </div>
