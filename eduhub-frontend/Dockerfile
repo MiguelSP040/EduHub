@@ -16,22 +16,14 @@ COPY . .
 # Construye la aplicación para producción
 RUN npm run build
 
-# Etapa 2: Servir la aplicación con Express.js
-FROM node:20-alpine
+# Etapa 2: Servir la aplicación con Nginx
+FROM nginx:alpine
 
-# Establece el directorio de trabajo dentro del contenedor
-WORKDIR /app
+# Copia los archivos construidos al directorio predeterminado de Nginx
+COPY --from=build /app/dist /usr/share/nginx/html
 
-# Copia los archivos construidos y el servidor
-COPY --from=build /app/dist ./dist
-COPY server.js .
+# Expone el puerto 80
+EXPOSE 80
 
-# Instala solo las dependencias de producción
-COPY package.json package-lock.json ./
-RUN npm install --production
-
-# Expone el puerto 3000
-EXPOSE 3000
-
-# Comando para iniciar el servidor
-CMD ["node", "server.js"]
+# Comando para iniciar Nginx
+CMD ["nginx", "-g", "daemon off;"]

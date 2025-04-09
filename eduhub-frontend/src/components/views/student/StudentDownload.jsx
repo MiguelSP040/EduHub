@@ -1,6 +1,6 @@
 import React, { useContext } from 'react'
 import { AuthContext } from '../../../context/AuthContext';
-import ImageQR from '../../../assets/img/qr_eduhub.svg'
+import ImageQR from '../../../assets/img/eas-update.svg';
 import eduhubIcon from '../../../assets/img/eduhub-icon.png';
 
 export default function StudentDownload() {
