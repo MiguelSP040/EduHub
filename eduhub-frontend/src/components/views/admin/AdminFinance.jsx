@@ -9,10 +9,11 @@ import { getCourses } from '../../../services/courseService';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import logo from '../../../assets/img/eduhub-icon.png';
+import { useConfirmDialog } from '../../utilities/ConfirmDialogsProvider';
 
 const AdminFinance = () => {
   const { showSuccess, showError, showWarn } = useToast();
-
+  const { confirmAction } = useConfirmDialog();
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const navbarRef = useRef(null);
   const [chartData, setChartData] = useState([]);
@@ -103,21 +104,34 @@ const AdminFinance = () => {
   };
 
   const handlePay = async (courseId) => {
-    const confirm = window.confirm('¿Deseas pagarle al instructor por este curso?');
-    if (!confirm) return;
+    confirmAction({
+      message: '¿Deseas pagarle al instructor por este curso?',
+      header: 'Confirmación de pago',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Sí, pagar',
+      rejectLabel: 'Cancelar',
+      acceptClassName: 'p-confirm-dialog-accept',
+      rejectClassName: 'p-confirm-dialog-reject',
+      onAccept: async () => {
+        try {
+          const res = await payInstructorForCourse(courseId);
 
-    const res = await payInstructorForCourse(courseId);
-    if (res.status !== 200) {
-      showError('Error', res.message);
-      fetchUnpaidCourses();
-      fetchFinances();
-    }
+          if (res.status !== 200) {
+            showError('Error', res.message);
+            await fetchUnpaidCourses();
+            await fetchFinances();
+            return;
+          }
 
-    if (res.status === 200) {
-      showSuccess('Pagado', res.message);
-      fetchUnpaidCourses();
-      fetchFinances();
-    }
+          showSuccess('Pagado', res.message);
+          await fetchUnpaidCourses();
+          await fetchFinances();
+        } catch (error) {
+          console.error('Error al procesar el pago:', error);
+          showError('Error', 'No se pudo completar el pago. Intenta nuevamente.');
+        }
+      },
+    });
   };
 
   return (

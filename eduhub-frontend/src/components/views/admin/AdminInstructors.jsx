@@ -9,10 +9,11 @@ import { payInstructorForCourse } from '../../../services/financeService';
 import { useToast } from '../../utilities/ToastProvider';
 import Loading from '../../utilities/Loading';
 import { Search } from 'react-feather';
+import { useConfirmDialog } from '../../utilities/ConfirmDialogsProvider';
 
 const AdminInstructors = () => {
   const { showSuccess, showError, showWarn } = useToast();
-
+  const { confirmAction } = useConfirmDialog();
   const navigate = useNavigate();
   const navbarRef = useRef(null);
   const viewInstructorModalRef = useRef(null);
@@ -52,35 +53,45 @@ const AdminInstructors = () => {
   };
 
   const handlePayToInstructor = async (instructorId) => {
-    const confirmAction = window.confirm('¿Estás seguro de que deseas pagar al instructor? Esta acción no se puede deshacer');
-    if (!confirmAction) return;
+    confirmAction({
+      message: '¿Estás seguro de que deseas pagar al instructor? Esta acción no se puede deshacer.',
+      header: 'Confirmación de pago',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Sí, pagar',
+      rejectLabel: 'Cancelar',
+      acceptClassName: 'p-confirm-dialog-accept',
+      rejectClassName: 'p-confirm-dialog-reject',
+      onAccept: async () => {
+        try {
+          const courses = await fetchCourses(instructorId);
+          const unpaidCourses = courses.filter((course) => course.payment === false);
 
-    try {
-      const courses = await fetchCourses(instructorId);
-      const unpaidCourses = courses.filter((course) => course.payment === false);
+          if (unpaidCourses.length === 0) {
+            showWarn('Sin cursos pendientes de pago', 'Este instructor no tiene cursos pendientes de pago');
+            return;
+          }
 
-      if (unpaidCourses.length === 0) {
-        showWarn('Sin cursos pendientes de pago', 'Este instructor no tiene cursos pendientes de pago');
-        return;
-      }
+          let allSuccessful = true;
+          let messages = [];
 
-      let allSuccessful = true;
-      let messages = [];
+          for (const course of unpaidCourses) {
+            const res = await payInstructorForCourse(course.id);
+            messages.push(`Curso: ${course.title} → ${res.message}`);
+            if (res.status !== 200) allSuccessful = false;
+          }
 
-      for (const course of unpaidCourses) {
-        const res = await payInstructorForCourse(course.id);
-        messages.push(`Curso: ${course.title} → ${res.message}`);
-        if (res.status !== 200) allSuccessful = false;
-      }
-
-      if (allSuccessful) {
-        showSuccess('Pagado', messages.join('\n'));
-        console.log('Todos los pagos procesados exitosamente');
-      }
-    } catch (error) {
-      console.error('Error al pagar al instructor:', error);
-      showError('Error', 'Error inesperado al procesar el pago');
-    }
+          if (allSuccessful) {
+            showSuccess('Pagado', messages.join('\n'));
+            console.log('Todos los pagos procesados exitosamente');
+          } else {
+            showWarn('Pagos incompletos', 'Algunos pagos no se procesaron correctamente.');
+          }
+        } catch (error) {
+          console.error('Error al pagar al instructor:', error);
+          showError('Error', 'Error inesperado al procesar el pago');
+        }
+      },
+    });
   };
 
   const handleActivateInstructor = async (instructorId) => {

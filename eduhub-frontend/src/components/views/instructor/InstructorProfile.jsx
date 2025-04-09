@@ -8,7 +8,7 @@ import Sidebar from './Sidebar';
 import Navbar from '../Navbar';
 import profilePlaceholder from '../../../assets/img/profileImage.png';
 import { Modal } from 'bootstrap';
-import { useConfirmDialog} from '../../utilities/ConfirmDialogsProvider';
+import { useConfirmDialog } from '../../utilities/ConfirmDialogsProvider';
 
 const InstructorProfile = () => {
   const { showSuccess, showError, showWarn } = useToast();
@@ -122,37 +122,68 @@ const InstructorProfile = () => {
     }
 
     const usernameChanged = userLogged?.username && formData.username !== userLogged.username;
+
     if (usernameChanged) {
-      const confirmed = window.confirm('Has cambiado tu nombre de usuario. Si continúas, se cerrará la sesión actual. ¿Deseas continuar?');
-      if (!confirmed) return;
+      confirmAction({
+        message: 'Has cambiado tu nombre de usuario. Si continúas, se cerrará la sesión actual. ¿Deseas continuar?',
+        header: 'Confirmación',
+        icon: 'pi pi-exclamation-triangle',
+        acceptLabel: 'Sí, continuar',
+        rejectLabel: 'Cancelar',
+        acceptClassName: 'p-confirm-dialog-accept',
+        rejectClassName: 'p-confirm-dialog-reject',
+        onAccept: async () => {
+          setLoading(true);
+
+          try {
+            const response = await updateProfile(formData);
+
+            if (!response.ok) {
+              showError('Error', 'Error de conexión con el servidor');
+              return;
+            }
+
+            showSuccess('Actualización exitosa', 'Actualización completada con éxito');
+
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/';
+          } catch (error) {
+            console.error(`Error al actualizar el perfil ${error}`);
+            showError('Error', 'No se pudo actualizar el perfil de usuario');
+          } finally {
+            setLoading(false);
+          }
+        },
+      });
+      return; 
     }
 
     setLoading(true);
+
     try {
       const response = await updateProfile(formData);
+
       if (!response.ok) {
         showError('Error', 'Error de conexión con el servidor');
         return;
       }
+
       showSuccess('Actualización exitosa', 'Actualización completada con éxito');
 
-      updateUser(formData);
+      setUserLogger((prevState) => ({
+        ...prevState,
+        ...formData,
+      }));
 
-      if (usernameChanged) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = '/';
-        return;
-      }
-
-      setUserLogger((prevState) => ({ ...prevState, ...formData }));
       const modal = Modal.getInstance(updateUserModalRef.current);
       if (modal) modal.hide();
     } catch (error) {
       console.error(`Error al actualizar el perfil ${error}`);
       showError('Error', 'No se pudo actualizar el perfil de usuario');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handlePasswordUpdate = () => {
