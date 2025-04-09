@@ -3,12 +3,12 @@ import { AuthContext } from '../../../context/AuthContext';
 import { updateProfile, findUserById } from '../../../services/userService';
 import { verifyPassword } from '../../../services/authService';
 import { useToast } from '../../utilities/ToastProvider';
+import { useConfirmDialog } from '../../utilities/ConfirmDialogsProvider';
 import PasswordInput from '../../PasswordInputRegister';
 import Sidebar from './Sidebar';
 import Navbar from '../Navbar';
 import profilePlaceholder from '../../../assets/img/profileImage.png';
 import { Modal } from 'bootstrap';
-import { useConfirmDialog} from '../../utilities/ConfirmDialogsProvider';
 
 const InstructorProfile = () => {
   const { showSuccess, showError, showWarn } = useToast();
