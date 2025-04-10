@@ -182,7 +182,7 @@ const InstructorDashboard = () => {
           <div className="card p-0 text-start">
             <img src={course?.coverImage ? `data:image/jpeg;base64,${course.coverImage}` : CourseBanner} height={120} className="card-img-top" alt={course.title} />
             <div className="card-body course-body-height">
-              <div className="d-flex justify-content-between align-items-center mb-2">
+              <div className="d-flex flex-nowrap justify-content-between align-items-center mb-2">
                 <h5 className="card-title text-truncate">{course.title}</h5>
                 <span className="badge badge-purple-color">{course.price === 0 ? 'GRATIS' : `$${course.price}`}</span>
               </div>

@@ -181,7 +181,7 @@ const AdminDashboard = () => {
               alt={course.title}
             />
             <div className="card-body course-body-height">
-              <div className="d-flex justify-content-between align-items-center mb-2">
+              <div className="d-flex flex-nowrap justify-content-between align-items-center mb-2">
                 <h5 className="card-title text-truncate">{course.title}</h5>
                 <span className="badge badge-purple-color px-3 m-2">
                   {course.price === 0 ? 'GRATIS' : `$${course.price}`}
